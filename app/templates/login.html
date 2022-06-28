@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/bootstrap.min.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/login.css')}}">
+    {% if title %}
+    <title>Monitora - {{title}}</title>
+    {% else %}
+    <table>Monitora</table>
+    {% endif %}
+</head>
+
+<body>
+    <form class="form-signin", method="Post", action="">
+        <h1 class="h3 mb-3 font-weight-normal">Faça Seu Login</h1>
+        {% with messages = get_flashed_messages(with_categories=true)%}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{category}}">
+                        {{message}}
+                    </div>
+                {% endfor %}
+            {%endif%}
+        {%endwith%}
+        {{form.hidden_tag()}}
+        {{ form.email.label(class='sr-only') }}
+        {% if form.email.errors %}
+            {{ form.email(class='form-control form-control-lg is-invalid') }}
+            <div class="invalid-feedback">
+                {% for error in form.email.errors %}
+                    <span> {{ error }}</span>
+                {% endfor %}
+            </div>
+        {% else %}
+            {{ form.email(class='form-control', placeholder='E-mail') }}
+        {% endif %}
+
+        {{ form.password.label(class='sr-only')}}
+        {{ form.password(class='form-control', placeholder='Password')}}
+
+        <div class="ckeckbox mb-3">
+            {{form.remember()}}
+            {{form.remember.label()}}
+        </div>
+
+        {{form.submit(class='btn btn-lg btn-primary btn-block')}}
+
+        <p class="mt-5 mb-3 text-muted">&copy; 2022-2022</p>
+
+    </form>
+
+    <script src="{{url_for('static', filename='js/jquery.min.js')}}"></script>
+    <script src="{{url_for('static', filename='js/popper.min.js')}}"></script>
+    <script src="{{url_for('static', filename='js/bootstrap.min.js')}}"></script>
+</body>
+
+</html>

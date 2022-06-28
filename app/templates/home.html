@@ -1,0 +1,64 @@
+{% extends 'layout.html' %}
+
+{% block content %}
+<div class="home">
+   
+    <main role="main">
+
+        <!-- Main jumbotron for a primary marketing message or call to action -->
+        <div class="jumbotron">
+            <div class="container">
+                {% with messages = get_flashed_messages(with_categories=true)%}
+                    {% if messages %}
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{category}}">
+                                {{message}}
+                            </div>
+                        {% endfor %}
+                    {%endif%}
+                {%endwith%}
+                <h1 class="display-3 monitora">Monitora</h1>
+                <p>Informações são atualizadas a cadas 4 horas, se precisar atualizar selecione o botão atualizar.</p>
+                <p><a class="btn btn-primary btn-lg" href="#" role="button">Atualizar &raquo;</a></p>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- Example row of columns -->
+            <div class="row">
+                <div class="col-md-4">
+                    <img class="dashimg" src="{{url_for('static', filename='img/ok.png')}}" alt="">
+                    <spam class="conectado"> Conectado</spam>
+                    <p class="dashdispositivo">Dispositivos:<span class="dashqtd">{{desktop.conectado}}</span></p>
+                    <p class="dashdispositivo">Atualizado:<span class="data">{{desktop.data}}</span></p>
+                    <p class="dashdispositivo">Hora:<span class="data">{{desktop.hora}}:{{desktop.min}}:{{desktop.seg}}</span></p>
+                    <p><a class="btn btn-secondary" href="#" role="button">Ver delalhe &raquo;</a></p>
+                </div>
+                <div class="col-md-4">
+                    <img class="dashimg" src="{{url_for('static', filename='img/erro.png')}}" alt="">
+                    <span class="desconectado">Desconectado</span>
+                    <p class="dashdispositivo">Dispositivos:<span class="dashqtd">{{desktop.desconectado}}</span></p>
+                    <p class="dashdispositivo">Atualizado:<span class="data">{{desktop.data}}</span></p>
+                    <p class="dashdispositivo">Hora:<span class="data">{{desktop.hora}}:{{desktop.min}}:{{desktop.seg}}</span></p>
+                    <p><a class="btn btn-secondary" href="#" role="button">Ver delalhe&raquo;</a></p>
+                </div>
+                <div class="col-md-4">
+                    <img class="dashimg" src="{{url_for('static', filename='img/Atenção.png')}}" alt="">
+                    <span class="atencao">Atenção</span>
+                    <p class="dashdispositivo">Dispositivos:<span class="dashqtd">{{desktop.atencao}}</span></p>
+                    <p class="dashdispositivo">Atualizado:<span class="data">{{desktop.data}}</span></p>
+                    <p class="dashdispositivo">Hora:<span class="data">{{desktop.hora}}:{{desktop.min}}:{{desktop.seg}}</span></p>
+                    <p><a class="btn btn-secondary" href="#" role="button">Ver delalhe &raquo;</a></p>
+                </div>
+            </div>
+
+            <hr>
+
+        </div> <!-- /container -->
+
+    </main>
+    <footer class="container">
+        <p>&copy; Company 2022-2022</p>
+    </footer>
+</div>
+{% endblock %}

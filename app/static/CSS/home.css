@@ -1,0 +1,42 @@
+:root{
+    --vermelho:#e50914;
+    --verde:#1fc01f;
+    --laranja: rgb(223, 186, 85);
+}
+
+.conectado{
+    color: var(--verde);
+    font-size: 40px;
+}
+
+.desconectado{
+    color: var(--vermelho);
+    font-size: 40px;
+}
+
+.atencao{
+    color: var(--laranja);
+    font-size: 40px;
+}
+
+.dashimg{
+    width: 20%;
+  }
+
+.dashqtd{
+    color: #1fc01f;
+    font-size: 40px;
+}
+.dashdispositivo{
+    font-family: 'Courier New', Courier, monospace;
+    color: #e50914;
+}
+
+.data{
+    color: #1fc01f;
+    font-size: 20px;
+}
+
+.monitora{
+    font-family: 'Courgette', cursive;
+}

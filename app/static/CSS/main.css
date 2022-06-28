@@ -1,0 +1,13 @@
+:root{
+    --vermelho:#e50914;
+    --preta:#141414;
+    --branca: #ffff;
+}
+
+ .logo{
+    margin-left: 5px;
+    margin-right: 5px;
+    color: var(--vermelho);
+    font-family: 'Arial Black', Times;
+    font-size: 40px;
+}
