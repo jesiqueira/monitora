@@ -27,16 +27,16 @@
             {%endif%}
         {%endwith%}
         {{form.hidden_tag()}}
-        {{ form.email.label(class='sr-only') }}
-        {% if form.email.errors %}
-            {{ form.email(class='form-control form-control-lg is-invalid') }}
+        {{ form.login.label(class='sr-only') }}
+        {% if form.login.errors %}
+            {{ form.login(class='form-control form-control-lg is-invalid') }}
             <div class="invalid-feedback">
-                {% for error in form.email.errors %}
+                {% for error in form.login.errors %}
                     <span> {{ error }}</span>
                 {% endfor %}
             </div>
         {% else %}
-            {{ form.email(class='form-control', placeholder='E-mail') }}
+            {{ form.login(class='form-control', placeholder='Login') }}
         {% endif %}
 
         {{ form.password.label(class='sr-only')}}
