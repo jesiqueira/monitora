@@ -1,13 +1,14 @@
 from datetime import datetime
+from enum import unique
 from app import db
 
 
 class Endereco(db.Model):
     __tablename__ = 'Endereco'
     id = db.Column(db.Integer, primary_key=True)
-    cidade = db.Column(db.String(40), nullable=False)
     rua = db.Column(db.String(40), nullable=False)
     cep = db.Column(db.String(8), nullable=False)
+    cidade = db.Column(db.String(40), nullable=False)
     sites = db.relationship('Site', backref='endereco', lazy=True)
 
     def __init__(self, cidade='São Paulo', rua='Anônima', cep='00.000-000'):
@@ -25,12 +26,12 @@ class Site(db.Model):
     nome = db.Column(db.String(30), nullable=False)
     usuario = db.relationship('Usuario', backref='usuario', lazy=True)
     local = db.relationship('Local', backref='local', lazy=True)
-    id_endereco = db.Column(db.Integer, db.ForeignKey(
+    idEndereco = db.Column(db.Integer, db.ForeignKey(
         'endereco.id'), nullable=False)
     
-    def __init__(self, nome='Anônio', id_endereco=0):
+    def __init__(self, nome='Anônio', idEndereco=0):
         self.nome = nome
-        self.id_endereco = id_endereco
+        self.idEndereco = idEndereco
 
     def __repr__(self) -> str:
         return f"Site('{self.nome}')"
@@ -74,17 +75,17 @@ class Local(db.Model):
     __tablename__ = 'Local'
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(40), unique=True, nullable=False)
+    localizadoEm = db.Column(db.String(40), unique=True, nullable=False)
     dispositivo = db.relationship('Dispositivo', backref='local', lazy=True)
-    relatorio = db.relationship('Relatorio', backref='localRelatorio', lazy=True)
     idSite = db.Column(db.Integer, db.ForeignKey('site.id'), nullable=False)
 
-    def __init__(self, nome='Anonimo', dispositivo='default', idSite=0):
+    def __init__(self, nome='Anonimo', localizadoEm='default', idSite=0):
         self.nome = nome
-        self.dispositivo = dispositivo
+        self.localizadoEm = localizadoEm
         self.idSite = idSite
 
     def __repr__(self) -> str:
-        return f"Local('{self.nome}')"
+        return f"Local('{self.nome}, {self.localizadoEm}, {self.dispositivo}')"
 
 
 class Dispositivo(db.Model):
@@ -104,6 +105,19 @@ class Dispositivo(db.Model):
     def __repr__(self) -> str:
         return f"Dispositivo('{self.serial}', '{self.patrimonio}')"
 
+class Acao(db.Model):
+    __tablename__ = 'Acao'
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(40), unique=True, nullable=False)
+    relatorio = db.relationship('Relatorio', backref='acaoRelatorio', lazy=True)
+
+    def __init__(self, nome='Default') -> None:
+        self.nome = nome
+    
+    def __repr__(self) -> str:
+        return f"Acao('{self.nome}')"
+        
+
 
 class Relatorio(db.Model):
     __tablename__ = 'Relatorio'
@@ -112,13 +126,14 @@ class Relatorio(db.Model):
     serial = db.Column(db.String(40), unique=True)
     patrimonio = db.Column(db.String(40), unique=True)
     idUsuario = db.Column(db.Integer, db.ForegnKey('usuario.id'), nullable=False)
-    idLocal = db.Column(db.Integer, db.ForegnKey('usuario.id'), nullable=False)
+    idAcao = db.Column(db.Integer, db.ForegnKey('acao.id'), nullable=False)
 
-    def __init__(self, data=datetime.utcnow, serial='S4TW02Q3', patrimonio='default', idUsuario=0, idLocal=0):
+    def __init__(self, data=datetime.utcnow, serial='S4TW02Q3', patrimonio='default', idUsuario=0, idAcao=0):
         self.data = data
         self.serial = serial
         self.patrimonio = patrimonio
         self.idUsuario = idUsuario
+        self.idAcao = idAcao
 
     def __repr__(self) -> str:
         return f"Relatorio('{self.data}', '{self.serial}', '{self.patrimonio}')"
