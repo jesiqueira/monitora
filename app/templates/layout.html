@@ -35,7 +35,12 @@
                     <div class="col-sm-4 offset-md-1 py-4">
                         <h4 class="text-white">Opções</h4>
                         <ul class="list-unstyled">
-                            <li><a href="{{url_for('user.login')}}" class="text-white">Logar</a></li>
+                            {% if current_user.is_authenticated %}
+                                <li><a href="{{url_for('user.logout')}}" class="text-white">Sair</a></li>
+                                <li><a href="#" class="text-white">Tela Administrativa</a></li>
+                            {% else %}
+                                <li><a href="{{url_for('user.login')}}" class="text-white">Logar</a></li>
+                            {% endif %}
                             <li><a href="#" class="text-white">Contactar Suporte</a></li>
                         </ul>
                     </div>
