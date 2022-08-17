@@ -88,7 +88,7 @@ class Local(db.Model):
 
 
 class Dispositivo(db.Model):
-    __tablename__ = 'Dispositivo'
+    # __tablename__ = 'Dispositivo'
     id = db.Column(db.Integer, primary_key=True)
     serial = db.Column(db.String(40), unique=True)
     patrimonio = db.Column(db.String(40), unique=True)
