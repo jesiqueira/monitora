@@ -1,5 +1,4 @@
 from datetime import datetime
-from enum import unique
 from app import db
 
 
@@ -45,7 +44,7 @@ class Usuarios(db.Model):
     senha = db.Column(db.String(60), unique=True, nullable=False)
     email = db.Column(db.String(40), nullable=False)
     relatorios = db.relationship('Relatorio', backref='usuario', lazy=True)
-    idSite = db.Column(db.Integer, db.Foreignkey('site.id'), nullable=False)
+    idSite = db.Column(db.Integer, db.ForeignKey('site.id'), nullable=False)
 
     def __init__(self, nome='Anonima', login='default', senha='default', email='defaul@default.com.br',idSite=0):
         self.nome = nome
@@ -62,7 +61,7 @@ class Tipo(db.Model):
     __tablename__ = 'Tipo'
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(40), unique=True, nullable=False)
-    dispositos = db.relationship('Dispositivo', backref='tipo', nullable=False)
+    dispositos = db.relationship('Dispositivo', backref='tipo')
 
     def __init__(self, nome='Anonimo'):
         self.nome = nome
@@ -125,8 +124,8 @@ class Relatorio(db.Model):
     data = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     serial = db.Column(db.String(40), unique=True)
     patrimonio = db.Column(db.String(40), unique=True)
-    idUsuario = db.Column(db.Integer, db.ForegnKey('usuario.id'), nullable=False)
-    idAcao = db.Column(db.Integer, db.ForegnKey('acao.id'), nullable=False)
+    idUsuario = db.Column(db.Integer, db.ForeignKey('usuario.id'), nullable=False)
+    idAcao = db.Column(db.Integer, db.ForeignKey('acao.id'), nullable=False)
 
     def __init__(self, data=datetime.utcnow, serial='S4TW02Q3', patrimonio='default', idUsuario=0, idAcao=0):
         self.data = data
