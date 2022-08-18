@@ -2,7 +2,7 @@ from flask import render_template, flash, redirect, url_for, Blueprint
 from app.controllers.users.form import LoginForm
 from app import db, bcrypt
 from app.models.bdMonitora import Usuario, Endereco, Site
-from flask_login import login_user, current_user, logout_user
+from flask_login import login_user, current_user, logout_user, login_required
 
 
 user = Blueprint('user', __name__)

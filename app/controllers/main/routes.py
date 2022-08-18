@@ -1,5 +1,5 @@
 from flask import render_template, flash, redirect, url_for, Blueprint
-from flask_login import current_user
+from flask_login import current_user, login_required
 
 
 main = Blueprint('main', __name__)
@@ -22,3 +22,9 @@ desktop = {
 def home():
     # print(current_user.id)
     return render_template('home.html', title='Home', local='São Carlos', desktop=desktop)
+
+
+@main.route('/administration')
+@login_required
+def administration():
+    return render_template('layout2.html', title='Home', local='São Carlos', desktop=desktop)

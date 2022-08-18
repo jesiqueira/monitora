@@ -1,0 +1,87 @@
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="{{url_for('static', filename='img/favicon.ico')}}" type="image/x-icon">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/main.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/bootstrap.min.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/home.css')}}">
+    <link rel="stylesheet" href="{{url_for('static', filename='css/admin.css')}}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Courgette&display=swap" rel="stylesheet">
+
+
+    <style>
+      .bd-placeholder-img {
+        font-size: 1.125rem;
+        text-anchor: middle;
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+
+      @media (min-width: 768px) {
+        .bd-placeholder-img-lg {
+          font-size: 3.5rem;
+        }
+      }
+    </style>
+  </head>
+  <body>
+
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container">
+        <a class="navbar-brand" href="#">Monitora</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbars" aria-controls="navbars" aria-expanded="false" aria-label="Toggle navigation">
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="navbars">
+          <ul class="navbar-nav mr-auto">
+            <li class="nav-item px-4 active">
+              <a class="nav-link" href="#">Estoque <span class="sr-only">(current)</span></a>
+            </li>
+            <li class="nav-item px-4">
+              <a class="nav-link" href="#">Link</a>
+            </li>
+            <li class="nav-item px-4">
+              <a class="nav-link" href="#">Link 2</a>
+            </li>
+            <li class="nav-item px-4 dropdown">
+              <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-expanded="false">Cadastrar</a>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="#">Usuários</a>
+                <a class="dropdown-item" href="#">Estoque</a>
+                <a class="dropdown-item" href="#">Something else here</a>
+              </div>
+            </li>
+          </ul>
+          <ul class="navbar-nav flex-row ml-md-auto d-none d-md-flex">
+            <li class="nav-item">
+              <a class="nav-link" href="{{url_for('user.logout')}}">Sair</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+
+    <header>
+
+    </header>
+  
+    {% block content %}  {% endblock %}
+
+
+    <script src="{{url_for('static', filename='js/jquery.min.js')}}"></script>
+    <script src="{{url_for('static', filename='js/popper.min.js')}}"></script>
+    <script src="{{url_for('static', filename='js/bootstrap.min.js')}}"></script>
+    <script src="{{url_for('static', filename='js/holder.min.js')}}"></script>
+    <script src="https://kit.fontawesome.com/3af24db212.js" crossorigin="anonymous"></script> 
+      
+  </body>
+</html>

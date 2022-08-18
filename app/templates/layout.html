@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 
 <head>
     <meta charset="UTF-8">
@@ -37,7 +37,7 @@
                         <ul class="list-unstyled">
                             {% if current_user.is_authenticated %}
                                 <li><a href="{{url_for('user.logout')}}" class="text-white">Sair</a></li>
-                                <li><a href="#" class="text-white">Tela Administrativa</a></li>
+                                <li><a href="{{url_for('main.administration')}}" class="text-white">Tela Administrativa</a></li>
                             {% else %}
                                 <li><a href="{{url_for('user.login')}}" class="text-white">Logar</a></li>
                             {% endif %}
