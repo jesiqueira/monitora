@@ -1,5 +1,5 @@
-from flask import render_template, flash, redirect, url_for, Blueprint
-from app.controllers.users.form import LoginForm
+from flask import render_template, flash, redirect, url_for, Blueprint, request
+from app.controllers.users.form import LoginForm, CreateUserForm
 from app import db, bcrypt
 from app.models.bdMonitora import Usuario, Endereco, Site
 from flask_login import login_user, current_user, logout_user, login_required
@@ -20,7 +20,8 @@ def login():
         user = Usuario.query.filter_by(login=form.login.data).first()
         if user and bcrypt.check_password_hash(user.senha, form.password.data):
             login_user(user, remember=form.remember.data)
-            return redirect(url_for('main.home'))
+            next_page = request.args.get('next')
+            return redirect(next_page) if next_page else redirect(url_for('main.home'))
         else:
             flash('Error, Verifique Login/Senha!', 'danger')
 
@@ -59,3 +60,9 @@ def createAdmin():
     else:
         flash('Login Administrador já existe!', 'danger')
         return redirect(url_for('main.home'))
+
+@user.route('/user/new')
+@login_required
+def novo_usuario():
+    form = CreateUserForm()
+    return render_template('criar_usuario.html', title='Novo usuário', form=form)

@@ -22,9 +22,3 @@ desktop = {
 def home():
     # print(current_user.id)
     return render_template('home.html', title='Home', local='São Carlos', desktop=desktop)
-
-
-@main.route('/administration')
-@login_required
-def administration():
-    return render_template('layout2.html', title='Home', local='São Carlos', desktop=desktop)

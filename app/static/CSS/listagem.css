@@ -1,0 +1,7 @@
+.table thead tr th{
+  color: rgb(30,144,255)
+}
+.table thead tr th a{
+  color: rgb(30,144,255);
+  text-decoration: none;
+}

@@ -1,0 +1,63 @@
+{% extends "layout2.html" %}
+{% block content %}
+  <div class="container">
+    <div class="content-section mt-4">
+      <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        <fieldset class="form-group">
+          <legend class="border-bottom mb-4">Cadastrar Novo Equipamento Site</legend>
+          <div class="form-group">
+            {{ form.serial.label(class='form-control-label') }}
+            {% if form.serial.errors %}
+              {{ form.serial(class='form-control form-control-lg in-invalid')}}
+              <div class="invalid-feedback">
+                {% for error in form.serial.errors %}
+                  <span>{{ error }}</span>
+                {% endfor %}
+              </div>
+            {% else %}
+              {{ form.serial(class='form-control form-control-lg',placeholder='Ex.: XTPOQ1V1')}}
+            {% endif %}
+          </div>
+          <div class="form-group">
+            {{ form.patrimonio.label(class='form-control-label') }}
+            {% if form.patrimonio.errors %}
+              {{ form.patrimonio(class='form-control form-control-lg in-invalid')}}
+              <div class="invalid-feedback">
+                {% for error in form.patrimonio.errors %}
+                  <span>{{ error }}</span>
+                {% endfor %}
+              </div>
+            {% else %}
+              {{ form.patrimonio(class='form-control form-control-lg', placeholder='Ex.: MSG00000001234')}}
+            {% endif %}
+          </div>
+          <div class="form-row">
+            <div class="col-3 mb-4">
+              {{form.posicao.label(class="form-group mr-2")}}
+              {{ form.posicao(class='form-control form-control-lg', placeholder='Ex.: P01')}}
+            </div>
+            <div class="col-9">
+              {{form.selection.label(class="form-group mr-2")}}
+              {{form.selection(class='custom-select mr-sm-2"')}}
+            </div>
+            {{form.tipoDispositivo.label(class='form-group')}}:
+            <div class="form-check form-check-inlinee">
+              {% for i in form.tipoDispositivo %}
+                {{i}}
+                {{i.label(class='form-check-label')}}
+                &nbsp;&nbsp;
+              {% endfor %}
+              <!-- {{form.tipoDispositivo.label(class='form-check-label')}}
+              {{form.tipoDispositivo(class='form-check-input')}} -->
+            </div>
+            
+          </div>
+          <div class="form-group mt-4">
+            {{ form.submit(class='btn btn-outline-primary')}}
+          </div>
+        </fieldset>
+      </form>
+    </div>
+  </div>
+{% endblock content %}
