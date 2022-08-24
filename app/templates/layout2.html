@@ -42,7 +42,7 @@
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
       <div class="container">
-        <a class="navbar-brand" href="{{url_for('main.home')}}">Monitora</a>
+        <a class="navbar-brand" href="{{url_for('main.home')}}"><i class="fa-solid fa-house"></i> Monitora</a>
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbars" aria-controls="navbars" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
@@ -50,41 +50,49 @@
         <div class="collapse navbar-collapse" id="navbars">
           <ul class="navbar-nav mr-auto">
             <li class="nav-item px-4 active">
-              <a class="nav-link" href="{{url_for('equipamento.listagem')}}">Site<span class="sr-only">(current)</span></a>
+              <a class="nav-link" href="{{url_for('equipamento.listagem')}}"><i class="fa-solid fa-clipboard-list"></i> Inventário<span class="sr-only">(current)</span></a>
             </li>
             <li class="nav-item px-4">
-              <a class="nav-link" href="#">Estoque</a>
-            </li>
-            <li class="nav-item px-4">
-              <a class="nav-link" href="#">Link 2</a>
+              <a class="nav-link" href="#"><i class="fa-solid fa-table"></i> Estoque</a>
             </li>
             <li class="nav-item px-4 dropdown">
-              <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-expanded="false">Cadastrar</a>
+              <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-gears"></i> Administrar</a>
               <div class="dropdown-menu">
-                <a class="dropdown-item" href="#">Estoque</a>
-                <a class="dropdown-item" href="{{url_for('user.novo_usuario')}}">Usuários</a>
-                <a class="dropdown-item" href="#">Site</a>
+                <a class="dropdown-item" href="#"><i class="fa-solid fa-table"></i> Estoque</a>
+                <a class="dropdown-item" href="{{url_for('main.site')}}"><i class="fa-solid fa-map-location"></i> Site</a>
+                <a class="dropdown-item" href="{{url_for('user.lista_usuario')}}"><i class="fa-solid fa-user-gear"></i> Usuários</a>
+                <a class="dropdown-item" href="{{url_for('main.localizarPA')}}"><i class="fa-solid fa-magnifying-glass-location"></i> Local-Atendimento</a>
               </div>
             </li>
           </ul>
           <ul class="navbar-nav flex-row ml-md-auto d-none d-md-flex">
             <li class="nav-item">
-              <a class="nav-link" href="{{url_for('user.logout')}}">Sair</a>
+              <span class="text-light"><i class="fa-solid fa-user-check text-success"></i> {{current_user.userNome}}</span>
+            </li>
+          </ul>
+          <ul class="navbar-nav flex-row ml-md-auto d-none d-md-flex">
+            <li class="nav-item">
+              <a class="nav-link" href="{{url_for('user.logout')}}"><i class="fa-solid fa-right-from-bracket"></i> Sair</a>
             </li>
           </ul>
         </div>
       </div>
     </nav>
-    {% with messages = get_flashed_messages(with_categories=true)%}
-        {% if messages %}
-            {% for category, message in messages %}
-                <div class="alert alert-{{category}}">
-                    {{message}}
-                </div>
-            {% endfor %}
-        {%endif%}
-    {%endwith%}
-    {% block content %}  {% endblock %}
+    <div class="container mt-4">
+      
+      {% with messages = get_flashed_messages(with_categories=true)%}
+          {% if messages %}
+              {% for category, message in messages %}
+                  <div class="alert alert-{{category}}">
+                      {{message}}
+                  </div>
+              {% endfor %}
+          {%endif%}
+      {%endwith%}
+
+      {% block content %}  {% endblock %}
+
+    </div>
 
     <hr>
     <footer class="container">

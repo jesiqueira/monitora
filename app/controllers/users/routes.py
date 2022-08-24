@@ -15,7 +15,6 @@ def login():
 
     form = LoginForm()
 
-
     if form.validate_on_submit():
         user = Usuario.query.filter_by(login=form.login.data).first()
         if user and bcrypt.check_password_hash(user.senha, form.password.data):
@@ -29,6 +28,7 @@ def login():
 
 
 @user.route('/logout')
+@login_required
 def logout():
     logout_user()
     return redirect(url_for('main.home'))
@@ -61,15 +61,25 @@ def createAdmin():
         flash('Login Administrador já existe!', 'danger')
         return redirect(url_for('main.home'))
 
-@user.route('/user/new',  methods=['GET', 'POST'])
+@user.route('/usuarios')
+@login_required
+def lista_usuario():
+    users = db.session.query(Usuario.id, Usuario.userNome, Usuario.login, Usuario.email, Site.siteNome).join(Usuario, Site.id == Usuario.idSite).all()
+    # print(users[1].siteNome)
+    return render_template('usuario.html', title='Usuários', usuarios=users)
+
+@user.route('/usuario/novo',  methods=['GET', 'POST'])
 @login_required
 def novo_usuario():
     form = CreateUserForm()
+
     if form.validate_on_submit():
-        print(f'{form.nome.data}')
+        hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+        site = Site.query.filter_by(siteNome=form.siteSelect.data).first_or_404(description=f'Site {site.siteNome} não localizado, verifique se está cadastrado!')
+        user = Usuario(nome=form.nome.data, login=form.login.data, senha=hashed_password, email=form.email.data, idSite=site.id)
+        db.session.add(user)
+        db.session.commit()
         flash(f'Conta criada com sucesso para: {form.nome.data}!', 'success')
-        # return redirect(url_for('main.home'))
-    else:
-        print('Algo de errado não está certo.')
+        return redirect(url_for('user.lista_usuario'))
     
     return render_template('criar_usuario.html', title='Novo usuário', form=form)

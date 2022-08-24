@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField, RadioField
-from wtforms.validators import DataRequired, length
+from wtforms.validators import DataRequired, Length
 
 class Equipamento(FlaskForm):
   serial = StringField('Serial', validators=[DataRequired()])

@@ -1,60 +1,56 @@
 {% extends 'layout2.html' %}
-
 {% block content %}
-<div class="container">
   <header>
-      <div class="jumbotron jumbotron-fluid mt-4">
-        <div class="container">
-          <h1 class="display-4">Equipamento on site </h1>
-          <p class="lead">Relação de todos os equipamentos cadastrado para uso no site.</p>
+    <div class="jumbotron jumbotron-fluid mt-4">
+      <div class="container">
+        <h1 class="display-4">Equipamento on site</h1>
+        <p class="lead">
+          Relação de todos os equipamentos cadastrado para uso no site.
+        </p>
+      </div>
+    </div>
+    <!-- <h2 class="my-3">Listagem</h2> -->
+    <form action="#" class="ml-3 mb-4">
+      <div class="form-group">
+        <div class="row">
+          <input type="text" class="form-control col-md-5" name="consulta" placeholder="Digita aqui a consulta"/>
+          <select class="form-control col-md-2 ml-3" name="campo" id="">
+            <option value="serial">Serial</option>
+            <option value="patrimonio">Patrimonio</option>
+            <option value="local">Local</option>
+          </select>
+          <button type="submit" class="btn btn-success ml-4"><i class="fa-solid fa-magnifying-glass"></i> Consultar</button>
+          <a class="btn btn-primary ml-3" href="{{url_for('equipamento.novo_equipamento')}}" role="button"><i class="fa-solid fa-desktop"></i> Novo</a>
         </div>
       </div>
-      <!-- <h2 class="my-3">Listagem</h2> -->
-      <form action="#" class="ml-3 mb-4">
-        <div class="form-group">
-          <div class="row">
-            <input type="text" class="form-control col-md-5" name="consulta" placeholder="Digita aqui a consulta">
-            <select class="form-control col-md-2 ml-3" name="campo" id="">
-              <option value="serial">Serial</option>
-              <option value="patrimonio">Patrimonio</option>
-              <option value="local">Local</option>
-            </select>
-            <button type="submit" class="btn btn-success ml-4">Consultar</button>
-            <a class="btn btn-primary ml-3" href="{{url_for('equipamento.novo_equipamento')}}" role="button">Novo</a>
-          </div>
-        </div>
-      </form>
+    </form>
   </header>
   <main>
-      <table class="table table-hover text-center">
-        <thead>
-          <tr class="table-secondary">
-            <th scope="col"><a href="#">Id</a></th>
-            <th scope="col"><a href="#">Serial</a></th>
-            <th scope="col"><a href="#">Patrimônio</a></th>
-            <th scope="col"><a href="#">Hostname</a></th>
-            <th scope="col"><a href="#">Local</a></th>
-            <th scope="col"><a href="#">Posição</a></th>
-            <th scope="col"><a href="#">Tipo Equipamento</a></th>
-            <th scope="col">Ação</th>
-          </tr>
-        </thead>
-        <tbody>
-            {% for dados in equipamentos%}
-              <tr>
-                <th scope="row">{{dados.id}}</th>
-                <td>{{dados.serial}}</td>
-                <td>{{dados.patrimonio}}</td>
-                <td>{{dados.hostname}}</td>
-                <td>{{dados.local}}</td>
-                <td>{{dados.posicao}}</td>
-                <td>{{dados.tipo}}</td>
-                <td><a class="btn btn-info" href="#" role="button">Editar</a></td>
-              </tr>
-            {% endfor %}
-        </tbody>
-      </table>
-    </main>
-</div>
+    <table class="table table-hover text-center">
+      <thead>
+        <tr class="table-secondary">
+          <th scope="col"><a href="#">Id</a></th>
+          <th scope="col"><a href="#">Serial</a></th>
+          <th scope="col"><a href="#">Patrimônio</a></th>
+          <th scope="col"><a href="#">Hostname</a></th>
+          <th scope="col"><a href="#">Local</a></th>
+          <th scope="col"><a href="#">Tipo Equipamento</a></th>
+          <th scope="col">Ação</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for dados in equipamentos%}
+        <tr>
+          <th scope="row">{{dados.id}}</th>
+          <td>{{dados.serial}}</td>
+          <td>{{dados.patrimonio}}</td>
+          <td>{{dados.hostname}}</td>
+          <td>{{dados.local}}</td>
+          <td>{{dados.tipo}}</td>
+          <td><a class="btn btn-info" href="#" role="button"><i class="fa-solid fa-pen-to-square"></i> Editar</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </main>
 {% endblock content %}
-
