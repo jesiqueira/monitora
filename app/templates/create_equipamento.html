@@ -33,16 +33,12 @@
             {% endif %}
           </div>
           <div class="form-row">
-            <div class="col-3 mb-4">
-              {{form.posicao.label(class="form-group mr-2")}}
-              {{ form.posicao(class='form-control form-control-lg', placeholder='Ex.: P01')}}
-            </div>
-            <div class="col-9">
+            <div class="col-12">
               {{form.selection.label(class="form-group mr-2")}}
               {{form.selection(class='custom-select mr-sm-2"')}}
             </div>
-            {{form.tipoDispositivo.label(class='form-group')}}:
-            <div class="form-check form-check-inlinee">
+            {{form.tipoDispositivo.label(class='form-group mt-4')}}
+            <div class="form-check form-check-inlinee mt-4">
               {% for i in form.tipoDispositivo %}
                 {{i}}
                 {{i.label(class='form-check-label')}}

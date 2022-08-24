@@ -61,8 +61,15 @@ def createAdmin():
         flash('Login Administrador já existe!', 'danger')
         return redirect(url_for('main.home'))
 
-@user.route('/user/new')
+@user.route('/user/new',  methods=['GET', 'POST'])
 @login_required
 def novo_usuario():
     form = CreateUserForm()
+    if form.validate_on_submit():
+        print(f'{form.nome.data}')
+        flash(f'Conta criada com sucesso para: {form.nome.data}!', 'success')
+        # return redirect(url_for('main.home'))
+    else:
+        print('Algo de errado não está certo.')
+    
     return render_template('criar_usuario.html', title='Novo usuário', form=form)
