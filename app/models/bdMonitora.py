@@ -80,18 +80,16 @@ class Tipo(db.Model):
 class Local(db.Model):
     __tablename__ = 'Local'
     id = db.Column(db.Integer, primary_key=True)
-    localNome = db.Column(db.String(40), unique=True, nullable=False)
     localizadoEm = db.Column(db.String(40), unique=True, nullable=False)
     dispositivo = db.relationship('Dispositivo', backref='local', lazy=True)
     idSite = db.Column(db.Integer, db.ForeignKey('Site.id'), nullable=False)
 
-    def __init__(self, nome='Anonimo', localizadoEm='default', idSite=0):
-        self.localNome = nome
+    def __init__(self, localizadoEm='default', idSite=0):
         self.localizadoEm = localizadoEm
         self.idSite = idSite
 
     def __repr__(self) -> str:
-        return f"Local('{self.localNome}, {self.localizadoEm}, {self.dispositivo}')"
+        return f"Local('{self.localizadoEm}, {self.dispositivo}')"
 
 
 class Dispositivo(db.Model):
@@ -99,17 +97,19 @@ class Dispositivo(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     serial = db.Column(db.String(40), unique=True)
     patrimonio = db.Column(db.String(40), unique=True)
+    hostname = db.Column(db.String(40), unique=True)
     idLocal = db.Column(db.Integer, db.ForeignKey('Local.id'), nullable=False)
     idTipo = db.Column(db.Integer, db.ForeignKey('Tipo.id'), nullable=False)
 
-    def __init__(self, serial='S4TW02Q3', patrimonio='default', idLocal=0, idTipo=0):
+    def __init__(self, serial='S4TW02Q3', patrimonio='default', hostanme='PBR00150-XPTO', idLocal=0, idTipo=0):
         self.serial = serial
         self.patrimonio = patrimonio
+        self.hostname = hostanme
         self.idLocal = idLocal
         self.idTipo = idTipo
 
     def __repr__(self) -> str:
-        return f"Dispositivo('{self.serial}', '{self.patrimonio}')"
+        return f"Dispositivo('{self.serial}', '{self.patrimonio}', '{self.hostname}')"
 
 
 class Acao(db.Model):

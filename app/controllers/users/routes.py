@@ -75,11 +75,12 @@ def novo_usuario():
 
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-        site = Site.query.filter_by(siteNome=form.siteSelect.data).first_or_404(description=f'Site {site.siteNome} não localizado, verifique se está cadastrado!')
-        user = Usuario(nome=form.nome.data, login=form.login.data, senha=hashed_password, email=form.email.data, idSite=site.id)
-        db.session.add(user)
-        db.session.commit()
-        flash(f'Conta criada com sucesso para: {form.nome.data}!', 'success')
+        site = Site.query.filter_by(siteNome=form.siteSelect.data).first_or_404()
+        if site:
+            user = Usuario(nome=form.nome.data, login=form.login.data, senha=hashed_password, email=form.email.data, idSite=site.id)
+            db.session.add(user)
+            db.session.commit()
+            flash(f'Conta criada com sucesso para: {form.nome.data}!', 'success')
         return redirect(url_for('user.lista_usuario'))
     
     return render_template('criar_usuario.html', title='Novo usuário', form=form)

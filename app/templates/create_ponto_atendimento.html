@@ -1,0 +1,43 @@
+{% extends "layout2.html" %}
+{% block content %}
+  <header>
+    <div class="jumbotron jumbotron-fluid mt-4">
+      <div class="container">
+        <h1 class="display-4">Local - dispositivos</h1>
+        <p class="lead">Preenchar todos os campos para cadastrar novo local no site.</p>
+      </div>
+    </div>
+  </header>
+  <div class="content-section mt-4">
+    <form method="POST" action="">
+      {{ form.hidden_tag() }}
+      <fieldset class="form-group">
+        <!-- <legend class="border-bottom mb-4">Cadastrar Novo Equipamento Site</legend> -->
+        <div class="form-row">
+          <div class="form-group col-md-6">
+            {{ form.localPa.label(class='form-control-label') }} {% if
+            form.localPa.errors %} {{ form.localPa(class='form-control form-control-lg
+            is-invalid')}}
+            <div class="invalid-feedback">
+              {% for error in form.localPa.errors %}
+                <span>{{ error }}</span>
+              {% endfor %}
+            </div>
+            {% else %} 
+              {{ form.localPa(class='form-control form-control-lg', placeholder='Ex.: TA-F1-BA-P1')}}
+            {% endif %}
+          </div>
+          <div class="form-group col-md-6">
+            {{form.localSelect.label(class="form-group mr-2")}}
+            {{form.localSelect(class='custom-select mr-sm-2')}}
+          </div>
+        </div>
+        <div class="form-group mt-4">
+          {{ form.submit(class='btn btn-outline-primary')}}
+          <a href="{{url_for('main.localizarPA')}}" class="btn btn-outline-danger ml-3">Cancelar</a>
+          
+        </div>
+      </fieldset>
+    </form>
+  </div>
+{% endblock content %}

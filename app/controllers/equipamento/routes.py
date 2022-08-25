@@ -1,6 +1,6 @@
 from flask import render_template, Blueprint, flash, redirect, url_for
 from flask_login import login_required
-from app.controllers.equipamento.form_disposivo import Equipamento
+from app.controllers.equipamento.form_disposivo import Dispositivo
 
 equipamento = Blueprint('equipamento', __name__)
 
@@ -127,16 +127,14 @@ def listagem():
 @equipamento.route('/dispotivo/novo', methods=['GET', 'POST'])
 @login_required
 def novo_equipamento():
-  form = Equipamento()
-  if form.validate_on_submit():
-    flash('Equipamento cadastrado com sucesso.', 'success')
-    return redirect(url_for('equipamento.listagem'))
-  return render_template('create_equipamento.html', title='Novo Equipamento', form=form)
-
-
+    form = Dispositivo()
+    if form.validate_on_submit():
+        flash('Equipamento cadastrado com sucesso.', 'success')
+        return redirect(url_for('equipamento.listagem'))
+    return render_template('create_equipamento.html', title='Novo Equipamento', form=form)
 
 
 # @disposito.route('/listagem/<int:equipamento_id>/editar')
 # @login_required
 # def editar(equipamento_id):
-#     equipamento = 
+#     equipamento =

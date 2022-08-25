@@ -39,6 +39,19 @@
             {{ form.patrimonio(class='form-control form-control-lg', placeholder='Ex.: MSG00000001234')}}
           {% endif %}
         </div>
+        <div class="form-group">
+          {{ form.hostname.label(class='form-control-label') }}
+          {% if form.hostname.errors %}
+            {{ form.hostname(class='form-control form-control-lg in-invalid')}}
+            <div class="invalid-feedback">
+              {% for error in form.hostname.errors %}
+                <span>{{ error }}</span>
+              {% endfor %}
+            </div>
+          {% else %}
+            {{ form.hostname(class='form-control form-control-lg', placeholder='Ex.: PBR001150-M1234')}}
+          {% endif %}
+        </div>
         <div class="form-row">
           <div class="col-12">
             {{form.selection.label(class="form-group mr-2")}}
@@ -58,6 +71,7 @@
         </div>
         <div class="form-group mt-4">
           {{ form.submit(class='btn btn-outline-primary')}}
+          <a href="{{url_for('equipamento.listagem')}}" class="btn btn-outline-danger ml-3">Cancelar</a>
         </div>
       </fieldset>
     </form>

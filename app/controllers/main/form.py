@@ -1,7 +1,8 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField
+from wtforms import StringField, SubmitField, SelectField
 from wtforms.validators import DataRequired, Length, ValidationError
-from app.models.bdMonitora import Site, Endereco
+from app.models.bdMonitora import Site, Endereco, Local
+from app import db
 
 
 class SiteForm(FlaskForm):
@@ -26,6 +27,22 @@ class SiteForm(FlaskForm):
       if endereco:
         raise ValidationError('Cep já está cadastrado no sistema!')
 
-class localAtendimento(FlaskForm):
-  nomeLocal = StringField('Local', validators=[DataRequired(), Length(min=5, max=30, message='Campo obrigatório, mínimo 5, máximo 30 caracteres!')])
-  
+class LocalAtendimento(FlaskForm):
+  localPa = StringField('Local P.A', validators=[DataRequired(), Length(min=5, max=30, message='Campo obrigatório, mínimo 5, máximo 30 caracteres!')])
+  localSelect = SelectField('Site', choices=[])
+
+  def __init__(self, **kwargs):
+    super().__init__(**kwargs)
+    sites = db.session.query(Site.siteNome).all()
+    listaSite = []
+    for site in sites:
+        listaSite.append(site[0])
+        self.localSelect.choices=listaSite
+
+
+  submit = SubmitField('Cadastrar')
+
+  def validate_nome(self, localPa):
+      local = Local.query.filter_by(localizadoEm=localPa.data).first()
+      if local:
+        raise ValidationError('Ponto de Atendimento já está cadastrado no sistema!')

@@ -22,8 +22,7 @@ class CreateUserForm(FlaskForm):
         message='Verificar e-mail informado!')])
     password = PasswordField('Senha', validators=[DataRequired(), Length(
         min=6, max=16, message='Se atentar ao criterio, senha deve ter no mínimo 6 e no máximo 16 caracter!')])
-    confiPassword = PasswordField('Confirme a Senha', validators=[
-                                  DataRequired(), EqualTo('password', message="As senhas não são iguais.")])
+    confiPassword = PasswordField('Confirme a Senha', validators=[DataRequired(), EqualTo('password', message="As senhas não são iguais.")])
     siteSelect = SelectField('Site', choices=[])
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

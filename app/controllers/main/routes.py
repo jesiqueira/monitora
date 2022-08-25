@@ -1,7 +1,7 @@
 from flask import render_template, flash, redirect, url_for, Blueprint
-from app.controllers.main.form import SiteForm
+from app.controllers.main.form import SiteForm, LocalAtendimento
 from flask_login import current_user, login_required
-from app.models.bdMonitora import Endereco, Site
+from app.models.bdMonitora import Endereco, Site, Local
 from app import db
 
 
@@ -49,7 +49,27 @@ def registrar_site():
         return redirect(url_for('main.site'))
     return render_template('registrar_site.html', title='Registrar Site', form=form)
 
-@main.route('/site/pa', methods=['GET', 'POST'])
+@main.route('/site/local', methods=['GET', 'POST'])
 @login_required
 def localizarPA():
-    return render_template('localizacaoPa.html', title='Ponto Atendimento')
+    locais = db.session.query(Local.id, Local.localizadoEm, Site.siteNome).join(Local, Site.id == Local.idSite).all()
+    return render_template('local.html', title='Ponto Atendimento', locais=locais)
+
+
+@main.route('/site/registrarLocal', methods=['GET', 'POST'])
+@login_required
+def registrarLocal():
+    form = LocalAtendimento()
+    if form.validate_on_submit():
+        site = Site.query.filter_by(siteNome=form.localSelect.data).first()
+        if site:
+            local = Local(form.localPa.data, site.id)
+            db.session.add(local)
+            db.session.commit()
+            flash('Ponto de atendimento cadastrado com sucesso', 'success')
+            return redirect(url_for('main.localizarPA'))
+        else:
+            flash('Ponto de atendimento cadastrado com sucesso', 'danger')
+            return redirect(url_for('main.registrarPa'))
+
+    return render_template('create_ponto_atendimento.html', title='Novo Ponto Atendimento', form=form)
