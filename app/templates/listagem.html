@@ -39,14 +39,14 @@
         </tr>
       </thead>
       <tbody>
-        {% for dados in equipamentos%}
+        {% for equipamento in equipamentos%}
         <tr>
-          <th scope="row">{{dados.id}}</th>
-          <td>{{dados.serial}}</td>
-          <td>{{dados.patrimonio}}</td>
-          <td>{{dados.hostname}}</td>
-          <td>{{dados.local}}</td>
-          <td>{{dados.tipo}}</td>
+          <th scope="row">{{equipamento.id}}</th>
+          <td>{{equipamento.serial}}</td>
+          <td>{{equipamento.patrimonio}}</td>
+          <td>{{equipamento.hostname}}</td>
+          <td>{{equipamento.localizadoEm}}</td>
+          <td>{{equipamento.tipoNome}}</td>
           <td><a class="btn btn-info" href="#" role="button"><i class="fa-solid fa-pen-to-square"></i> Editar</a></td>
         </tr>
         {% endfor %}

@@ -1,0 +1,45 @@
+{% extends 'layout2.html' %}
+{% block content %}
+  <header>
+    <div class="jumbotron jumbotron-fluid mt-4">
+      <div class="container">
+        <h1 class="display-4">Tipos equpamentos cadastrados</h1>
+        <p class="lead">
+          Relação de todos os tipos de equipamentos cadastrado no sistema.
+        </p>
+      </div>
+    </div>
+    <form action="#" class="ml-3 mb-4">
+      <div class="form-group">
+        <div class="row">
+          <input type="text" class="form-control col-md-5" name="consulta" placeholder="Digita aqui a consulta"/>
+          <select class="form-control col-md-2 ml-3" name="campo" id="">
+            <option value="serial">Nome</option>
+          </select>
+          <button type="submit" class="btn btn-success ml-4"><i class="fa-solid fa-magnifying-glass"></i> Consultar</button>
+          <a class="btn btn-primary ml-3" href="{{url_for('equipamento.criarEqupamento')}}" role="button"><i class="fa-solid fa-plus"></i> Novo</a>
+        </div>
+      </div>
+    </form>
+  </header>
+  <main>
+    <table class="table table-hover text-center">
+      <thead>
+        <tr class="table-secondary">
+          <th scope="col"><a href="#">Id</a></th>
+          <th scope="col"><a href="#">Nome</a></th>
+          <th scope="col">Ação</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for tipoEquipamento in tipoEquipamentos%}
+          <tr>
+            <th scope="row">{{tipoEquipamento.id}}</th>
+            <td>{{tipoEquipamento.tipoNome}}</td>
+            <td><a class="btn btn-info" href="#" role="button"><i class="fa-solid fa-pen-to-square"></i> Editar</a></td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </main>
+{% endblock content %}
