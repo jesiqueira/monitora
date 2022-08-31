@@ -47,7 +47,7 @@
           <td>{{equipamento.hostname}}</td>
           <td>{{equipamento.localizadoEm}}</td>
           <td>{{equipamento.tipoNome}}</td>
-          <td><a class="btn btn-info" href="#" role="button"><i class="fa-solid fa-pen-to-square"></i> Editar</a></td>
+          <td><a class="btn btn-info" href="{{url_for('equipamento.editarEquipamento', id=equipamento.id)}}" role="button"><i class="fa-solid fa-pen-to-square"></i> Editar</a></td>
         </tr>
         {% endfor %}
       </tbody>

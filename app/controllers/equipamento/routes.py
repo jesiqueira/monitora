@@ -1,5 +1,4 @@
-from distutils.log import ERROR
-from flask import render_template, Blueprint, flash, redirect, url_for
+from flask import render_template, Blueprint, flash, redirect, url_for, request
 from flask_login import login_required
 from app.controllers.equipamento.form_disposivo import DispositivosForm, TipoDispositivoForm
 from app.models.bdMonitora import Local, Tipo, Dispositivo, Site
@@ -39,6 +38,26 @@ def novo_equipamento():
             return redirect(url_for('equipamento.listagem'))
 
     return render_template('create_equipamento.html', title='Novo Equipamento', form=form)
+
+@equipamento.route('/equipamento/<int:id>/editar', methods=['GET', 'POST'])
+@login_required
+def editarEquipamento(id):
+    form = DispositivosForm()
+    equipamentos = db.session.query(Dispositivo.id, Dispositivo.serial, Dispositivo.patrimonio, Dispositivo.hostname, Local.localizadoEm, Tipo.tipoNome).join(Local, Local.id == Dispositivo.idLocal).join(Tipo, Tipo.id == Dispositivo.idTipo).filter(Dispositivo.id == id).first()
+    
+    if form.validate_on_submit():
+        flash('Cadastro atualizado com sucesso', 'success')
+        return redirect(url_for('equipamento.viewEqupamento'))
+    
+    elif request.method == 'GET':
+        form.serial.data = equipamentos.serial
+        form.patrimonio.data = equipamentos.patrimonio
+        form.hostname.data = equipamentos.hostname
+        form.selection.data = equipamentos.localizadoEm
+        form.tipoDispositivo.data = equipamentos.tipoNome
+
+    return render_template('update_equipamento.html', title='Editar Equipamento', legenda = 'Editar equipamento site', form=form)
+    
 
 @equipamento.route('/equipamento/view')
 def viewEqupamento():
