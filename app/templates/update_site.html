@@ -1,0 +1,98 @@
+{% extends 'layout2.html' %}
+{% block content %}
+  <header>
+    <div class="jumbotron jumbotron-fluid mt-4">
+      <div class="container">
+        <h1 class="display-4">{{legenda}}</h1>
+        <p class="lead">
+         Verifique os dados para atualizar site no sistema.
+        </p>
+      </div>
+    </div>
+  </header>
+  <main>
+    <div class="content-section mt-4">
+      <form method="POST" action="">
+        {{ form.hidden_tag() }}
+        <fieldset class="form-group">
+          <!-- <legend class="border-bottom mb-4">Cadastro usuário</legend> -->
+          <div class="form-group">
+            {{ form.nome.label(class='form-control-label') }} {% if form.nome.errors
+            %} {{ form.nome(class='form-control form-control-lg is-invalid')}}
+            <div class="invalid-feedback">
+              {% for error in form.nome.errors %}
+              <span>{{ error }}</span>
+              {% endfor %}
+            </div>
+            {% else %} {{ form.nome(class='form-control
+            form-control-lg',placeholder='Nome do site')}} {% endif %}
+          </div>
+          <div class="form-group">
+            {{ form.rua.label(class='form-control-label') }} {% if
+            form.rua.errors %} {{ form.rua(class='form-control form-control-lg
+            is-invalid')}}
+            <div class="invalid-feedback">
+              {% for error in form.rua.errors %}
+              <span>{{ error }}</span>
+              {% endfor %}
+            </div>
+            {% else %} {{ form.rua(class='form-control form-control-lg',
+            placeholder='Informe a rua')}} {% endif %}
+          </div>
+          <div class="form-group">
+            {{ form.cep.label(class='form-control-label') }} {% if
+            form.cep.errors %} {{ form.cep(class='form-control form-control-lg
+            is-invalid')}}
+            <div class="invalid-feedback">
+              {% for error in form.cep.errors %}
+              <span>{{ error }}</span>
+              {% endfor %}
+            </div>
+            {% else %} {{ form.cep(class='form-control form-control-lg',
+            placeholder='Informe o cep')}} {% endif %}
+          </div>
+          <div class="form-group">
+            {{ form.cidade.label(class='form-control-label') }} {% if
+            form.cidade.errors %} {{ form.cidade(class='form-control
+            form-control-lg is-invalid')}}
+            <div class="invalid-feedback">
+              {% for error in form.cidade.errors %}
+              <span>{{ error }}</span>
+              {% endfor %}
+            </div>
+            {% else %} {{ form.cidade(class='form-control form-control-lg',
+            placeholder='Informe a cidade')}} {% endif %}
+          </div>
+          <div class="form-group mt-4">
+            {{ form.submit(class='btn btn-outline-primary')}}
+            <a href="{{url_for('main.site')}}" class="btn btn-outline-warning ml-3"><i class="fa-solid fa-xmark"></i> Cancelar</a>
+            <a href="#" role="button" class="btn btn-danger ml-3" data-toggle="modal" data-target="#deleteModalCenter"><i class="fa-solid fa-trash-can"></i> Excluir</a>
+          </div>
+        </fieldset>
+      </form>
+      <!-- Modal -->
+      <div class="modal fade" id="deleteModalCenter" tabindex="-1" role="dialog" aria-labelledby="deleteModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="exampleModalLongTitle">Excluir Site?</h5>
+              <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+              </button>
+            </div>
+            <div class="modal-body">
+              <span class="font-weight-bold">Se esse é o seu desejo então confirme selecionando Excluir</span>
+              
+            </div>
+            <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+              <form action="{{url_for('main.delete_site', id_site=id_site)}}" method="POST">
+                <input type="submit" class="btn btn-danger" value="Excluir">
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+{% endblock content %}

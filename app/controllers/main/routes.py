@@ -1,5 +1,5 @@
-from flask import render_template, flash, redirect, url_for, Blueprint
-from app.controllers.main.form import SiteForm, LocalAtendimento
+from flask import render_template, flash, redirect, url_for, Blueprint, request
+from app.controllers.main.form import (SiteForm, LocalAtendimento, SiteUpdateForm)
 from flask_login import current_user, login_required
 from app.models.bdMonitora import Endereco, Site, Local
 from app import db
@@ -48,6 +48,42 @@ def registrar_site():
         flash('Site Cadastrado com sucesso!', 'success')
         return redirect(url_for('main.site'))
     return render_template('registrar_site.html', title='Registrar Site', form=form)
+
+@main.route('/site/<int:id_site>/update', methods=['GET', 'POST'])
+@login_required
+def update_site(id_site):
+    endereco = Endereco.query.get_or_404(id_site)
+    site =Site.query.filter_by(idEndereco=endereco.id).first_or_404()
+    form = SiteUpdateForm()
+    if form.validate_on_submit():
+        endereco.rua = form.rua.data
+        endereco.cep = form.cep.data
+        endereco.cidade = form.cidade.data
+        site.siteNome = form.nome.data
+        db.session.commit()
+        flash('Dados atualizados com sucesso', 'success')
+        return redirect(url_for('main.site'))
+    elif request.method == 'GET':
+        form.rua.data = endereco.rua
+        form.cep.data = endereco.cep
+        form.cidade.data = endereco.cidade
+        form.nome.data = site.siteNome
+    return render_template('update_site.html', title='Update Site', legenda ='Editar Site', id_site=id_site, form=form)
+
+@main.route('/site/<int:id_site>/delete', methods=['POST'])
+@login_required
+def delete_site(id_site):
+    endereco = Endereco.query.get_or_404(id_site)
+    site =Site.query.filter_by(idEndereco=endereco.id).first_or_404()
+    if site.id != 1:
+        db.session.delete(endereco)
+        db.session.delete(site)
+        db.session.commit()
+        flash('Site removido conforme solicitado', 'success')
+    else:
+        flash('Restrição de segurança - Site não pode ser removido', 'danger')
+    return redirect(url_for('main.site'))
+
 
 @main.route('/site/local', methods=['GET', 'POST'])
 @login_required

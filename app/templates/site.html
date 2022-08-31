@@ -42,7 +42,9 @@
             <td>{{site.siteNome}}</td>
             <td>{{site.cidade}}</td>
             <td>{{site.cep}}</td>
-            <td><a class="btn btn-info" href="#" role="button"><i class="fa-solid fa-pen-to-square"></i> Editar</a></td>
+            <td>
+              <a class="btn btn-info" href="{{url_for('main.update_site', id_site=site.id)}}" role="button"><i class="fa-solid fa-pen-to-square"></i> Editar</a>
+            </td>
           </tr>
         {% endfor %}
       </tbody>
