@@ -1,7 +1,7 @@
 from flask import render_template, flash, redirect, url_for, Blueprint, request
-from app.controllers.users.form import LoginForm, CreateUserForm
+from app.controllers.users.form import (LoginForm, CreateUserForm, UpdateUserForm)
 from app import db, bcrypt
-from app.models.bdMonitora import Usuario, Endereco, Site
+from app.models.bdMonitora import (Usuario, Endereco, Site)
 from flask_login import login_user, current_user, logout_user, login_required
 
 
@@ -66,7 +66,7 @@ def createAdmin():
 def lista_usuario():
     users = db.session.query(Usuario.id, Usuario.userNome, Usuario.login, Usuario.email, Site.siteNome).join(Usuario, Site.id == Usuario.idSite).all()
     # print(users[1].siteNome)
-    return render_template('usuario.html', title='Usuários', usuarios=users)
+    return render_template('users/usuario.html', title='Usuários', usuarios=users)
 
 @user.route('/usuario/novo',  methods=['GET', 'POST'])
 @login_required
@@ -83,4 +83,19 @@ def novo_usuario():
             flash(f'Conta criada com sucesso para: {form.nome.data}!', 'success')
         return redirect(url_for('user.lista_usuario'))
     
-    return render_template('criar_usuario.html', title='Novo usuário', form=form)
+    return render_template('users/criar_usuario.html', title='Novo usuário', form=form)
+
+@user.route('/usuario/<int:id_user>/update',  methods=['GET', 'POST'])
+@login_required
+def update_usuario(id_user):
+    user = Usuario.query.get_or_404(id_user)
+    form = UpdateUserForm()
+    if form.validate_on_submit():
+        pass
+    elif request.method == 'GET':
+        form.nome.data = user.userNome
+        form.login.data = user.login
+        form.email.data = user.email
+
+    
+    return render_template('users/update_usuario.html', title='Editar usuário', legenda='Update dados do Usuário', form=form)

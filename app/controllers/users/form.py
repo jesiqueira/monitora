@@ -51,3 +51,24 @@ class CreateUserForm(FlaskForm):
         if user:
             raise ValidationError(
                 'Email já Cadastrado, escolha email diferente!')
+
+class UpdateUserForm(FlaskForm):
+    nome = StringField('Nome',  validators=[DataRequired(), Length(
+        min=4, max=40, message='Nome não corresponde aos criterios! Tem que ter entre 4 a 40 caracter.')])
+    login = StringField('Login', validators=[DataRequired(), Length(
+        min=4, max=15, message='Login não corresponde aos criterios! Tem que ter entre 4 a 15 caracter.')])
+    email = StringField('Email', validators=[DataRequired(), Email(
+        message='Verificar e-mail informado!')])
+    password = PasswordField('Senha', validators=[DataRequired(), Length(
+        min=6, max=16, message='Se atentar ao criterio, senha deve ter no mínimo 6 e no máximo 16 caracter!')])
+    confiPassword = PasswordField('Confirme a Senha', validators=[DataRequired(), EqualTo('password', message="As senhas não são iguais.")])
+    siteSelect = SelectField('Site', choices=[])
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        sites = db.session.query(Site.siteNome).all()
+        listaSite = []
+        for site in sites:
+            listaSite.append(site[0])
+        self.siteSelect.choices=listaSite
+    
+    submit = SubmitField('Atualizar')
