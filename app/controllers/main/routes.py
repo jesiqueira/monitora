@@ -1,3 +1,4 @@
+import re
 from flask import render_template, flash, redirect, url_for, Blueprint, request
 from app.controllers.main.form import (SiteForm, LocalAtendimento, SiteUpdateForm)
 from flask_login import current_user, login_required
@@ -70,9 +71,10 @@ def update_site(id_site):
         form.nome.data = site.siteNome
     return render_template('update_site.html', title='Update Site', legenda ='Editar Site', id_site=id_site, form=form)
 
-@main.route('/site/<int:id_site>/delete', methods=['POST'])
+@main.route('/site/delete', methods=['POST'])
 @login_required
-def delete_site(id_site):
+def delete_site():
+    id_site = request.form.get('id_site')
     endereco = Endereco.query.get_or_404(id_site)
     site =Site.query.filter_by(idEndereco=endereco.id).first_or_404()
     if site.id != 1:
@@ -83,7 +85,6 @@ def delete_site(id_site):
     else:
         flash('Restrição de segurança - Site não pode ser removido', 'danger')
     return redirect(url_for('main.site'))
-
 
 @main.route('/site/local', methods=['GET', 'POST'])
 @login_required
