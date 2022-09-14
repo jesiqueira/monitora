@@ -37,7 +37,9 @@
                         <ul class="list-unstyled">
                             {% if current_user.is_authenticated %}
                                 <li><a href="{{url_for('user.logout')}}" class="text-white"> <i class="fa-solid fa-right-from-bracket"></i> Sair</a></li>
-                                <li><a href="{{url_for('equipamento.listagem')}}" class="text-white"><i class="fa-solid fa-gears"></i> Tela Administrativa</a></li>
+                                {% if current_user.admin %}
+                                    <li><a href="{{url_for('equipamento.listagem')}}" class="text-white"><i class="fa-solid fa-gears"></i> Tela Administrativa</a></li>
+                                {% endif %}
                             {% else %}
                                 <li><a href="{{url_for('user.login')}}" class="text-white"><i class="fa-solid fa-right-from-bracket"></i> Logar</a></li>
                             {% endif %}

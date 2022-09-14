@@ -37,20 +37,51 @@
         </tr>
       </thead>
       <tbody>
-        {% for user in usuarios%}
-          {% if user.login == 'Admin'%}
+        {% for users in usuarios%}
+          {% if users.login == 'Admin'%}
           {% else %}
             <tr>
-              <th scope="row">{{user.id}}</th>
-              <td>{{user.userNome}}</td>
-              <td>{{user.login}}</td>
-              <td>{{user.email}}</td>
-              <td>{{user.siteNome}}</td>
-              <td><a class="btn btn-info" href="{{url_for('user.update_usuario', id_user=user.id)}}" role="button"><i class="fa-solid fa-pen-to-square"></i> Editar</a></td>
+              <th scope="row">{{users.id}}</th>
+              <td>{{users.userNome}}</td>
+              <td>{{users.login}}</td>
+              <td>{{users.email}}</td>
+              <td>{{users.siteNome}}</td>
+              <td>
+                <!-- <a class="btn btn-info" href="{{url_for('user.update_usuario', id_user=users.id)}}" role="button"><i class="fa-solid fa-pen-to-square"></i> Editar</a> -->
+                <a href="#" onclick="editarUser('{{users.id}}')" role="button" class="btn btn-danger ml-3" data-toggle="modal" data-target="#editarUser"><i class="fa-solid fa-pen-to-square"></i></a>
+              </td>
             </tr>
           {% endif %}
         {% endfor %}
       </tbody>
     </table>
   </main>
+
+  <!-- Modal -->
+  <div class="modal fade" id="editarUser" tabindex="-1" role="dialog" aria-labelledby="editarUserTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLongTitle">O que deseja fazer?</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <input type="hidden" name="id_user" id="id_user">
+          <div class="form-row">
+            <div class="col-md-6">
+              <a class="btn btn-info ml-4" onclick="window.location = updateURLUser()" role="button"><i class="fa-solid fa-pen-to-square"></i> Editar Usuário</a>
+            </div>
+            <div class="col-md-6">
+              <a class="btn btn-info ml-4" onclick="window.location = trocarSenhaURLUser()" role="button"><i class="fa-solid fa-pen-to-square"></i> Trocar Senha</a>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+        </div>
+      </div>
+    </div>
+  </div>
 {% endblock content %}
