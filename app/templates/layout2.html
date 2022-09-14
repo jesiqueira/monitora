@@ -49,26 +49,32 @@
 
         <div class="collapse navbar-collapse" id="navbars">
           <ul class="navbar-nav mr-auto">
-            <li class="nav-item px-4 active">
+            <li class="nav-item px-3 active">
               <a class="nav-link" href="{{url_for('equipamento.listagem')}}"><i class="fa-solid fa-clipboard-list"></i> Inventário<span class="sr-only">(current)</span></a>
             </li>
-            <li class="nav-item px-4">
+            <li class="nav-item px-3">
               <a class="nav-link" href="#"><i class="fa-solid fa-table"></i> Estoque</a>
             </li>
-            <li class="nav-item px-4 dropdown">
-              <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-gears"></i> Administrar</a>
+            <li class="nav-item px-3 dropdown">
+              <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-gears"></i> Adm-site</a>
               <div class="dropdown-menu">
                 <a class="dropdown-item" href="#"><i class="fa-solid fa-table"></i> Estoque</a>
                 <a class="dropdown-item" href="{{url_for('main.site')}}"><i class="fa-solid fa-map-location"></i> Site</a>
-                <a class="dropdown-item" href="{{url_for('user.lista_usuario')}}"><i class="fa-solid fa-user-gear"></i> Usuários</a>
                 <a class="dropdown-item" href="{{url_for('main.localizarPA')}}"><i class="fa-solid fa-magnifying-glass-location"></i> Local-Atendimento</a>
                 <a class="dropdown-item" href="{{url_for('equipamento.viewEqupamento')}}"><i class="fa-solid fa-laptop-code"></i> Equipamento</a>
+              </div>
+            </li>
+            <li class="nav-item px-3 dropdown">
+              <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-users-gear"></i> Usuários</a>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="{{url_for('user.novo_usuario')}}"><i class="fa-solid fa-user-plus"></i> Novo usuário</a>
+                <a class="dropdown-item" href="{{url_for('user.lista_usuario')}}"><i class="fa-solid fa-list-ol"></i> Listar usuário</a>
               </div>
             </li>
           </ul>
           <ul class="navbar-nav flex-row ml-md-auto d-none d-md-flex">
             <li class="nav-item">
-              <span class="text-light"><i class="fa-solid fa-user-check text-success"></i> {{current_user.userNome}}</span>
+              <span class="text-light"><i class="fa-solid fa-user-check text-success"></i> {{current_user.login}}</span>
             </li>
           </ul>
           <ul class="navbar-nav flex-row ml-md-auto d-none d-md-flex">
