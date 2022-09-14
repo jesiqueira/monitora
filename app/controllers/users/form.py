@@ -20,6 +20,8 @@ class CreateUserForm(FlaskForm):
         min=4, max=15, message='Login não corresponde aos criterios! Tem que ter entre 4 a 15 caracter.')])
     email = StringField('Email', validators=[DataRequired(), Email(
         message='Verificar e-mail informado!')])
+    admin = BooleanField('Administrador')
+    ativo = BooleanField('Ativo')
     password = PasswordField('Senha', validators=[DataRequired(), Length(
         min=6, max=16, message='Se atentar ao criterio, senha deve ter no mínimo 6 e no máximo 16 caracter!')])
     confiPassword = PasswordField('Confirme a Senha', validators=[DataRequired(), EqualTo('password', message="As senhas não são iguais.")])
@@ -59,6 +61,8 @@ class UpdateUserForm(FlaskForm):
         min=4, max=15, message='Login não corresponde aos criterios! Tem que ter entre 4 a 15 caracter.')])
     email = StringField('Email', validators=[DataRequired(), Email(
         message='Verificar e-mail informado!')])
+    admin = BooleanField('Administrador')
+    ativo = BooleanField('Ativo')
     password = PasswordField('Senha', validators=[DataRequired(), Length(
         min=6, max=16, message='Se atentar ao criterio, senha deve ter no mínimo 6 e no máximo 16 caracter!')])
     confiPassword = PasswordField('Confirme a Senha', validators=[DataRequired(), EqualTo('password', message="As senhas não são iguais.")])

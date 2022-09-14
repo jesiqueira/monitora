@@ -1,4 +1,5 @@
 from datetime import datetime
+from email.policy import default
 from enum import unique
 from app import db, login_manager
 from flask_login import UserMixin
@@ -50,18 +51,22 @@ class Usuario(db.Model, UserMixin):
     login = db.Column(db.String(20), unique=True, nullable=False)
     senha = db.Column(db.String(60), unique=True, nullable=False)
     email = db.Column(db.String(40), nullable=False)
+    admin = db.Column(db.Boolean, nullable=False, default=False)
+    ativo = db.Column(db.Boolean, nullable=False, default=False)
     relatorios = db.relationship('Relatorio', backref='usuario', lazy=True)
     idSite = db.Column(db.Integer, db.ForeignKey('Site.id'), nullable=False)
 
-    def __init__(self, nome='Anonima', login='default', senha='default', email='defaul@default.com.br', idSite=0):
+    def __init__(self, nome='Anonima', login='default', senha='default', email='defaul@default.com.br', admin= False, ativo= False, idSite=0):
         self.userNome = nome
         self.login = login
         self.senha = senha
         self.email = email
+        self.admin = admin
+        self.ativo = ativo
         self.idSite = idSite
 
     def __repr__(self):
-        return f"Usuario('{self.userNome}', '{self.login}', '{self.email}')"
+        return f"Usuario('{self.userNome}', '{self.login}', '{self.email}', '{self.admin}', '{self.ativo}')"
 
 
 class Tipo(db.Model):

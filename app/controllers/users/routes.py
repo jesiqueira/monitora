@@ -52,7 +52,7 @@ def createAdmin():
         db.session.add(site)
 
         user = Usuario('Administrador', 'Admin', hashed_password,
-                       'Administrador@email.com.br', 1)
+                       'Administrador@email.com.br', True, True, 1)
         db.session.add(user)
         db.session.commit()
         flash('Login Administrador criado com sucesso!', 'success')
@@ -77,7 +77,7 @@ def novo_usuario():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
         site = Site.query.filter_by(siteNome=form.siteSelect.data).first_or_404()
         if site:
-            user = Usuario(nome=form.nome.data, login=form.login.data, senha=hashed_password, email=form.email.data, idSite=site.id)
+            user = Usuario(nome=form.nome.data, login=form.login.data, senha=hashed_password, email=form.email.data, admin=form.admin.data, ativo=form.ativo.data ,idSite=site.id)
             db.session.add(user)
             db.session.commit()
             flash(f'Conta criada com sucesso para: {form.nome.data}!', 'success')
@@ -96,6 +96,8 @@ def update_usuario(id_user):
         form.nome.data = user.userNome
         form.login.data = user.login
         form.email.data = user.email
+        form.admin.data = user.admin
+        form.ativo.data = user.ativo
 
     
     return render_template('users/update_usuario.html', title='Editar usuário', legenda='Update dados do Usuário', form=form)
