@@ -53,3 +53,18 @@ class LocalAtendimento(FlaskForm):
       local = Local.query.filter_by(localizadoEm=localPa.data).first()
       if local:
         raise ValidationError('Ponto de Atendimento já está cadastrado no sistema!')
+
+class UpdateLocal(FlaskForm):
+  localPa = StringField('Local P.A', validators=[DataRequired(), Length(min=5, max=30, message='Campo obrigatório, mínimo 5, máximo 30 caracteres!')])
+  localSelect = SelectField('Site', choices=[])
+
+  def __init__(self, **kwargs):
+    super().__init__(**kwargs)
+    sites = db.session.query(Site.siteNome).all()
+    listaSite = []
+    for site in sites:
+        listaSite.append(site[0])
+        self.localSelect.choices=listaSite
+
+
+  submit = SubmitField('Update')

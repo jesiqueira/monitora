@@ -1,6 +1,5 @@
-import re
 from flask import render_template, flash, redirect, url_for, Blueprint, request
-from app.controllers.main.form import (SiteForm, LocalAtendimento, SiteUpdateForm)
+from app.controllers.main.form import (SiteForm, LocalAtendimento, SiteUpdateForm, UpdateLocal)
 from flask_login import current_user, login_required
 from app.models.bdMonitora import Endereco, Site, Local
 from app import db
@@ -25,14 +24,14 @@ desktop = {
 @main.route('/monitora')
 def home():
     # print(current_user.id)
-    return render_template('home.html', title='Home', local='São Carlos', desktop=desktop)
+    return render_template('main/home.html', title='Home', local='São Carlos', desktop=desktop)
 
 
 @main.route('/site')
 @login_required
 def site():
     sites = db.session.query(Site.id, Site.siteNome, Endereco.rua, Endereco.cep, Endereco.cidade).join(Site, Endereco.id == Site.id).all()
-    return render_template('site.html', title='Site', sites=sites)
+    return render_template('main/site.html', title='Site', sites=sites)
 
 
 @main.route('/site/new', methods=['GET', 'POST'])
@@ -48,7 +47,7 @@ def registrar_site():
         db.session.commit()
         flash('Site Cadastrado com sucesso!', 'success')
         return redirect(url_for('main.site'))
-    return render_template('registrar_site.html', title='Registrar Site', form=form)
+    return render_template('main/registrar_site.html', title='Registrar Site', form=form)
 
 @main.route('/site/<int:id_site>/update', methods=['GET', 'POST'])
 @login_required
@@ -69,7 +68,7 @@ def update_site(id_site):
         form.cep.data = endereco.cep
         form.cidade.data = endereco.cidade
         form.nome.data = site.siteNome
-    return render_template('update_site.html', title='Update Site', legenda ='Editar Site', id_site=id_site, form=form)
+    return render_template('main/update_site.html', title='Update Site', legenda ='Editar Site', id_site=id_site, form=form)
 
 @main.route('/site/delete', methods=['POST'])
 @login_required
@@ -90,7 +89,7 @@ def delete_site():
 @login_required
 def localizarPA():
     locais = db.session.query(Local.id, Local.localizadoEm, Site.siteNome).join(Local, Site.id == Local.idSite).all()
-    return render_template('local.html', title='Ponto Atendimento', locais=locais)
+    return render_template('main/local.html', title='Ponto Atendimento', locais=locais)
 
 
 @main.route('/site/registrarLocal', methods=['GET', 'POST'])
@@ -109,4 +108,24 @@ def registrarLocal():
             flash('Ponto de atendimento cadastrado com sucesso', 'danger')
             return redirect(url_for('main.registrarPa'))
 
-    return render_template('create_ponto_atendimento.html', title='Novo Ponto Atendimento', form=form)
+    return render_template('main/create_ponto_atendimento.html', title='Novo Ponto Atendimento', form=form)
+
+
+@main.route('/site/updateLocal', methods=['GET', 'POST'])
+@login_required
+def updateLocal():
+    form = UpdateLocal()
+    if form.validate_on_submit():
+        pass
+        # site = Site.query.filter_by(siteNome=form.localSelect.data).first()
+        # if site:
+        #     local = Local(form.localPa.data, site.id)
+        #     db.session.add(local)
+        #     db.session.commit()
+        #     flash('Ponto de atendimento cadastrado com sucesso', 'success')
+        #     return redirect(url_for('main.localizarPA'))
+        # else:
+        #     flash('Ponto de atendimento cadastrado com sucesso', 'danger')
+        #     return redirect(url_for('main.registrarPa'))
+
+    return render_template('main/update_local.html', title='Update Ponto Atendimento', form=form)

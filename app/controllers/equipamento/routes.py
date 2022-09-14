@@ -14,7 +14,7 @@ def listagem():
         equipamentos = db.session.query(Dispositivo.id, Dispositivo.serial, Dispositivo.patrimonio, Dispositivo.hostname, Local.localizadoEm, Tipo.tipoNome).join(Local, Local.id == Dispositivo.idLocal).join(Tipo, Tipo.id == Dispositivo.idTipo).all()
     except:
         print(F"Erro!")
-    return render_template('listagem.html', title='Listagem', equipamentos=equipamentos)
+    return render_template('equipamentos/listagem.html', title='Listagem', equipamentos=equipamentos)
 
 
 @equipamento.route('/dispotivo/novo', methods=['GET', 'POST'])
@@ -37,7 +37,7 @@ def novo_equipamento():
             flash('Equipamento cadastrado com sucesso.', 'success')
             return redirect(url_for('equipamento.listagem'))
 
-    return render_template('create_equipamento.html', title='Novo Equipamento', form=form)
+    return render_template('equipamentos/create_equipamento.html', title='Novo Equipamento', form=form)
 
 @equipamento.route('/equipamento/<int:id>/editar', methods=['GET', 'POST'])
 @login_required
@@ -56,13 +56,13 @@ def editarEquipamento(id):
         form.selection.data = equipamentos.localizadoEm
         form.tipoDispositivo.data = equipamentos.tipoNome
 
-    return render_template('update_equipamento.html', title='Editar Equipamento', legenda = 'Editar equipamento site', form=form)
+    return render_template('equipamentos/update_equipamento.html', title='Editar Equipamento', legenda = 'Editar equipamento site', form=form)
     
 
 @equipamento.route('/equipamento/view')
 def viewEqupamento():
     tipoEquipamentos = Tipo.query.all()
-    return render_template('lista_tipoEquipamento.html', title='View Equipamento', tipoEquipamentos=tipoEquipamentos)
+    return render_template('equipamentos/lista_tipoEquipamento.html', title='View Equipamento', tipoEquipamentos=tipoEquipamentos)
 
 @equipamento.route('/equipamento/novo', methods=['GET', 'POST'])
 def criarEqupamento():
@@ -75,7 +75,7 @@ def criarEqupamento():
         flash('Equipamento cadastrado com sucesso.', 'success')
         return redirect(url_for('equipamento.viewEqupamento'))
 
-    return render_template('create_tipoEquipamento.html', title='Cadastrar Novo Equipamento', form=form)
+    return render_template('equipamentos/create_tipoEquipamento.html', title='Cadastrar Novo Equipamento', form=form)
 
 
 # @disposito.route('/listagem/<int:equipamento_id>/editar')

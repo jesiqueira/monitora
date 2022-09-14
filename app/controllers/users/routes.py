@@ -24,7 +24,7 @@ def login():
         else:
             flash('Error, Verifique Login/Senha!', 'danger')
 
-    return render_template('login.html', title='Login', form=form)
+    return render_template('users/login.html', title='Login', form=form)
 
 
 @user.route('/logout')
