@@ -96,17 +96,27 @@ def novo_usuario():
 @login_required
 def update_usuario(id_user):
     if current_user.admin:
-        user = Usuario.query.get_or_404(id_user)
+        try:
+            user = Usuario.query.get_or_404(id_user)
+        except Exception as e:
+            # print(f'Erro ao consultar usuário {e}')
+            abort(404)        
         form = UpdateUserForm()
         if form.validate_on_submit():
-            print('okkkkkkk')
+            user.userNome = form.nome.data
+            user.login = form.login.data
+            user.email = form.email.data
+            user.admin = form.admin.data
+            user.ativo = form.ativo.data
+            db.session.commit()
+            flash('Dados atualizados com sucesso', 'success')
+            return redirect(url_for('user.lista_usuario'))
         elif request.method == 'GET':
             form.nome.data = user.userNome
             form.login.data = user.login
             form.email.data = user.email
             form.admin.data = user.admin
             form.ativo.data = user.ativo
-
         return render_template('users/update_usuario.html', title='Editar usuário', legenda='Update dados do Usuário', form=form)
     else:
         abort(403)
