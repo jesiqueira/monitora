@@ -12,20 +12,22 @@ user = Blueprint('user', __name__)
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('main.home'))
-
     form = LoginForm()
-
-    if form.validate_on_submit():
+    try:
         user = Usuario.query.filter_by(login=form.login.data).first()
-        if user and bcrypt.check_password_hash(user.senha, form.password.data) and user.ativo:
-            login_user(user, remember=form.remember.data)
-            next_page = request.args.get('next')
-            return redirect(next_page) if next_page else redirect(url_for('main.home'))
-        elif not user.ativo:
-            abort(403)
-        else:
-            flash('Error, Verifique Login/Senha!', 'danger')
+        if form.validate_on_submit():
+            if user and bcrypt.check_password_hash(user.senha, form.password.data) and user.ativo:
+                login_user(user, remember=form.remember.data)
+                next_page = request.args.get('next')
+                return redirect(next_page) if next_page else redirect(url_for('main.home'))
+            elif not user.ativo:
+                abort(403)
+            else:
+                flash('Error, Verifique Login/Senha!', 'danger')
 
+    except Exception as e:
+        abort(403)
+    
     return render_template('users/login.html', title='Login', form=form)
 
 
