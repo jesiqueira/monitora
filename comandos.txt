@@ -8,3 +8,25 @@ python run.py db init
 python run.py db migrate
 python run.py db upgrade
 
+
+----npn----
+npm init
+
+---bootstrap--
+npm install bootstrap@4.2.1
+
+
+Se você instalou a versão do vídeo e quer atualizar seu font-awesome, siga os passos abaixo:
+
+1 - Desinstale o pacote ao qual instalou usando o comando: npm uninstall font-awesome;
+2 - Installe o pacote atualizado (v 5.11) com o comando: npm install @fortawesome/fontawesome-free
+3 - Referencie na sua página os seguintes arquivos css:
+
+<link rel="stylesheet" href="node_modules/@fortawesome/fontawesome-free/css/fontawesome.css">
+
+<link rel="stylesheet" href="node_modules/@fortawesome/fontawesome-free/css/brands.css">
+
+<link rel="stylesheet" href="node_modules/@fortawesome/fontawesome-free/css/solid.css">
+
+-----fontawesome--
+npm install @fortawesome/fontawesome-free
