@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, HiddenField
 from wtforms.validators import DataRequired, Length, EqualTo, Email, ValidationError
 from app.models.bdMonitora import Usuario, Site
 from app import db
@@ -75,6 +75,7 @@ class UpdateUserForm(FlaskForm):
     submit = SubmitField('Atualizar')
 
 class UpdatePassWordUserForm(FlaskForm):
+    id_user = HiddenField()
     password = PasswordField('Senha', validators=[DataRequired(), Length(
         min=6, max=16, message='Se atentar ao criterio, senha deve ter no mínimo 6 e no máximo 16 caracter!')])
     confiPassword = PasswordField('Confirme a Senha', validators=[DataRequired(), EqualTo('password', message="As senhas não são iguais.")])

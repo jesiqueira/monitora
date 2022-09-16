@@ -48,7 +48,7 @@
               <td>{{users.siteNome}}</td>
               <td>
                 <!-- <a class="btn btn-info" href="{{url_for('user.update_usuario', id_user=users.id)}}" role="button"><i class="fa-solid fa-pen-to-square"></i> Editar</a> -->
-                <a href="#" onclick="editarUser('{{users.id}}')" role="button" class="btn btn-danger ml-3" data-toggle="modal" data-target="#editarUser"><i class="fa-solid fa-pen-to-square"></i></a>
+                <a href="" onclick="editarUser('{{users.id}}')" role="button" class="btn btn-danger ml-3" data-toggle="modal" data-target="#editarUser"><i class="fa-solid fa-pen-to-square"></i></a>
               </td>
             </tr>
           {% endif %}
@@ -74,7 +74,7 @@
               <a class="btn btn-info ml-4" onclick="window.location = updateURLUser()" role="button"><i class="fa-solid fa-pen-to-square"></i> Editar Usuário</a>
             </div>
             <div class="col-md-6">
-              <a class="btn btn-info ml-4" onclick="window.location = trocarSenhaURLUser()" role="button"><i class="fa-solid fa-pen-to-square"></i> Trocar Senha</a>
+              <a class="btn btn-info ml-4" onclick="trocarSenhaURLUser()" role="button"><i class="fa-solid fa-pen-to-square"></i> Trocar Senha</a>
             </div>
           </div>
         </div>

@@ -28,5 +28,8 @@ Se você instalou a versão do vídeo e quer atualizar seu font-awesome, siga os
 
 <link rel="stylesheet" href="node_modules/@fortawesome/fontawesome-free/css/solid.css">
 
+Veja os ícones disponíveis no link: https://fontawesome.com/icons?d=gallery&m=free
+Documentação: https://fontawesome.com/how-to-use/on-the-web/referencing-icons/basic-use
+
 -----fontawesome--
 npm install @fortawesome/fontawesome-free
