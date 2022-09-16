@@ -10,7 +10,7 @@ equipamento = Blueprint('equipamento', __name__)
 @equipamento.route('/listagem')
 @login_required
 def listagem():
-    if current_user.admin:
+    if current_user.admin and current_user.ativo:
         try:
             equipamentos = db.session.query(Dispositivo.id, Dispositivo.serial, Dispositivo.patrimonio, Dispositivo.hostname, Local.localizadoEm, Tipo.tipoNome).join(Local, Local.id == Dispositivo.idLocal).join(Tipo, Tipo.id == Dispositivo.idTipo).all()
         except Exception as e:
@@ -23,7 +23,7 @@ def listagem():
 @equipamento.route('/dispotivo/novo', methods=['GET', 'POST'])
 @login_required
 def novo_equipamento():
-    if current_user.admin:
+    if current_user.admin and current_user.ativo:
         form = DispositivosForm()
         if form.validate_on_submit():
             try:
@@ -48,7 +48,7 @@ def novo_equipamento():
 @equipamento.route('/equipamento/<int:id>/editar', methods=['GET', 'POST'])
 @login_required
 def editarEquipamento(id):
-    if current_user.admin:
+    if current_user.admin and current_user.ativo:
         form = DispositivosForm()
         equipamentos = db.session.query(Dispositivo.id, Dispositivo.serial, Dispositivo.patrimonio, Dispositivo.hostname, Local.localizadoEm, Tipo.tipoNome).join(Local, Local.id == Dispositivo.idLocal).join(Tipo, Tipo.id == Dispositivo.idTipo).filter(Dispositivo.id == id).first()
         
@@ -70,7 +70,7 @@ def editarEquipamento(id):
 
 @equipamento.route('/equipamento/view')
 def viewEqupamento():
-    if current_user.admin:
+    if current_user.admin and current_user.ativo:
         tipoEquipamentos = Tipo.query.all()
         return render_template('equipamentos/lista_tipoEquipamento.html', title='View Equipamento', tipoEquipamentos=tipoEquipamentos)
     else:
@@ -78,7 +78,7 @@ def viewEqupamento():
 
 @equipamento.route('/equipamento/novo', methods=['GET', 'POST'])
 def criarEqupamento():
-    if current_user.admin:
+    if current_user.admin and current_user.ativo:
         form = TipoDispositivoForm()
         if form.validate_on_submit():
             tipo = Tipo(form.nome.data)

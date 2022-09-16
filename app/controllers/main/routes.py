@@ -30,7 +30,7 @@ def home():
 @main.route('/site')
 @login_required
 def site():
-    if current_user.admin:
+    if current_user.admin and current_user.ativo:
         sites = db.session.query(Site.id, Site.siteNome, Endereco.rua, Endereco.cep, Endereco.cidade).join(Site, Endereco.id == Site.id).all()
         return render_template('main/site.html', title='Site', sites=sites)
     else:
@@ -40,7 +40,7 @@ def site():
 @main.route('/site/new', methods=['GET', 'POST'])
 @login_required
 def registrar_site():
-    if current_user.admin:
+    if current_user.admin and current_user.ativo:
         form = SiteForm()
         if form.validate_on_submit():
             endereco = Endereco(cidade=form.cidade.data, rua=form.rua.data, cep=form.cep.data)
@@ -58,7 +58,7 @@ def registrar_site():
 @main.route('/site/<int:id_site>/update', methods=['GET', 'POST'])
 @login_required
 def update_site(id_site):
-    if current_user.admin:
+    if current_user.admin and current_user.ativo:
         endereco = Endereco.query.get_or_404(id_site)
         site =Site.query.filter_by(idEndereco=endereco.id).first_or_404()
         form = SiteUpdateForm()
@@ -82,7 +82,7 @@ def update_site(id_site):
 @main.route('/site/delete', methods=['POST'])
 @login_required
 def delete_site():
-    if current_user.admin:
+    if current_user.admin and current_user.ativo:
         id_site = request.form.get('id_site')
         endereco = Endereco.query.get_or_404(id_site)
         site =Site.query.filter_by(idEndereco=endereco.id).first_or_404()
@@ -100,7 +100,7 @@ def delete_site():
 @main.route('/site/local', methods=['GET', 'POST'])
 @login_required
 def localizarPA():
-    if current_user.admin:
+    if current_user.admin and current_user.ativo:
         locais = db.session.query(Local.id, Local.localizadoEm, Site.siteNome).join(Local, Site.id == Local.idSite).all()
         return render_template('main/local.html', title='Ponto Atendimento', locais=locais)
     else:
@@ -110,7 +110,7 @@ def localizarPA():
 @main.route('/site/registrarLocal', methods=['GET', 'POST'])
 @login_required
 def registrarLocal():
-    if current_user.admin:
+    if current_user.admin and current_user.ativo:
         form = LocalAtendimento()
         if form.validate_on_submit():
             site = Site.query.filter_by(siteNome=form.localSelect.data).first()
@@ -132,7 +132,7 @@ def registrarLocal():
 @main.route('/site/updateLocal', methods=['GET', 'POST'])
 @login_required
 def updateLocal():
-    if current_user.admin:
+    if current_user.admin and current_user.ativo:
         form = UpdateLocal()
         if form.validate_on_submit():
             pass

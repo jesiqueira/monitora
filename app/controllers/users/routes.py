@@ -68,7 +68,7 @@ def createAdmin():
 @user.route('/usuarios')
 @login_required
 def lista_usuario():
-    if current_user.admin:
+    if current_user.admin and current_user.ativo:
         users = db.session.query(Usuario.id, Usuario.userNome, Usuario.login, Usuario.email, Site.siteNome).join(Usuario, Site.id == Usuario.idSite).all()
         # print(users[1].siteNome)
         return render_template('users/usuario.html', title='Usuários', usuarios=users)
@@ -78,7 +78,7 @@ def lista_usuario():
 @user.route('/usuario/novo',  methods=['GET', 'POST'])
 @login_required
 def novo_usuario():
-    if current_user.admin:
+    if current_user.admin and current_user.ativo:
         form = CreateUserForm()
         if form.validate_on_submit():
             hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
@@ -97,7 +97,7 @@ def novo_usuario():
 @user.route('/usuario/<int:id_user>/update',  methods=['GET', 'POST'])
 @login_required
 def update_usuario(id_user):
-    if current_user.admin:
+    if current_user.admin and current_user.ativo:
         try:
             user = Usuario.query.get_or_404(id_user)
         except Exception as e:
