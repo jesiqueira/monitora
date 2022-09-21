@@ -73,7 +73,7 @@ class Tipo(db.Model):
     __tablename__ = 'Tipo'
     id = db.Column(db.Integer, primary_key=True)
     tipoNome = db.Column(db.String(40), unique=True, nullable=False)
-    dispositos = db.relationship('Dispositivo', backref='tipo')
+    inventario = db.relationship('Inventario', backref='tipo')
 
     def __init__(self, nome='Anonimo'):
         self.tipoNome = nome
@@ -86,7 +86,7 @@ class Local(db.Model):
     __tablename__ = 'Local'
     id = db.Column(db.Integer, primary_key=True)
     localizadoEm = db.Column(db.String(40), unique=True, nullable=False)
-    dispositivo = db.relationship('Dispositivo', backref='local', lazy=True)
+    inventario = db.relationship('Inventario', backref='local', lazy=True)
     idSite = db.Column(db.Integer, db.ForeignKey('Site.id'), nullable=False)
 
     def __init__(self, localizadoEm='default', idSite=0):
@@ -97,8 +97,8 @@ class Local(db.Model):
         return f"Local('{self.id}, {self.localizadoEm}', '{self.idSite}')"
 
 
-class Dispositivo(db.Model):
-    __tablename__ = 'Dispositivo'
+class Inventario(db.Model):
+    __tablename__ = 'Inventario'
     id = db.Column(db.Integer, primary_key=True)
     serial = db.Column(db.String(40), unique=True)
     patrimonio = db.Column(db.String(40), unique=True)
@@ -114,7 +114,7 @@ class Dispositivo(db.Model):
         self.idTipo = idTipo
 
     def __repr__(self) -> str:
-        return f"Dispositivo('{self.serial}', '{self.patrimonio}', '{self.hostname}')"
+        return f"Inventario('{self.serial}', '{self.patrimonio}', '{self.hostname}')"
 
 
 class Acao(db.Model):

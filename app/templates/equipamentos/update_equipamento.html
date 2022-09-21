@@ -54,7 +54,7 @@
         </div>
         <div class="form-row">
           <div class="col-6">
-            {{form.selection.label(class="form-group mr-2")}}
+            {{form.selection.label(class="form-group mr-2" )}}
             {% if form.selection.errors %}
               {{form.selection(class='custom-select mr-sm-2 is-invalid')}}
               <div class="invalid-feedback">
@@ -63,7 +63,7 @@
                 {% endfor %}
               </div>
             {% else %}
-              {{ form.selection(class='custom-select')}}
+              {{ form.selection(class='custom-select', disabled=true)}}
             {% endif %}
           </div>
           <div class="col-6">

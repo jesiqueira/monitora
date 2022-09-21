@@ -10,9 +10,6 @@ function editarUser(id_user){
   document.querySelector('#id_user').value = id_user;
 }
 
-function editarInventario(id_inventario){
-  document.querySelector('#id_inventario').value = id_user;
-}
 
 function updateURLUser(){
   
@@ -23,6 +20,7 @@ function updateURLUser(){
   // console.log("URL nova: "+ url);
   return url;
 }
+
 function trocarSenhaURLUser(){
   
   var id_user = document.querySelector('#id_user').value;
@@ -42,6 +40,36 @@ function trocarSenhaURLUser(){
   input.type = 'hidden';
   input.name = 'id_users';
   input.value = id_user;
+  form.appendChild(input);
+  document.body.appendChild(form);
+  form.submit();
+}
+
+// =========== Funções para página inventário================
+
+function editarInventario(id_inventario){
+  document.querySelector('#id_inventario').value = id_inventario;
+}
+
+function ediatarDadosEquipamentoInventario(){
+  
+  var id_inventario = document.querySelector('#id_inventario').value;
+  // var url = window.location.hostname;
+  // var port = window.location.port;
+  // var url ='/usuario/' + id_user + '/updatePassword';
+  // var url =url + ':' + port + '/usuario/' + id_user + '/updatePassword';
+  var url ='/atualizarInventario';
+  // console.log('Id user: ', id_user, url);
+  // console.log("URL nova: "+ url);
+
+  var form = document.createElement('form');
+  form.action=url;
+  form.method='POST';
+
+  var input = document.createElement('input');
+  input.type = 'hidden';
+  input.name = 'id_inventario';
+  input.value = id_inventario;
   form.appendChild(input);
   document.body.appendChild(form);
   form.submit();
