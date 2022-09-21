@@ -10,6 +10,10 @@ function editarUser(id_user){
   document.querySelector('#id_user').value = id_user;
 }
 
+function editarInventario(id_inventario){
+  document.querySelector('#id_inventario').value = id_user;
+}
+
 function updateURLUser(){
   
   var id_user = document.querySelector('#id_user').value;

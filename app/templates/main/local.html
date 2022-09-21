@@ -40,7 +40,7 @@
             <td>{{local.localizadoEm}}</td>
             <td>{{local.siteNome}}</td>
             <td>
-              <a class="btn btn-info" href="#" role="button"><i class="fa-solid fa-pen-to-square"></i> Editar</a>
+              <a class="btn btn-info" href="{{url_for('main.updateLocal', id_local=local.id)}}" role="button"><i class="fa-solid fa-pen-to-square"></i> Editar</a>
               <a href="#" onclick="excluirLocal('{{local.id}}')" role="button" class="btn btn-danger ml-3" data-toggle="modal" data-target="#deleteModalCenter"><i class="fa-solid fa-trash-can"></i> Excluir</a>
             </td>
           </tr>
@@ -59,7 +59,7 @@
           </button>
         </div>
         <div class="modal-body">
-          <span class="font-weight-bold">Se esse é o seu desejo então confirme selecionando Excluir</span>
+          <span class="font-weight-bold">Se esse é o seu desejo então confirme selecionando Excluir, teste</span>
           <!-- <span id="teste_id"></span> -->          
         </div>
         <div class="modal-footer">

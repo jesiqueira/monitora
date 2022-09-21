@@ -47,6 +47,28 @@ class DispositivosForm(FlaskForm):
             listaTipoDispositivo.append(tipo[0])
         self.tipoDispositivo.choices = listaTipoDispositivo
 
+class UpdateDispositivosForm(FlaskForm):
+    serial = StringField('Serial', validators=[DataRequired()])
+    patrimonio = StringField('Patromônio', validators=[DataRequired(), Length(min=1, max=40, message='Campo obrigatório, mínimo 1 máximo 30 caracteres.')])
+    hostname = StringField('Hostname', validators=[DataRequired(), Length(min=1, max=30, message='Campo Obrigatório, mínimo 1 no máximo 30 caracteres.')])
+    selection = SelectField('Local', choices=[])
+    tipoDispositivo = SelectField('Tipo equipamento', choices=[])
+    submit = SubmitField('Atualizar')
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        locais = db.session.query(Local.localizadoEm).all()
+        tipoDispositivos = db.session.query(Tipo.tipoNome).all()
+        listaLocal = []
+        listaTipoDispositivo = []
+        for local in locais:
+            listaLocal.append(local[0])
+        self.selection.choices = listaLocal
+        
+        for tipo in tipoDispositivos:
+            listaTipoDispositivo.append(tipo[0])
+        self.tipoDispositivo.choices = listaTipoDispositivo
+
 class TipoDispositivoForm(FlaskForm):
     nome = StringField('Nome', validators=[DataRequired(), Length(min=1, max=40, message='Campo Obrigatório, mínimo 1 máximo de 40 caracteres.')])
     submit = SubmitField('Cadastrar')

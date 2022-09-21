@@ -1,8 +1,12 @@
+from asyncio.log import logger
+import logging
+from sqlite3 import InternalError
 from flask import render_template, flash, redirect, url_for, Blueprint, request, abort
 from app.controllers.main.form import (SiteForm, LocalAtendimento, SiteUpdateForm, UpdateLocal)
 from flask_login import current_user, login_required
 from app.models.bdMonitora import Endereco, Site, Local
 from app import db
+from sqlalchemy import exc
 
 
 main = Blueprint('main', __name__)
@@ -97,7 +101,7 @@ def delete_site():
     else:
         abort(403)
 
-@main.route('/site/local', methods=['GET', 'POST'])
+@main.route('/local', methods=['GET', 'POST'])
 @login_required
 def localizarPA():
     if current_user.admin and current_user.ativo:
@@ -107,7 +111,7 @@ def localizarPA():
         abort(403)
 
 
-@main.route('/site/registrarLocal', methods=['GET', 'POST'])
+@main.route('/local/registrarLocal', methods=['GET', 'POST'])
 @login_required
 def registrarLocal():
     if current_user.admin and current_user.ativo:
@@ -129,23 +133,40 @@ def registrarLocal():
     return render_template('main/create_ponto_atendimento.html', title='Novo Ponto Atendimento', form=form)
 
 
-@main.route('/site/updateLocal', methods=['GET', 'POST'])
+@main.route('/local/<int:id_local>/update', methods=['GET', 'POST'])
 @login_required
-def updateLocal():
+def updateLocal(id_local):
     if current_user.admin and current_user.ativo:
         form = UpdateLocal()
+        try:
+            localForm = db.session.query(Local.localizadoEm, Local.idSite, Local.id, Site.siteNome).join(Site, Site.id == Local.idSite).filter(Local.id==id_local).first_or_404()
+            # print(local)
+            # precisa verificar a consulta para atualizar local e o site
+        except Exception as e:
+            # print(f'Erro ao realizar consulta{e}')
+            abort(404)
         if form.validate_on_submit():
-            pass
-            # site = Site.query.filter_by(siteNome=form.localSelect.data).first()
-            # if site:
-            #     local = Local(form.localPa.data, site.id)
-            #     db.session.add(local)
-            #     db.session.commit()
-            #     flash('Ponto de atendimento cadastrado com sucesso', 'success')
-            #     return redirect(url_for('main.localizarPA'))
-            # else:
-            #     flash('Ponto de atendimento cadastrado com sucesso', 'danger')
-            #     return redirect(url_for('main.registrarPa'))
+            try:
+                local = Local.query.get_or_404(id_local)
+                site = Site.query.filter(Site.siteNome == form.localSelect.data).first_or_404()
+            except Exception as e:
+                # print(f'Erro ao realizar consulta: {e}')
+                abort(404)
+            local.idSite = site.id
+            local.localizadoEm = form.localPa.data
+            try:
+                db.session.commit()
+                flash('Local atualizado com sucesso', 'success')
+                return redirect(url_for('main.localizarPA'))
+            except exc.IntegrityError as e:
+                # print(f'Erro de integridade chave unique: {e}')
+                flash('Local já cadastrado! Verificar dados inseridos.', 'danger')
+                db.session.flush()
+                db.session.rollback()
+
+        elif request.method == 'GET':
+            form.localPa.data = localForm.localizadoEm
+            form.localSelect.data = localForm.siteNome
 
         return render_template('main/update_local.html', title='Update Ponto Atendimento', form=form)
     else:

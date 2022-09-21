@@ -94,7 +94,7 @@ class Local(db.Model):
         self.idSite = idSite
 
     def __repr__(self) -> str:
-        return f"Local('{self.localizadoEm}, {self.dispositivo}')"
+        return f"Local('{self.id}, {self.localizadoEm}', '{self.idSite}')"
 
 
 class Dispositivo(db.Model):

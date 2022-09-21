@@ -1,2 +1,4 @@
 class Relatorio():
-  pass
+  
+  def createRelatorio(nome= '', login='', acao=''):
+    pass

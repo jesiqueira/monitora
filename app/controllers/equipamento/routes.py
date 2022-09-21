@@ -1,21 +1,21 @@
 from flask import render_template, Blueprint, flash, redirect, url_for, request, abort
 from flask_login import login_required, current_user
-from app.controllers.equipamento.form_disposivo import DispositivosForm, TipoDispositivoForm
+from app.controllers.equipamento.form_disposivo import DispositivosForm, TipoDispositivoForm, UpdateDispositivosForm
 from app.models.bdMonitora import Local, Tipo, Dispositivo, Site
 from app import db
 
 equipamento = Blueprint('equipamento', __name__)
 
 
-@equipamento.route('/listagem')
+@equipamento.route('/inventario')
 @login_required
-def listagem():
+def inventario():
     if current_user.admin and current_user.ativo:
         try:
             equipamentos = db.session.query(Dispositivo.id, Dispositivo.serial, Dispositivo.patrimonio, Dispositivo.hostname, Local.localizadoEm, Tipo.tipoNome).join(Local, Local.id == Dispositivo.idLocal).join(Tipo, Tipo.id == Dispositivo.idTipo).all()
         except Exception as e:
             print(f"Erro! {e}")
-        return render_template('equipamentos/listagem.html', title='Listagem', equipamentos=equipamentos)
+        return render_template('equipamentos/inventario.html', title='Inventário', equipamentos=equipamentos)
     else:
         abort(403)
 
@@ -39,7 +39,7 @@ def novo_equipamento():
                 db.session.add(dispositivo)
                 db.session.commit()
                 flash('Equipamento cadastrado com sucesso.', 'success')
-                return redirect(url_for('equipamento.listagem'))
+                return redirect(url_for('equipamento.inventario'))
 
         return render_template('equipamentos/create_equipamento.html', title='Novo Equipamento', form=form)
     else:
@@ -49,12 +49,13 @@ def novo_equipamento():
 @login_required
 def editarEquipamento(id):
     if current_user.admin and current_user.ativo:
-        form = DispositivosForm()
+        form = UpdateDispositivosForm()
         equipamentos = db.session.query(Dispositivo.id, Dispositivo.serial, Dispositivo.patrimonio, Dispositivo.hostname, Local.localizadoEm, Tipo.tipoNome).join(Local, Local.id == Dispositivo.idLocal).join(Tipo, Tipo.id == Dispositivo.idTipo).filter(Dispositivo.id == id).first()
         
         if form.validate_on_submit():
-            flash('Cadastro atualizado com sucesso', 'success')
-            return redirect(url_for('equipamento.viewEqupamento'))
+            print(id)
+            flash('Dados atualizado com sucesso', 'success')
+            return redirect(url_for('equipamento.inventario'))
         
         elif request.method == 'GET':
             form.serial.data = equipamentos.serial
@@ -92,7 +93,7 @@ def criarEqupamento():
         abort(403)
 
 
-# @disposito.route('/listagem/<int:equipamento_id>/editar')
+# @disposito.route('/inventario/<int:equipamento_id>/editar')
 # @login_required
 # def editar(equipamento_id):
 #     equipamento =
