@@ -1,6 +1,3 @@
-from asyncio.log import logger
-import logging
-from sqlite3 import InternalError
 from flask import render_template, flash, redirect, url_for, Blueprint, request, abort
 from app.controllers.main.form import (SiteForm, LocalAtendimento, SiteUpdateForm, UpdateLocal)
 from flask_login import current_user, login_required

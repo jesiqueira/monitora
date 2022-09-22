@@ -48,7 +48,7 @@ class InventariosForm(FlaskForm):
         self.tipoDispositivo.choices = listatipoDispositivo
 
 class UpdateInventariosForm(FlaskForm):
-    localHidden = HiddenField()
+    idHidden = HiddenField()
     serial = StringField('Serial', validators=[DataRequired()])
     patrimonio = StringField('Patromônio', validators=[DataRequired(), Length(min=1, max=40, message='Campo obrigatório, mínimo 1 máximo 30 caracteres.')])
     hostname = StringField('Hostname', validators=[DataRequired(), Length(min=1, max=30, message='Campo Obrigatório, mínimo 1 no máximo 30 caracteres.')])

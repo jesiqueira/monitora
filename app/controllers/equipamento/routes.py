@@ -1,9 +1,9 @@
-from faulthandler import disable
 from flask import render_template, Blueprint, flash, redirect, url_for, request, abort
 from flask_login import login_required, current_user
 from app.controllers.equipamento.form_disposivo import InventariosForm, TipoInventarioForm, UpdateInventariosForm
 from app.models.bdMonitora import Local, Tipo, Inventario, Site
 from app import db
+from sqlalchemy import exc
 
 equipamento = Blueprint('equipamento', __name__)
 
@@ -53,21 +53,33 @@ def atualizarInventario():
         form = UpdateInventariosForm() 
         
         if request.method == 'POST' and request.form.get('id_inventario'):
-            id = request.form.get('id_inventario')
-            inventarios = db.session.query(Inventario.id, Inventario.serial, Inventario.patrimonio, Inventario.hostname, Local.localizadoEm, Tipo.tipoNome).join(Local, Local.id == Inventario.idLocal).join(Tipo, Tipo.id == Inventario.idTipo).filter(Inventario.id == id).first()
+            form.idHidden.data = request.form.get('id_inventario')
+            inventarios = db.session.query(Inventario.id, Inventario.serial, Inventario.patrimonio, Inventario.hostname, Local.localizadoEm, Tipo.tipoNome).join(Local, Local.id == Inventario.idLocal).join(Tipo, Tipo.id == Inventario.idTipo).filter(Inventario.id == form.idHidden.data).first()
             form.serial.data = inventarios.serial
             form.patrimonio.data = inventarios.patrimonio
             form.hostname.data = inventarios.hostname
             form.selection.data = inventarios.localizadoEm
-            form.localHidden.data = inventarios.localizadoEm
             form.tipoDispositivo.data = inventarios.tipoNome
             return render_template('equipamentos/update_equipamento.html', title='Editar Equipamento', legenda = 'Editar equipamento site', form=form)
 
         if form.validate_on_submit():
-            print(f'Dados validados ao enviar formulario: {form.localHidden.data}')
-            print(f'Dados validados ao enviar formulario: {form.serial.data}')
-            flash('Dados atualizado com sucesso', 'success')
-            return redirect(url_for('equipamento.inventario'))
+            try:
+                inventario = Inventario.query.get_or_404(form.idHidden.data)
+                tipo = Tipo.query.get_or_404(inventario.idTipo)                
+                inventario.serial = form.serial.data
+                inventario.patrimonio = form.patrimonio.data
+                inventario.hostname = form.hostname.data
+                tipo.tipoNome = form.tipoDispositivo.data
+
+                db.session.commit()
+                flash('Dados atualizado com sucesso', 'success')
+                return redirect(url_for('equipamento.inventario'))
+            except exc.IntegrityError as e:
+                print(f'Error: {e}')
+                flash('Local já cadastrado! Verificar dados inseridos.', 'danger')
+                db.session.flush()
+                db.session.rollback()
+                abort(404)
         return render_template('equipamentos/update_equipamento.html', title='Editar Equipamento', legenda = 'Editar equipamento site', form=form)
         
     else:
