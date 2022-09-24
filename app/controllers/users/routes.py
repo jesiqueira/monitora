@@ -70,8 +70,8 @@ def createAdmin():
 @login_required
 def lista_usuario():
     if current_user.admin and current_user.ativo:
-        users = db.session.query(Usuario.id, Usuario.userNome, Usuario.login, Usuario.email, Site.siteNome).join(Usuario, Site.id == Usuario.idSite).all()
-        # print(users[1].siteNome)
+        users = db.session.query(Usuario.id, Usuario.nome.label('userNome'), Usuario.login, Usuario.email, Site.nome.label('siteNome')).join(Usuario, Site.id == Usuario.idSite).all()
+        # print(users[1]['siteNome'])
         return render_template('users/usuario.html', title='Usuários', usuarios=users)
     else:
         abort(403)
@@ -83,7 +83,7 @@ def novo_usuario():
         form = CreateUserForm()
         if form.validate_on_submit():
             hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-            site = Site.query.filter_by(siteNome=form.siteSelect.data).first_or_404()
+            site = Site.query.filter_by(nome=form.siteSelect.data).first_or_404()
             if site:
                 user = Usuario(nome=form.nome.data, login=form.login.data, senha=hashed_password, email=form.email.data, admin=form.admin.data, ativo=form.ativo.data ,idSite=site.id)
                 db.session.add(user)
@@ -115,7 +115,7 @@ def update_usuario(id_user):
             flash('Dados atualizados com sucesso', 'success')
             return redirect(url_for('user.lista_usuario'))
         elif request.method == 'GET':
-            form.nome.data = user.userNome
+            form.nome.data = user.nome
             form.login.data = user.login
             form.email.data = user.email
             form.admin.data = user.admin

@@ -32,7 +32,8 @@ def home():
 @login_required
 def site():
     if current_user.admin and current_user.ativo:
-        sites = db.session.query(Site.id, Site.siteNome, Endereco.rua, Endereco.cep, Endereco.cidade).join(Site, Endereco.id == Site.id).all()
+        sites = db.session.query(Site.id, Site.nome, Endereco.rua, Endereco.cep, Endereco.cidade).join(Site, Endereco.id == Site.id).all()
+        # print(sites[0].nome)
         return render_template('main/site.html', title='Site', sites=sites)
     else:
         abort(403)
@@ -60,14 +61,17 @@ def registrar_site():
 @login_required
 def update_site(id_site):
     if current_user.admin and current_user.ativo:
-        endereco = Endereco.query.get_or_404(id_site)
-        site =Site.query.filter_by(idEndereco=endereco.id).first_or_404()
+        try:
+            endereco = Endereco.query.get_or_404(id_site)
+            site =Site.query.filter_by(idEndereco=endereco.id).first_or_404()
+        except Exception as e:
+            print(f'Erro ao consultar: {e}')
         form = SiteUpdateForm()
         if form.validate_on_submit():
             endereco.rua = form.rua.data
             endereco.cep = form.cep.data
             endereco.cidade = form.cidade.data
-            site.siteNome = form.nome.data
+            site.nome = form.nome.data
             db.session.commit()
             flash('Dados atualizados com sucesso', 'success')
             return redirect(url_for('main.site'))
@@ -75,7 +79,7 @@ def update_site(id_site):
             form.rua.data = endereco.rua
             form.cep.data = endereco.cep
             form.cidade.data = endereco.cidade
-            form.nome.data = site.siteNome
+            form.nome.data = site.nome
         return render_template('main/update_site.html', title='Update Site', legenda ='Editar Site', id_site=id_site, form=form)
     else:
         abort(403)
@@ -102,7 +106,7 @@ def delete_site():
 @login_required
 def localizarPA():
     if current_user.admin and current_user.ativo:
-        locais = db.session.query(Local.id, Local.localizadoEm, Site.siteNome).join(Local, Site.id == Local.idSite).all()
+        locais = db.session.query(Local.id, Local.localizadoEm, Site.nome).join(Local, Site.id == Local.idSite).all()
         return render_template('main/local.html', title='Ponto Atendimento', locais=locais)
     else:
         abort(403)
@@ -114,7 +118,7 @@ def registrarLocal():
     if current_user.admin and current_user.ativo:
         form = LocalAtendimento()
         if form.validate_on_submit():
-            site = Site.query.filter_by(siteNome=form.localSelect.data).first()
+            site = Site.query.filter_by(nome=form.localSelect.data).first()
             if site:
                 local = Local(form.localPa.data, site.id)
                 db.session.add(local)
@@ -136,7 +140,7 @@ def updateLocal(id_local):
     if current_user.admin and current_user.ativo:
         form = UpdateLocal()
         try:
-            localForm = db.session.query(Local.localizadoEm, Local.idSite, Local.id, Site.siteNome).join(Site, Site.id == Local.idSite).filter(Local.id==id_local).first_or_404()
+            localForm = db.session.query(Local.localizadoEm, Local.idSite, Local.id, Site.nome).join(Site, Site.id == Local.idSite).filter(Local.id==id_local).first_or_404()
             # print(local)
             # precisa verificar a consulta para atualizar local e o site
         except Exception as e:
@@ -145,7 +149,7 @@ def updateLocal(id_local):
         if form.validate_on_submit():
             try:
                 local = Local.query.get_or_404(id_local)
-                site = Site.query.filter(Site.siteNome == form.localSelect.data).first_or_404()
+                site = Site.query.filter(Site.nome == form.localSelect.data).first_or_404()
             except Exception as e:
                 # print(f'Erro ao realizar consulta: {e}')
                 abort(404)
@@ -163,7 +167,7 @@ def updateLocal(id_local):
 
         elif request.method == 'GET':
             form.localPa.data = localForm.localizadoEm
-            form.localSelect.data = localForm.siteNome
+            form.localSelect.data = localForm.nome
 
         return render_template('main/update_local.html', title='Update Ponto Atendimento', form=form)
     else:

@@ -1,7 +1,8 @@
+from inspect import Attribute
 from flask import render_template, Blueprint, flash, redirect, url_for, request, abort
 from flask_login import login_required, current_user
 from app.controllers.equipamento.form_disposivo import InventariosForm, TipoInventarioForm, UpdateInventariosForm
-from app.models.bdMonitora import Local, Tipo, Inventario, Site
+from app.models.bdMonitora import Local, Tipo, Equipamento, Site, tipoEquipamento
 from app import db
 from sqlalchemy import exc
 
@@ -13,10 +14,12 @@ equipamento = Blueprint('equipamento', __name__)
 def inventario():
     if current_user.admin and current_user.ativo:
         try:
-            inventarios = db.session.query(Inventario.id, Inventario.serial, Inventario.patrimonio, Inventario.hostname, Local.localizadoEm, Tipo.tipoNome).join(Local, Local.id == Inventario.idLocal).join(Tipo, Tipo.id == Inventario.idTipo).all()
+            # inventarios = db.session.query(Equipamento.id, Equipamento.serial, Equipamento.patrimonio, Equipamento.hostname, Local.localizadoEm, Tipo.nome).join(
+            #     Local, Local.id == Equipamento.idLocal).join(Tipo, Tipo.id_inventario == Equipamento.id).all()
+            pass
         except Exception as e:
             print(f"Erro! {e}")
-        return render_template('equipamentos/inventario.html', title='Inventário', equipamentos=inventarios)
+        return render_template('equipamentos/inventario.html', title='Inventário')#equipamentos=inventarios
     else:
         abort(403)
 
@@ -29,43 +32,44 @@ def novo_equipamento():
         if form.validate_on_submit():
             try:
                 local = Local.query.filter_by(localizadoEm=form.selection.data).first()
-            except Exception as e:
-                print(f'Erro ao Obter Local! {e}')        
-            try:
-                tipo = Tipo.query.filter_by(tipoNome=form.tipoDispositivo.data).first()
-            except Exception as e:
-                print(f"Erro ao obter Tipo! {e}")
-            if local and tipo:
-                inventario = Inventario(serial=form.serial.data, patrimonio=form.patrimonio.data, hostanme=form.hostname.data, idLocal=local.id, idTipo=tipo.id)
+                inventario = Equipamento(serial=form.serial.data, patrimonio=form.patrimonio.data,
+                                         hostanme=form.hostname.data, idLocal=local.id)
+                
+                tipo = Tipo.query.filter_by(nome=form.tipoDispositivo.data).first_or_404()
+                inventario.tipo.append(tipo)
                 db.session.add(inventario)
                 db.session.commit()
                 flash('Equipamento cadastrado com sucesso.', 'success')
                 return redirect(url_for('equipamento.inventario'))
+            except Exception as e:
+                print(f'Erro ao Obter Local! {e}')
 
         return render_template('equipamentos/create_equipamento.html', title='Novo Equipamento', form=form)
     else:
         abort(403)
 
+
 @equipamento.route('/atualizarInventario', methods=['POST'])
 @login_required
 def atualizarInventario():
     if current_user.admin and current_user.ativo:
-        form = UpdateInventariosForm() 
-        
+        form = UpdateInventariosForm()
+
         if request.method == 'POST' and request.form.get('id_inventario'):
             form.idHidden.data = request.form.get('id_inventario')
-            inventarios = db.session.query(Inventario.id, Inventario.serial, Inventario.patrimonio, Inventario.hostname, Local.localizadoEm, Tipo.tipoNome).join(Local, Local.id == Inventario.idLocal).join(Tipo, Tipo.id == Inventario.idTipo).filter(Inventario.id == form.idHidden.data).first()
+            inventarios = db.session.query(Equipamento.id, Equipamento.serial, Equipamento.patrimonio, Equipamento.hostname, Local.localizadoEm, Tipo.tipoNome).join(
+                Local, Local.id == Equipamento.idLocal).join(Tipo, Tipo.id == Equipamento.idTipo).filter(Equipamento.id == form.idHidden.data).first()
             form.serial.data = inventarios.serial
             form.patrimonio.data = inventarios.patrimonio
             form.hostname.data = inventarios.hostname
             form.selection.data = inventarios.localizadoEm
             form.tipoDispositivo.data = inventarios.tipoNome
-            return render_template('equipamentos/update_equipamento.html', title='Editar Equipamento', legenda = 'Editar equipamento site', form=form)
+            return render_template('equipamentos/update_equipamento.html', title='Editar Equipamento', legenda='Editar equipamento site', form=form)
 
         if form.validate_on_submit():
             try:
-                inventario = Inventario.query.get_or_404(form.idHidden.data)
-                tipo = Tipo.query.get_or_404(inventario.idTipo)                
+                inventario = Equipamento.query.get_or_404(form.idHidden.data)
+                tipo = Tipo.query.get_or_404(inventario.idTipo)
                 inventario.serial = form.serial.data
                 inventario.patrimonio = form.patrimonio.data
                 inventario.hostname = form.hostname.data
@@ -80,11 +84,11 @@ def atualizarInventario():
                 db.session.flush()
                 db.session.rollback()
                 abort(404)
-        return render_template('equipamentos/update_equipamento.html', title='Editar Equipamento', legenda = 'Editar equipamento site', form=form)
-        
+        return render_template('equipamentos/update_equipamento.html', title='Editar Equipamento', legenda='Editar equipamento site', form=form)
+
     else:
         abort(403)
-    
+
 
 @equipamento.route('/equipamento/view')
 def viewEqupamento():
@@ -93,6 +97,7 @@ def viewEqupamento():
         return render_template('equipamentos/lista_tipoEquipamento.html', title='View Equipamento', tipoEquipamentos=tipoEquipamentos)
     else:
         abort(403)
+
 
 @equipamento.route('/equipamento/novo', methods=['GET', 'POST'])
 def criarEqupamento():

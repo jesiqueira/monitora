@@ -28,7 +28,7 @@ class CreateUserForm(FlaskForm):
     siteSelect = SelectField('Site', choices=[])
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        sites = db.session.query(Site.siteNome).all()
+        sites = db.session.query(Site.nome).all()
         listaSite = []
         for site in sites:
             listaSite.append(site[0])
@@ -37,7 +37,7 @@ class CreateUserForm(FlaskForm):
     submit = SubmitField('Cadastrar')
 
     def validate_nome(self, nome):
-        user = Usuario.query.filter_by(userNome=nome.data).first()
+        user = Usuario.query.filter_by(nome=nome.data).first()
         if user:
             raise ValidationError(
                 'Nome já Cadastrado, escolha nome diferente!')
@@ -66,7 +66,7 @@ class UpdateUserForm(FlaskForm):
     siteSelect = SelectField('Site', choices=[])
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        sites = db.session.query(Site.siteNome).all()
+        sites = db.session.query(Site.nome).all()
         listaSite = []
         for site in sites:
             listaSite.append(site[0])

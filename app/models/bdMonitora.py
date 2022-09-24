@@ -1,5 +1,4 @@
 from datetime import datetime
-from email.policy import default
 from enum import unique
 from app import db, login_manager
 from flask_login import UserMixin
@@ -30,24 +29,24 @@ class Endereco(db.Model):
 class Site(db.Model):
     __tablename__ = 'Site'
     id = db.Column(db.Integer, primary_key=True)
-    siteNome = db.Column(db.String(30), nullable=False, unique=True)
+    nome = db.Column(db.String(30), nullable=False, unique=True)
     usuario = db.relationship('Usuario', backref='usuario', lazy=True)
     local = db.relationship('Local', backref='local', lazy=True)
     idEndereco = db.Column(db.Integer, db.ForeignKey(
         'Endereco.id'), nullable=False)
 
     def __init__(self, nome='Default', idEndereco=0):
-        self.siteNome = nome
+        self.nome = nome
         self.idEndereco = idEndereco
 
     def __repr__(self) -> str:
-        return f"Site('{self.siteNome}')"
+        return f"Site('{self.nome}')"
 
 
 class Usuario(db.Model, UserMixin):
     __tablename__ = 'Usuario'
     id = db.Column(db.Integer, primary_key=True)
-    userNome = db.Column(db.String(40), unique=True, nullable=False)
+    nome = db.Column(db.String(40), unique=True, nullable=False)
     login = db.Column(db.String(20), unique=True, nullable=False)
     senha = db.Column(db.String(60), unique=True, nullable=False)
     email = db.Column(db.String(40), nullable=False)
@@ -56,8 +55,8 @@ class Usuario(db.Model, UserMixin):
     relatorios = db.relationship('Relatorio', backref='usuario', lazy=True)
     idSite = db.Column(db.Integer, db.ForeignKey('Site.id'), nullable=False)
 
-    def __init__(self, nome='Anonima', login='default', senha='default', email='defaul@default.com.br', admin= False, ativo= False, idSite=0):
-        self.userNome = nome
+    def __init__(self, nome='Anonima', login='default', senha='default', email='defaul@default.com.br', admin=False, ativo=False, idSite=0):
+        self.nome = nome
         self.login = login
         self.senha = senha
         self.email = email
@@ -69,24 +68,11 @@ class Usuario(db.Model, UserMixin):
         return f"Usuario('{self.userNome}', '{self.login}', '{self.email}', '{self.admin}', '{self.ativo}')"
 
 
-class Tipo(db.Model):
-    __tablename__ = 'Tipo'
-    id = db.Column(db.Integer, primary_key=True)
-    tipoNome = db.Column(db.String(40), unique=True, nullable=False)
-    inventario = db.relationship('Inventario', backref='tipo')
-
-    def __init__(self, nome='Anonimo'):
-        self.tipoNome = nome
-
-    def __repr__(self):
-        return f"Tipo('{self.tipoNome}')"
-
-
 class Local(db.Model):
     __tablename__ = 'Local'
     id = db.Column(db.Integer, primary_key=True)
     localizadoEm = db.Column(db.String(40), unique=True, nullable=False)
-    inventario = db.relationship('Inventario', backref='local', lazy=True)
+    Equipamento = db.relationship('Equipamento', backref='local', lazy=True)
     idSite = db.Column(db.Integer, db.ForeignKey('Site.id'), nullable=False)
 
     def __init__(self, localizadoEm='default', idSite=0):
@@ -97,38 +83,56 @@ class Local(db.Model):
         return f"Local('{self.id}, {self.localizadoEm}', '{self.idSite}')"
 
 
-class Inventario(db.Model):
-    __tablename__ = 'Inventario'
+tipoEquipamento = db.Table(
+    'tipoEquipamento',
+    db.Column('idEquipamento', db.Integer, db.ForeignKey('Equipamento.id')),
+    db.Column('idTipo', db.Integer, db.ForeignKey('Tipo.id'))
+)
+
+
+class Equipamento(db.Model):
+    __tablename__ = 'Equipamento'
     id = db.Column(db.Integer, primary_key=True)
     serial = db.Column(db.String(40), unique=True)
     patrimonio = db.Column(db.String(40), unique=True)
     hostname = db.Column(db.String(40), unique=True)
     idLocal = db.Column(db.Integer, db.ForeignKey('Local.id'), nullable=False)
-    idTipo = db.Column(db.Integer, db.ForeignKey('Tipo.id'), nullable=False)
+    tipo = db.relationship('Tipo', secondary=tipoEquipamento, backref='tipos')
 
-    def __init__(self, serial='S4TW02Q3', patrimonio='default', hostanme='PBR00150-XPTO', idLocal=0, idTipo=0):
+    def __init__(self, serial='S4TW02Q3', patrimonio='default', hostanme='PBR00150-XPTO', idLocal=0):
         self.serial = serial
         self.patrimonio = patrimonio
         self.hostname = hostanme
         self.idLocal = idLocal
-        self.idTipo = idTipo
 
     def __repr__(self) -> str:
-        return f"Inventario('{self.serial}', '{self.patrimonio}', '{self.hostname}')"
+        return f"Equipamento('{self.serial}', '{self.patrimonio}', '{self.hostname}')"
+
+
+class Tipo(db.Model):
+    __tablename__ = 'Tipo'
+    id = db.Column(db.Integer, primary_key=True)
+    nome = db.Column(db.String(40), unique=True, nullable=False)
+
+    def __init__(self, nome='Anonimo'):
+        self.nome = nome
+
+    def __repr__(self):
+        return f"Tipo('{self.nome}')"
 
 
 class Acao(db.Model):
     __tablename__ = 'Acao'
     id = db.Column(db.Integer, primary_key=True)
-    acaoNome = db.Column(db.String(40), unique=True, nullable=False)
+    nome = db.Column(db.String(40), unique=True, nullable=False)
     relatorio = db.relationship(
         'Relatorio', backref='acaoRelatorio', lazy=True)
 
     def __init__(self, nome='Default') -> None:
-        self.acaoNome = nome
+        self.nome = nome
 
     def __repr__(self) -> str:
-        return f"Acao('{self.acaoNome}')"
+        return f"Acao('{self.nome}')"
 
 
 class Relatorio(db.Model):

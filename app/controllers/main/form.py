@@ -13,7 +13,7 @@ class SiteForm(FlaskForm):
     submit = SubmitField('Cadastrar')
 
     def validate_nome(self, nome):
-      site = Site.query.filter_by(siteNome=nome.data).first()
+      site = Site.query.filter_by(nome=nome.data).first()
       if site:
         raise ValidationError('Nome já está cadastrado no sistema!')
     
@@ -40,7 +40,7 @@ class LocalAtendimento(FlaskForm):
 
   def __init__(self, **kwargs):
     super().__init__(**kwargs)
-    sites = db.session.query(Site.siteNome).all()
+    sites = db.session.query(Site.nome).all()
     listaSite = []
     for site in sites:
         listaSite.append(site[0])
@@ -60,7 +60,7 @@ class UpdateLocal(FlaskForm):
 
   def __init__(self, **kwargs):
     super().__init__(**kwargs)
-    sites = db.session.query(Site.siteNome).all()
+    sites = db.session.query(Site.nome).all()
     listaSite = []
     for site in sites:
         listaSite.append(site[0])
