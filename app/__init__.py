@@ -29,11 +29,13 @@ def create_app(config_class=Config):
     from app.controllers.users.routes import user
     from app.controllers.equipamento.routes import equipamento
     from app.controllers.errors.handlers import errors
+    from app.controllers.estoque.routes import est
 
     # Registrar Blueprint
     app.register_blueprint(main)
     app.register_blueprint(user)
     app.register_blueprint(equipamento)
     app.register_blueprint(errors)
+    app.register_blueprint(est)
 
     return manager
