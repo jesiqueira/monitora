@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField, HiddenField
 from wtforms.validators import DataRequired, Length, ValidationError
-from app.models.bdMonitora import Site, Endereco, Local
+from app.models.bdMonitora import Site, Endereco, LocalPa
 from app import db
 
 
@@ -50,7 +50,7 @@ class LocalAtendimento(FlaskForm):
   submit = SubmitField('Cadastrar')
 
   def validate_nome(self, localPa):
-      local = Local.query.filter_by(localizadoEm=localPa.data).first()
+      local = LocalPa.query.filter_by(localizadoEm=localPa.data).first()
       if local:
         raise ValidationError('Ponto de Atendimento já está cadastrado no sistema!')
 

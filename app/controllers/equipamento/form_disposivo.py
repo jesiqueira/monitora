@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField, HiddenField
 from wtforms.validators import DataRequired, Length, ValidationError
-from app.models.bdMonitora import Local, Equipamento, Tipo
+from app.models.bdMonitora import LocalPa, Computador, Site, Tipo
 from app import db
 
 
@@ -16,32 +16,32 @@ class InventariosForm(FlaskForm):
     submit = SubmitField('Cadastrar')
 
     def validate_serial(self, serial):
-        inventario = Equipamento.query.filter_by(serial=serial.data).first()
+        inventario = Computador.query.filter_by(serial=serial.data).first()
         if inventario:
             raise ValidationError('Serial já cadastrado no sistema!')
 
     def validate_patrimonio(self, patrimonio):
-        inventario = Equipamento.query.filter_by(
+        inventario = Computador.query.filter_by(
             patrimonio=patrimonio.data).first()
         if inventario:
             raise ValidationError('Patrimônio já cadastrado no sistema!')
 
     def validate_hostname(self, hostname):
-        inventario = Equipamento.query.filter_by(
+        inventario = Computador.query.filter_by(
             hostname=hostname.data).first()
         if inventario:
             raise ValidationError('Hostname já cadastrado no sistema!')
 
     def validate_selection(self, selection):
-        inventario = db.session.query(Equipamento).join(
-            Local, Equipamento.idLocal == Local.id).filter(Local.localizadoEm == selection.data).first()
+        # inventario = db.session.query(Computador).join(LocalPa, Computador.idLocal == LocalPa.id).filter(LocalPa.descricaoPa == selection.data).first()
+        inventario = db.session.query(Computador).join(Site, Computador.idSite== Site.id).join(LocalPa, Site.id== LocalPa.idSite).filter(LocalPa.descricaoPa == selection.data).first()
         if inventario:
             raise ValidationError(
                 'Local já tem equipamento. Atualize ou remova equipamento anterior!')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        locais = db.session.query(Local.localizadoEm).all()
+        locais = db.session.query(LocalPa.descricaoPa).all()
         tipoDispositivos = db.session.query(Tipo.nome).all()
         listaLocal = []
         listatipoDispositivo = []

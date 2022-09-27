@@ -1,9 +1,11 @@
 from flask import render_template, Blueprint, flash, redirect, url_for, request, abort
 from flask_login import login_required, current_user
 from app.controllers.equipamento.form_disposivo import InventariosForm, TipoInventarioForm, UpdateInventariosForm
-from app.models.bdMonitora import Local, Tipo, Equipamento, Site, tipoEquipamento
+from app.models.bdMonitora import LocalPa, Tipo, Computador, Site, Status
 from app import db
 from sqlalchemy import exc
+from datetime import date, datetime
+from pytz import timezone
 
 equipamento = Blueprint('equipamento', __name__)
 
@@ -13,8 +15,10 @@ equipamento = Blueprint('equipamento', __name__)
 def inventario():
     if current_user.admin and current_user.ativo:
         try:
-            inventarios  = db.session.query(Equipamento.id, Equipamento.serial, Equipamento.patrimonio, Equipamento.hostname, Local.localizadoEm, Tipo.nome).join(
-                Local, Local.id == Equipamento.idLocal).join(Equipamento.tipo).all()
+            # inventarios  = db.session.query(Computador.id, Computador.serial, Computador.patrimonio, Computador.hostname, Pa.localizadoEm, Tipo.nome).join(
+            #     Pa, Pa.id == Computador.idPa).join(Computador.tipo).all()
+            inventarios = db.session.query(Computador.id, Computador.serial, Computador.hostname, Computador.patrimonio, LocalPa.descricaoPa, Tipo.nome).join(
+                LocalPa, LocalPa.idSite == Computador.idSite).join(Computador.tipo).all()
 
         except Exception as e:
             # print(f"Erro! {e}")
@@ -31,22 +35,27 @@ def novo_equipamento():
         form = InventariosForm()
         if form.validate_on_submit():
             try:
-                local = Local.query.filter_by(localizadoEm=form.selection.data).first()
-                inventario = Equipamento(serial=form.serial.data, patrimonio=form.patrimonio.data,
-                                         hostanme=form.hostname.data, idLocal=local.id)
-                
-                tipo = Tipo.query.filter_by(nome=form.tipoDispositivo.data).first_or_404()
-                inventario.tipo.append(tipo)
-                db.session.add(inventario)
+                local = LocalPa.query.filter_by(descricaoPa=form.selection.data).first()
+                site = Site.query.filter_by(id = local.idSite).first_or_404()
+                data_e_hora_atuais = datetime.now()
+                fuso_horario = timezone('America/Sao_Paulo')
+                data_e_hora_sao_paulo = data_e_hora_atuais.astimezone(fuso_horario)
+                status = Status(1, data_e_hora_sao_paulo)
+                db.session.add(status)
                 db.session.commit()
-                flash('Equipamento cadastrado com sucesso.', 'success')
+                computador = Computador(serial=form.serial.data, hostname=form.hostname.data, patrimonio=form.patrimonio.data, idSite=site.id, idStatus=status.id)
+                tipo = Tipo.query.filter_by(nome=form.tipoDispositivo.data).first_or_404()
+                computador.tipo.append(tipo)
+                db.session.add(computador)
+                db.session.commit()
+                flash('Computador cadastrado com sucesso.', 'success')
                 return redirect(url_for('equipamento.inventario'))
             except Exception as e:
-                # print(f'Erro ao Obter Local! {e}')
+                print(f'Erro ao Obter Pa! {e}')
                 db.session.flush()
                 db.session.rollback()
 
-        return render_template('equipamentos/create_equipamento.html', title='Novo Equipamento', form=form)
+        return render_template('equipamentos/create_equipamento.html', title='Novo Computador', form=form)
     else:
         abort(403)
 
@@ -59,8 +68,8 @@ def atualizarInventario():
 
         if request.method == 'POST' and request.form.get('id_inventario'):
             form.idHidden.data = request.form.get('id_inventario')
-            inventarios  = db.session.query(Equipamento.id, Equipamento.serial, Equipamento.patrimonio, Equipamento.hostname, Local.localizadoEm, Tipo.nome).join(
-                Local, Local.id == Equipamento.idLocal).join(Equipamento.tipo).filter(Equipamento.id == form.idHidden.data).first_or_404()
+            inventarios  = db.session.query(Computador.id, Computador.serial, Computador.patrimonio, Computador.hostname, LocalPa.localizadoEm, Tipo.nome).join(
+                LocalPa, LocalPa.id == Computador.idLocal).join(Computador.tipo).filter(Computador.id == form.idHidden.data).first_or_404()
             form.serial.data = inventarios.serial
             form.patrimonio.data = inventarios.patrimonio
             form.hostname.data = inventarios.hostname
@@ -70,7 +79,7 @@ def atualizarInventario():
 
         if form.validate_on_submit():
             try:
-                inventario = db.session.query(Equipamento).filter_by(id = form.idHidden.data).filter(Equipamento.tipo).first_or_404()
+                inventario = db.session.query(Computador).filter_by(id = form.idHidden.data).filter(Computador.tipo).first_or_404()
                 tipo = Tipo.query.filter_by(nome=form.tipoDispositivo.data).first_or_404()
                 inventario.serial = form.serial.data
                 inventario.patrimonio = form.patrimonio.data

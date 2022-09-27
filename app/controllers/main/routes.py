@@ -1,7 +1,7 @@
 from flask import render_template, flash, redirect, url_for, Blueprint, request, abort
 from app.controllers.main.form import (SiteForm, LocalAtendimento, SiteUpdateForm, UpdateLocal)
 from flask_login import current_user, login_required
-from app.models.bdMonitora import Endereco, Site, Local
+from app.models.bdMonitora import Endereco, Site, LocalPa
 from app import db
 from sqlalchemy import exc
 
@@ -106,7 +106,7 @@ def delete_site():
 @login_required
 def localizarPA():
     if current_user.admin and current_user.ativo:
-        locais = db.session.query(Local.id, Local.localizadoEm, Site.nome).join(Local, Site.id == Local.idSite).all()
+        locais = db.session.query(LocalPa.id, LocalPa.descricaoPa, Site.nome).join(LocalPa, Site.id == LocalPa.idSite).all()
         return render_template('main/local.html', title='Ponto Atendimento', locais=locais)
     else:
         abort(403)
@@ -120,7 +120,7 @@ def registrarLocal():
         if form.validate_on_submit():
             site = Site.query.filter_by(nome=form.localSelect.data).first()
             if site:
-                local = Local(form.localPa.data, site.id)
+                local = LocalPa(form.localPa.data, site.id)
                 db.session.add(local)
                 db.session.commit()
                 flash('Ponto de atendimento cadastrado com sucesso', 'success')
@@ -140,15 +140,15 @@ def updateLocal(id_local):
     if current_user.admin and current_user.ativo:
         form = UpdateLocal()
         try:
-            localForm = db.session.query(Local.localizadoEm, Local.idSite, Local.id, Site.nome).join(Site, Site.id == Local.idSite).filter(Local.id==id_local).first_or_404()
+            localForm = db.session.query(LocalPa.descricaoPa, LocalPa.idSite, LocalPa.id, Site.nome).join(Site, Site.id == LocalPa.idSite).filter(LocalPa.id==id_local).first_or_404()
             # print(local)
             # precisa verificar a consulta para atualizar local e o site
         except Exception as e:
-            # print(f'Erro ao realizar consulta{e}')
+            print(f'Erro ao realizar consulta{e}')
             abort(404)
         if form.validate_on_submit():
             try:
-                local = Local.query.get_or_404(id_local)
+                local = LocalPa.query.get_or_404(id_local)
                 site = Site.query.filter(Site.nome == form.localSelect.data).first_or_404()
             except Exception as e:
                 # print(f'Erro ao realizar consulta: {e}')
@@ -166,9 +166,11 @@ def updateLocal(id_local):
                 db.session.rollback()
 
         elif request.method == 'GET':
-            form.localPa.data = localForm.localizadoEm
+            form.localPa.data = localForm.descricaoPa
             form.localSelect.data = localForm.nome
 
         return render_template('main/update_local.html', title='Update Ponto Atendimento', form=form)
     else:
         abort(403)
+
+# Falta fazer opção para excluir localPa
