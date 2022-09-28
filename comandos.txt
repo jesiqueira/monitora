@@ -9,6 +9,11 @@ python run.py db migrate
 python run.py db upgrade
 
 
+===Data====
+https://www.alura.com.br/artigos/lidando-com-datas-e-horarios-no-python
+https://www.delftstack.com/pt/howto/python/python-time-difference/#:~:text=por%2020%20segundos.-,Use%20datetime.,horas%20e%20intervalos%20de%20tempo.
+https://www.w3schools.com/python/python_datetime.asp
+
 ----npn----
 npm init
 

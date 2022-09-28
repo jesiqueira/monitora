@@ -4,6 +4,8 @@ from flask_login import current_user, login_required
 from app.models.bdMonitora import Endereco, Site, LocalPa
 from app import db
 from sqlalchemy import exc
+from app.controllers.equipamento.monitora import Monitora
+from datetime import date, datetime
 
 
 main = Blueprint('main', __name__)
@@ -25,7 +27,30 @@ desktop = {
 @main.route('/monitora')
 def home():
     # print(current_user.id)
-    return render_template('main/home.html', title='Home', local='São Carlos', desktop=desktop)
+    computador = {
+        'conectado' : 0,
+        'desconectado' : 0,
+        'data' : '',
+        'hora' :''
+    }
+    monitora = Monitora()
+    # monitora.atualizarStatusComputador()
+    monitora.calculaHora()
+    for comp in monitora.computadoresView():
+        if comp['status']:
+            # print(f"idStatus: {comp['idStatus']}, Status: {comp['status']}")
+            computador['conectado'] += 1
+            dataataualizacao = datetime
+            dataataualizacao = comp['data']
+            computador['data'] = dataataualizacao.strftime('%d/%m/%Y')
+            computador['hora'] = dataataualizacao.strftime('%H:%M:%S')
+            # print(computador['hora'])
+        else:
+            computador['desconectado'] += 1
+    
+        
+           
+    return render_template('main/home.html', title='Home', local='São Carlos', desktop=desktop, computador=computador)
 
 
 @main.route('/site')

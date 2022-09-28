@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField, HiddenField
 from wtforms.validators import DataRequired, Length, ValidationError
-from app.models.bdMonitora import LocalPa, Computador, Site, Tipo
+from app.models.bdMonitora import LocalPa, Computador, Tipo
 from app import db
 
 
@@ -33,7 +33,6 @@ class InventariosForm(FlaskForm):
             raise ValidationError('Hostname já cadastrado no sistema!')
 
     def validate_selection(self, selection):
-        # inventario = db.session.query(Computador).join(LocalPa, Computador.idLocal == LocalPa.id).filter(LocalPa.descricaoPa == selection.data).first()
         inventario = db.session.query(Computador).join(LocalPa, Computador.idLocalPa == LocalPa.id).filter(LocalPa.descricaoPa == selection.data).first()
         if inventario:
             raise ValidationError(

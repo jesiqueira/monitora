@@ -4,7 +4,7 @@ from app.controllers.equipamento.form_disposivo import InventariosForm, TipoInve
 from app.models.bdMonitora import LocalPa, Tipo, Computador, Site, Status
 from app import db
 from sqlalchemy import exc
-from datetime import date, datetime
+from datetime import datetime
 from pytz import timezone
 
 equipamento = Blueprint('equipamento', __name__)
