@@ -15,10 +15,11 @@ equipamento = Blueprint('equipamento', __name__)
 def inventario():
     if current_user.admin and current_user.ativo:
         try:
-            # inventarios  = db.session.query(Computador.id, Computador.serial, Computador.patrimonio, Computador.hostname, Pa.localizadoEm, Tipo.nome).join(
-            #     Pa, Pa.id == Computador.idPa).join(Computador.tipo).all()
-            inventarios = db.session.query(Computador.id, Computador.serial, Computador.hostname, Computador.patrimonio, LocalPa.descricaoPa, Tipo.nome).join(
-                LocalPa, LocalPa.idSite == Computador.idSite).join(Computador.tipo).all()
+            # SELECT Computador.hostname, Tipo.nome, LocalPa.descricaoPa From tipoComputador JOIN Tipo on Tipo.id = tipoComputador.idTipo Join Computador, LocalPa on Computador.idLocalPa = LocalPa.id
+            # inventarios = db.session.query(Computador.id, Computador.serial, Computador.hostname, Computador.patrimonio, LocalPa.descricaoPa, Tipo.nome).join(
+            #     Computador, LocalPa.idSite == Computador.idSite).join(Computador.tipo, ).all()
+            inventarios = db.session.query(Computador.id, Computador.serial, Computador.hostname, Computador.patrimonio, LocalPa.descricaoPa, Tipo.nome).join(Computador.tipo).filter(Computador.idLocalPa == LocalPa.id).all()
+            # print(f'Aqui: {inventarios}')
 
         except Exception as e:
             # print(f"Erro! {e}")
@@ -43,10 +44,17 @@ def novo_equipamento():
                 status = Status(1, data_e_hora_sao_paulo)
                 db.session.add(status)
                 db.session.commit()
-                computador = Computador(serial=form.serial.data, hostname=form.hostname.data, patrimonio=form.patrimonio.data, idSite=site.id, idStatus=status.id)
+                # db.session.flush()
+            except Exception as e:
+                print(f'Error: {e}')
+
+            try:
+                computador = Computador(serial=form.serial.data, hostname=form.hostname.data, patrimonio=form.patrimonio.data, idSite=site.id, idStatus=status.id, idlocalPa=local.id)
                 tipo = Tipo.query.filter_by(nome=form.tipoDispositivo.data).first_or_404()
                 computador.tipo.append(tipo)
                 db.session.add(computador)
+                print(computador)
+                print(computador.tipo)
                 db.session.commit()
                 flash('Computador cadastrado com sucesso.', 'success')
                 return redirect(url_for('equipamento.inventario'))
@@ -68,12 +76,11 @@ def atualizarInventario():
 
         if request.method == 'POST' and request.form.get('id_inventario'):
             form.idHidden.data = request.form.get('id_inventario')
-            inventarios  = db.session.query(Computador.id, Computador.serial, Computador.patrimonio, Computador.hostname, LocalPa.localizadoEm, Tipo.nome).join(
-                LocalPa, LocalPa.id == Computador.idLocal).join(Computador.tipo).filter(Computador.id == form.idHidden.data).first_or_404()
+            inventarios = db.session.query(Computador.id, Computador.serial, Computador.hostname, Computador.patrimonio, LocalPa.descricaoPa, Tipo.nome).join(Computador.tipo).join(LocalPa, LocalPa.id == Computador.id).filter(Computador.id == form.idHidden.data).first_or_404()
             form.serial.data = inventarios.serial
             form.patrimonio.data = inventarios.patrimonio
             form.hostname.data = inventarios.hostname
-            form.selection.data = inventarios.localizadoEm
+            form.selection.data = inventarios.descricaoPa
             form.tipoDispositivo.data = inventarios.nome
             return render_template('equipamentos/update_equipamento.html', title='Editar Equipamento', legenda='Editar equipamento site', form=form)
 

@@ -99,29 +99,6 @@ tipoComputador = db.Table(
 )
 
 
-class Computador(db.Model):
-    __tablename__ = 'Computador'
-    id = db.Column(db.Integer, primary_key=True)
-    serial = db.Column(db.String(40), unique=True)
-    hostname = db.Column(db.String(40), unique=True)
-    patrimonio = db.Column(db.String(40), unique=True)
-    idSite = db.Column(db.Integer, db.ForeignKey('Site.id'), nullable=False)
-    idStatus = db.Column(db.Integer, db.ForeignKey(
-        'Status.id'), nullable=False)
-    funcionario = db.relationship(
-        'Funcionario', backref='computador', lazy=True)
-    tipo = db.relationship('Tipo', secondary=tipoComputador, backref='tipos')
-
-    def __init__(self, serial='XPTO', hostname='XPTO', patrimonio='XPTO', idSite=0, idStatus=0) -> None:
-        self.serial = serial
-        self.hostname = hostname
-        self.patrimonio = patrimonio
-        self.idSite = idSite
-        self.idStatus = idStatus
-
-    def __repr__(self) -> str:
-        return f"Computador('{self.serial}', '{self.hostname}', '{self.patrimonio}')"
-
 
 class Funcionario(db.Model):
     __tablename__ = 'Funcionario'
@@ -238,6 +215,7 @@ class LocalPa(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     descricaoPa = db.Column(db.String(40), nullable=False, unique=True)
     idSite = db.Column(db.Integer, db.ForeignKey('Site.id'), nullable=False)
+    computador = db.relationship('Computador', backref='locapa', lazy=True)
 
     def __init__(self, descricao='XPTO', idSite=0) -> None:
         self.descricaoPa = descricao
@@ -259,3 +237,26 @@ class LocalFisico(db.Model):
 
     def __repr__(self) -> str:
         return f"LocalFisico('{self.nome}')"
+
+class Computador(db.Model):
+    __tablename__ = 'Computador'
+    id = db.Column(db.Integer, primary_key=True)
+    serial = db.Column(db.String(40), unique=True)
+    hostname = db.Column(db.String(40), unique=True)
+    patrimonio = db.Column(db.String(40), unique=True)
+    idSite = db.Column(db.Integer, db.ForeignKey('Site.id'), nullable=False)
+    idStatus = db.Column(db.Integer, db.ForeignKey('Status.id'), nullable=False)
+    idLocalPa = db.Column(db.Integer, db.ForeignKey('LocalPa.id'), nullable=False)
+    funcionario = db.relationship('Funcionario', backref='computador', lazy=True)
+    tipo = db.relationship('Tipo', secondary=tipoComputador, backref='tipos')
+
+    def __init__(self, serial='XPTO', hostname='XPTO', patrimonio='XPTO', idSite=0, idStatus=0, idlocalPa=0) -> None:
+        self.serial = serial
+        self.hostname = hostname
+        self.patrimonio = patrimonio
+        self.idSite = idSite
+        self.idStatus = idStatus
+        self.idLocalPa = idlocalPa
+
+    def __repr__(self) -> str:
+        return f"Computador('{self.serial}', '{self.hostname}', '{self.patrimonio}')"

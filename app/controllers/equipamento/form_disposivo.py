@@ -34,7 +34,7 @@ class InventariosForm(FlaskForm):
 
     def validate_selection(self, selection):
         # inventario = db.session.query(Computador).join(LocalPa, Computador.idLocal == LocalPa.id).filter(LocalPa.descricaoPa == selection.data).first()
-        inventario = db.session.query(Computador).join(Site, Computador.idSite== Site.id).join(LocalPa, Site.id== LocalPa.idSite).filter(LocalPa.descricaoPa == selection.data).first()
+        inventario = db.session.query(Computador).join(LocalPa, Computador.idSite == LocalPa.id).filter(LocalPa.descricaoPa == selection.data).first()
         if inventario:
             raise ValidationError(
                 'Local já tem equipamento. Atualize ou remova equipamento anterior!')
