@@ -44,22 +44,23 @@ def novo_equipamento():
                 status = Status(1, data_e_hora_sao_paulo)
                 db.session.add(status)
                 db.session.commit()
-                # db.session.flush()
             except Exception as e:
-                print(f'Error: {e}')
+                db.session.flush()
+                db.session.rollback()
+                # print(f'Error: {e}')
 
             try:
                 computador = Computador(serial=form.serial.data, hostname=form.hostname.data, patrimonio=form.patrimonio.data, idSite=site.id, idStatus=status.id, idlocalPa=local.id)
                 tipo = Tipo.query.filter_by(nome=form.tipoDispositivo.data).first_or_404()
                 computador.tipo.append(tipo)
                 db.session.add(computador)
-                print(computador)
-                print(computador.tipo)
+                # print(computador)
+                # print(computador.tipo)
                 db.session.commit()
                 flash('Computador cadastrado com sucesso.', 'success')
                 return redirect(url_for('equipamento.inventario'))
             except Exception as e:
-                print(f'Erro ao Obter Pa! {e}')
+                # print(f'Erro ao Obter Pa! {e}')
                 db.session.flush()
                 db.session.rollback()
 
@@ -97,10 +98,10 @@ def atualizarInventario():
                 return redirect(url_for('equipamento.inventario'))
             except exc.IntegrityError as e:
                 # print(f'Error: {e}')
-                flash('Local já cadastrado! Verificar dados inseridos.', 'danger')
+                flash('Verificar dados inseridos!', 'danger')
                 db.session.flush()
                 db.session.rollback()
-                abort(404)
+                # abort(404)
         return render_template('equipamentos/update_equipamento.html', title='Editar Equipamento', legenda='Editar equipamento site', form=form)
 
     else:
