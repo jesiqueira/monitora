@@ -29,7 +29,7 @@ def home():
     # print(current_user.id)
     monitora = Monitora()
     # monitora.threadAtualizarStatusComputador()
-    monitora.calculaHora() 
+    # monitora.calculaHora()
     return render_template('main/home.html', title='Home', local='São Carlos', desktop=desktop, computador=monitora.computadoresView())
 
 

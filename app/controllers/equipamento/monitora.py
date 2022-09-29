@@ -1,3 +1,4 @@
+from app.controllers.equipamento.routes import atualizarInventario
 from app.models.bdMonitora import Computador, LocalPa, Status
 from app import db
 import subprocess
@@ -50,26 +51,45 @@ class Monitora:
                 computador['desconectado'] += 1
         return computador
 
-    # ips = ['10.204.2.38', '10.204.2.40', 'NBR001150-01485']
-
-    def consultaStatusComputadores(self, listaComputadores):
+    def consultaAtaualizaStatusComputadores(self, listaComputadores):
         for computador in listaComputadores:
-            # print(computador['hostname'])
             # result = subprocess.Popen(["ping", "-n", "2", computador['hostname']]).wait()
             if subprocess.Popen(["ping", "-n", "2", computador['hostname']]).wait():
-                print(f"Hostname: {computador['hostname']}, está inativo")
+                self.atualizarStatusComputador(
+                    idComputador=computador['id'], idStatus=computador['idStatus'], statusComputador=False)
+                # print(f"Hostname: {computador['hostname']}, está inativo")
             else:
-                print(f"Hostname: {computador['hostname']}, está ativo")
+                self.atualizarStatusComputador(
+                    idComputador=computador['id'], idStatus=computador['idStatus'], statusComputador=True)
+                # print(f"Hostname: {computador['hostname']}, está ativo")
 
     def threadAtualizarStatusComputador(self) -> None:
-        t = threading.Thread(target=self.consultaStatusComputadores(self.listaComputadores))
+        t = threading.Thread(
+            target=self.consultaAtaualizaStatusComputadores(self.listaComputadores))
         t.start()
-    
-    def atualizarStatusComputador(self):
+
+    def atualizarStatusComputador(self, idComputador=0, idStatus=1, statusComputador=False):
         try:
-            print('Funcão AtualizarStatusComputador')
+            status = db.session.query(Status).join(Computador, Status.id == Computador.idStatus).filter(
+                Computador.id == idComputador and Status.id == idStatus).first_or_404()
+            if statusComputador:
+                status.ativo = statusComputador
+                status.dataHora = self.horaAtual()
+            elif(status.ativo):
+                status.ativo = statusComputador
+                status.dataHora = self.horaAtual()
+            db.session.commit()
         except Exception as e:
+            db.session.flush()
+            db.session.rollback()
             print(f'Error: {e}')
+
+    def horaAtual(self):
+        data_e_hora_atuais = datetime.now()
+        fuso_horario = timezone('America/Sao_Paulo')
+        data_e_hora_sao_paulo = data_e_hora_atuais.astimezone(fuso_horario)
+
+        return data_e_hora_sao_paulo
 
     def calculaHora(self):
         data_e_hora_atuais = datetime.now()
@@ -81,15 +101,20 @@ class Monitora:
         data2 = datetime.strptime(data_e_hora_em_texto, '%d/%m/%Y %H:%M')
         print(data1 - data2)
 
-        time_1 = datetime.strptime(
-            data_e_hora_sao_paulo.strftime("%H:%M:%S"), "%H:%M:%S")
+        time_1 = datetime.strptime(data_e_hora_sao_paulo.strftime(
+            "%d/%m/%Y %H:%M"), "%d/%m/%Y %H:%M")
         for computador in self.listaComputadores:
-            time_2 = datetime.strptime(
-                computador['data'].strftime("%H:%M:%S"), "%H:%M:%S")
+            texto_simples = computador['data']
+            novo_texto_simples = datetime.strftime(
+                computador['data'], '%d/%m/%Y %H:%M')
+            # print(f'Novo texto: {novo_texto_simples}')
+            time_2 = datetime.strptime(computador['data'].strftime(
+                '%d/%m/%Y %H:%M'), '%d/%m/%Y %H:%M')
             # hora = computador['data']
             # atual = data_e_hora_sao_paulo - hora
             # print(f"Diferença horas: {atual}")
         difereca_time = time_1 - time_2
     #   print(str(difereca_time))
     #   print(dir(difereca_time))
-        print(difereca_time.days)
+        print(f'Data hora atual: {data_e_hora_sao_paulo}')
+        print(f'Dirença: {difereca_time.days}')

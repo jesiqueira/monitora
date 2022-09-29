@@ -39,3 +39,8 @@ Documentação: https://fontawesome.com/how-to-use/on-the-web/referencing-icons/
 
 -----fontawesome--
 npm install @fortawesome/fontawesome-free
+
+
+Serial     patrimônio      hostname
+PE06XRJN  MSG000001485  NBR001150-01485
+6XWWZ23   MSG000000552  PBR001150-M0552
