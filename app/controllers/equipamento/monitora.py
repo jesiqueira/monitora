@@ -1,8 +1,8 @@
-from app.controllers.equipamento.routes import atualizarInventario
 from app.models.bdMonitora import Computador, LocalPa, Status
 from app import db
 import subprocess
 import threading
+import concurrent.futures
 from datetime import datetime, timedelta
 from pytz import timezone
 
@@ -55,18 +55,18 @@ class Monitora:
         for computador in listaComputadores:
             # result = subprocess.Popen(["ping", "-n", "2", computador['hostname']]).wait()
             if subprocess.Popen(["ping", "-n", "2", computador['hostname']]).wait():
-                self.atualizarStatusComputador(
-                    idComputador=computador['id'], idStatus=computador['idStatus'], statusComputador=False)
+                self.atualizarStatusComputador(idComputador=computador['id'], idStatus=computador['idStatus'], statusComputador=False)
                 # print(f"Hostname: {computador['hostname']}, está inativo")
             else:
-                self.atualizarStatusComputador(
-                    idComputador=computador['id'], idStatus=computador['idStatus'], statusComputador=True)
+                self.atualizarStatusComputador(idComputador=computador['id'], idStatus=computador['idStatus'], statusComputador=True)
                 # print(f"Hostname: {computador['hostname']}, está ativo")
 
     def threadAtualizarStatusComputador(self) -> None:
-        t = threading.Thread(
-            target=self.consultaAtaualizaStatusComputadores(self.listaComputadores))
-        t.start()
+        # t = threading.Thread(
+        #     target=self.consultaAtaualizaStatusComputadores(self.listaComputadores))
+        # t.start()
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            executor.map(self.consultaAtaualizaStatusComputadores, self.listaComputadores)
 
     def atualizarStatusComputador(self, idComputador=0, idStatus=1, statusComputador=False):
         try:
