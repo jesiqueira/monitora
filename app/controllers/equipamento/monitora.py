@@ -2,7 +2,6 @@ from app.models.bdMonitora import Computador, LocalPa, Status
 from app import db
 import subprocess
 import threading
-import concurrent.futures
 from datetime import datetime, timedelta
 from pytz import timezone
 
@@ -31,6 +30,7 @@ class Monitora:
             self.listaComputadores.append(desktop)
 
     def computadoresView(self):
+        '''Retorna o status dos computadores'''
         computador = {
             'conectado': 0,
             'desconectado': 0,
@@ -40,35 +40,33 @@ class Monitora:
         }
         for comp in self.listaComputadores:
             if comp['status']:
-                # print(f"idStatus: {comp['idStatus']}, Status: {comp['status']}")
                 computador['conectado'] += 1
                 dataataualizacao = datetime
                 dataataualizacao = comp['data']
                 computador['data'] = dataataualizacao.strftime('%d/%m/%Y')
                 computador['hora'] = dataataualizacao.strftime('%H:%M:%S')
-                # print(computador['hora'])
             else:
+                '''Ainda falta fazer o calcula da Data para saber o tempo que está inativo'''
                 computador['desconectado'] += 1
         return computador
 
-    def consultaAtaualizaStatusComputadores(self, listaComputadores):
-        for computador in listaComputadores:
-            # result = subprocess.Popen(["ping", "-n", "2", computador['hostname']]).wait()
-            if subprocess.Popen(["ping", "-n", "2", computador['hostname']]).wait():
-                self.atualizarStatusComputador(idComputador=computador['id'], idStatus=computador['idStatus'], statusComputador=False)
-                # print(f"Hostname: {computador['hostname']}, está inativo")
+    def consultaAtaualizaStatusComputadores(self, listaComputador):
+        '''Realiza Ping em uma lista de computadores para saber se estão conectado corretamente na rede'''
+        for listaComputador in listaComputador:
+            if subprocess.Popen(["ping", "-n", "2", listaComputador['hostname']]).wait():
+                self.atualizarStatusComputador(
+                    idComputador=listaComputador['id'], idStatus=listaComputador['idStatus'], statusComputador=False)
             else:
-                self.atualizarStatusComputador(idComputador=computador['id'], idStatus=computador['idStatus'], statusComputador=True)
-                # print(f"Hostname: {computador['hostname']}, está ativo")
+                self.atualizarStatusComputador(
+                    idComputador=listaComputador['id'], idStatus=listaComputador['idStatus'], statusComputador=True)
 
     def threadAtualizarStatusComputador(self) -> None:
-        # t = threading.Thread(
-        #     target=self.consultaAtaualizaStatusComputadores(self.listaComputadores))
-        # t.start()
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            executor.map(self.consultaAtaualizaStatusComputadores, self.listaComputadores)
+        t = threading.Thread(
+            target=self.consultaAtaualizaStatusComputadores(self.listaComputadores))
+        t.start()
+        print('Finalizou')
 
-    def atualizarStatusComputador(self, idComputador=0, idStatus=1, statusComputador=False):
+    def atualizarStatusComputador(self, idComputador=0, idStatus=0, statusComputador=False):
         try:
             status = db.session.query(Status).join(Computador, Status.id == Computador.idStatus).filter(
                 Computador.id == idComputador and Status.id == idStatus).first_or_404()
@@ -90,31 +88,3 @@ class Monitora:
         data_e_hora_sao_paulo = data_e_hora_atuais.astimezone(fuso_horario)
 
         return data_e_hora_sao_paulo
-
-    def calculaHora(self):
-        data_e_hora_atuais = datetime.now()
-        fuso_horario = timezone('America/Sao_Paulo')
-        data_e_hora_sao_paulo = data_e_hora_atuais.astimezone(fuso_horario)
-        data1 = datetime.strptime(data_e_hora_sao_paulo.strftime(
-            '%d/%m/%Y %H:%M'), '%d/%m/%Y %H:%M')
-        data_e_hora_em_texto = "27/09/2022 12:30"
-        data2 = datetime.strptime(data_e_hora_em_texto, '%d/%m/%Y %H:%M')
-        print(data1 - data2)
-
-        time_1 = datetime.strptime(data_e_hora_sao_paulo.strftime(
-            "%d/%m/%Y %H:%M"), "%d/%m/%Y %H:%M")
-        for computador in self.listaComputadores:
-            texto_simples = computador['data']
-            novo_texto_simples = datetime.strftime(
-                computador['data'], '%d/%m/%Y %H:%M')
-            # print(f'Novo texto: {novo_texto_simples}')
-            time_2 = datetime.strptime(computador['data'].strftime(
-                '%d/%m/%Y %H:%M'), '%d/%m/%Y %H:%M')
-            # hora = computador['data']
-            # atual = data_e_hora_sao_paulo - hora
-            # print(f"Diferença horas: {atual}")
-        difereca_time = time_1 - time_2
-    #   print(str(difereca_time))
-    #   print(dir(difereca_time))
-        print(f'Data hora atual: {data_e_hora_sao_paulo}')
-        print(f'Dirença: {difereca_time.days}')

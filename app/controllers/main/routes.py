@@ -10,27 +10,13 @@ from datetime import date, datetime
 
 main = Blueprint('main', __name__)
 
-desktop = {
-    'patrimônio': '56233',
-    'conectado': 1500,
-    'hora': 10,
-    'min': 30,
-    'seg': 25,
-    'data': '10/06/2022',
-    'desconectado': 10,
-    'atencao': 2
-}
-
 
 @main.route('/')
 @main.route('/home')
 @main.route('/monitora')
 def home():
     # print(current_user.id)
-    monitora = Monitora()
-    # monitora.threadAtualizarStatusComputador()
-    # monitora.calculaHora()
-    return render_template('main/home.html', title='Home', local='São Carlos', desktop=desktop, computador=monitora.computadoresView())
+    return render_template('main/home.html', title='Home', local='São Carlos', computador=Monitora().computadoresView())
 
 
 @main.route('/site')
@@ -179,3 +165,10 @@ def updateLocal(id_local):
         abort(403)
 
 # Falta fazer opção para excluir localPa
+
+@main.route('/home/AtualizarComputadorSite', methods=['GET'])
+def atualizarComputadorSite():
+    monitora = Monitora()
+    monitora.threadAtualizarStatusComputador()
+    flash('Dados Atualizado com sucesso!', 'success')
+    return redirect(url_for('main.home'))
