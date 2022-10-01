@@ -1,5 +1,6 @@
 from flask import render_template, flash, redirect, url_for, Blueprint, request, abort
-from app.controllers.main.form import (SiteForm, LocalAtendimento, SiteUpdateForm, UpdateLocal)
+from app.controllers.main.form import (
+    SiteForm, LocalAtendimento, SiteUpdateForm, UpdateLocal)
 from flask_login import current_user, login_required
 from app.models.bdMonitora import Endereco, Site, LocalPa
 from app import db
@@ -16,14 +17,16 @@ main = Blueprint('main', __name__)
 @main.route('/monitora')
 def home():
     # print(current_user.id)
-    return render_template('main/home.html', title='Home', local='São Carlos', computador=Monitora().computadoresView())
+    monitora = Monitora()
+    return render_template('main/home.html', title='Home', local='São Carlos', computador=monitora.computadoresView())
 
 
 @main.route('/site')
 @login_required
 def site():
     if current_user.admin and current_user.ativo:
-        sites = db.session.query(Site.id, Site.nome, Endereco.rua, Endereco.cep, Endereco.cidade).join(Site, Endereco.id == Site.id).all()
+        sites = db.session.query(Site.id, Site.nome, Endereco.rua, Endereco.cep, Endereco.cidade).join(
+            Site, Endereco.id == Site.id).all()
         # print(sites[0].nome)
         return render_template('main/site.html', title='Site', sites=sites)
     else:
@@ -36,7 +39,8 @@ def registrar_site():
     if current_user.admin and current_user.ativo:
         form = SiteForm()
         if form.validate_on_submit():
-            endereco = Endereco(cidade=form.cidade.data, rua=form.rua.data, cep=form.cep.data)
+            endereco = Endereco(cidade=form.cidade.data,
+                                rua=form.rua.data, cep=form.cep.data)
             db.session.add(endereco)
             db.session.commit()
             site = Site(form.nome.data, endereco.id)
@@ -48,13 +52,14 @@ def registrar_site():
     else:
         abort(403)
 
+
 @main.route('/site/<int:id_site>/update', methods=['GET', 'POST'])
 @login_required
 def update_site(id_site):
     if current_user.admin and current_user.ativo:
         try:
             endereco = Endereco.query.get_or_404(id_site)
-            site =Site.query.filter_by(idEndereco=endereco.id).first_or_404()
+            site = Site.query.filter_by(idEndereco=endereco.id).first_or_404()
         except Exception as e:
             print(f'Erro ao consultar: {e}')
         form = SiteUpdateForm()
@@ -71,9 +76,10 @@ def update_site(id_site):
             form.cep.data = endereco.cep
             form.cidade.data = endereco.cidade
             form.nome.data = site.nome
-        return render_template('main/update_site.html', title='Update Site', legenda ='Editar Site', id_site=id_site, form=form)
+        return render_template('main/update_site.html', title='Update Site', legenda='Editar Site', id_site=id_site, form=form)
     else:
         abort(403)
+
 
 @main.route('/site/delete', methods=['POST'])
 @login_required
@@ -81,7 +87,7 @@ def delete_site():
     if current_user.admin and current_user.ativo:
         id_site = request.form.get('id_site')
         endereco = Endereco.query.get_or_404(id_site)
-        site =Site.query.filter_by(idEndereco=endereco.id).first_or_404()
+        site = Site.query.filter_by(idEndereco=endereco.id).first_or_404()
         if site.id != 1:
             db.session.delete(endereco)
             db.session.delete(site)
@@ -93,11 +99,13 @@ def delete_site():
     else:
         abort(403)
 
+
 @main.route('/local', methods=['GET', 'POST'])
 @login_required
 def localizarPA():
     if current_user.admin and current_user.ativo:
-        locais = db.session.query(LocalPa.id, LocalPa.descricaoPa, Site.nome).join(LocalPa, Site.id == LocalPa.idSite).all()
+        locais = db.session.query(LocalPa.id, LocalPa.descricaoPa, Site.nome).join(
+            LocalPa, Site.id == LocalPa.idSite).all()
         return render_template('main/local.html', title='Ponto Atendimento', locais=locais)
     else:
         abort(403)
@@ -131,7 +139,8 @@ def updateLocal(id_local):
     if current_user.admin and current_user.ativo:
         form = UpdateLocal()
         try:
-            localForm = db.session.query(LocalPa.descricaoPa, LocalPa.idSite, LocalPa.id, Site.nome).join(Site, Site.id == LocalPa.idSite).filter(LocalPa.id==id_local).first_or_404()
+            localForm = db.session.query(LocalPa.descricaoPa, LocalPa.idSite, LocalPa.id, Site.nome).join(
+                Site, Site.id == LocalPa.idSite).filter(LocalPa.id == id_local).first_or_404()
             # print(local)
             # precisa verificar a consulta para atualizar local e o site
         except Exception as e:
@@ -140,7 +149,8 @@ def updateLocal(id_local):
         if form.validate_on_submit():
             try:
                 local = LocalPa.query.get_or_404(id_local)
-                site = Site.query.filter(Site.nome == form.localSelect.data).first_or_404()
+                site = Site.query.filter(
+                    Site.nome == form.localSelect.data).first_or_404()
             except Exception as e:
                 # print(f'Erro ao realizar consulta: {e}')
                 abort(404)
@@ -166,9 +176,10 @@ def updateLocal(id_local):
 
 # Falta fazer opção para excluir localPa
 
+
 @main.route('/home/AtualizarComputadorSite', methods=['GET'])
 def atualizarComputadorSite():
     monitora = Monitora()
-    monitora.threadAtualizarStatusComputador()
+    monitora.atualizarStatusComputador()
     flash('Dados Atualizado com sucesso!', 'success')
     return redirect(url_for('main.home'))

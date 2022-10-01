@@ -2,6 +2,7 @@ from app.models.bdMonitora import Computador, LocalPa, Status
 from app import db
 import subprocess
 import threading
+import concurrent.futures
 from datetime import datetime, timedelta
 from pytz import timezone
 
@@ -10,6 +11,7 @@ class Monitora:
 
     def __init__(self) -> None:
         self.listaComputadores = []
+        self.listaStatusComputadores = []
         self.consultaComputador()
 
     def consultaComputador(self):
@@ -48,35 +50,52 @@ class Monitora:
             else:
                 '''Ainda falta fazer o calcula da Data para saber o tempo que está inativo'''
                 computador['desconectado'] += 1
+                dataataualizacao = datetime
+                dataataualizacao = comp['data']
+                computador['data'] = dataataualizacao.strftime('%d/%m/%Y')
+                computador['hora'] = dataataualizacao.strftime('%H:%M:%S')
+
         return computador
 
-    def consultaAtaualizaStatusComputadores(self, listaComputador):
+    def consultaAtualizaStatusComputadores(self, listaComputador):
         '''Realiza Ping em uma lista de computadores para saber se estão conectado corretamente na rede'''
-        for listaComputador in listaComputador:
-            if subprocess.Popen(["ping", "-n", "2", listaComputador['hostname']]).wait():
-                self.atualizarStatusComputador(
-                    idComputador=listaComputador['id'], idStatus=listaComputador['idStatus'], statusComputador=False)
-            else:
-                self.atualizarStatusComputador(
-                    idComputador=listaComputador['id'], idStatus=listaComputador['idStatus'], statusComputador=True)
+        status = {
+            'idComputador': 0,
+            'idStatus': 0,
+            'statusComputador': 0
+        }
+        if subprocess.Popen(["ping", "-n", "2", listaComputador['hostname']]).wait():
+            status['idComputador'] = listaComputador['id']
+            status['idStatus'] = listaComputador['idStatus']
+            status['statusComputador'] = False
+            self.listaStatusComputadores.append(status)
+        else:
+            status['idComputador'] = listaComputador['id']
+            status['idStatus'] = listaComputador['idStatus']
+            status['statusComputador'] = True
+            self.listaStatusComputadores.append(status)
 
     def threadAtualizarStatusComputador(self) -> None:
-        t = threading.Thread(
-            target=self.consultaAtaualizaStatusComputadores(self.listaComputadores))
-        t.start()
-        print('Finalizou')
+        result = self.executarThread(
+            self.consultaAtualizaStatusComputadores, self.listaComputadores)
+        self.atualizarStatusComputador(self.listaStatusComputadores)
 
-    def atualizarStatusComputador(self, idComputador=0, idStatus=0, statusComputador=False):
+    def executarThread(self, func, lista):
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            executor.map(func, lista)
+
+    def atualizarStatusComputador(self, listaDeComputadores):
         try:
-            status = db.session.query(Status).join(Computador, Status.id == Computador.idStatus).filter(
-                Computador.id == idComputador and Status.id == idStatus).first_or_404()
-            if statusComputador:
-                status.ativo = statusComputador
-                status.dataHora = self.horaAtual()
-            elif(status.ativo):
-                status.ativo = statusComputador
-                status.dataHora = self.horaAtual()
-            db.session.commit()
+            for computador in listaDeComputadores:
+                status = db.session.query(Status).join(Computador, Status.id == Computador.idStatus).filter(
+                    Computador.id == computador['idComputador'] and Status.id == computador['idStatus']).first_or_404()
+                if computador['statusComputador']:
+                    status.ativo = computador['statusComputador']
+                    status.dataHora = self.horaAtual()
+                elif(status.ativo):
+                    status.ativo = computador['statusComputador']
+                    status.dataHora = self.horaAtual()
+                db.session.commit()
         except Exception as e:
             db.session.flush()
             db.session.rollback()
