@@ -1,9 +1,8 @@
 from app.models.bdMonitora import Computador, LocalPa, Status
 from app import db
 import subprocess
-import threading
 import concurrent.futures
-from datetime import datetime, timedelta
+from datetime import datetime
 from pytz import timezone
 
 
@@ -15,7 +14,7 @@ class Monitora:
         self.consultaComputador()
 
     def consultaComputador(self):
-
+        '''Realiza a consulta de todos os computadores cadastrado no BD que estão instalados em um site e salva o resultado em uma lista para uso posterior.'''
         computadores = db.session.query(Computador.id, Computador.hostname, Computador.serial, Computador.patrimonio, Status.id.label('idStatus'), Status.ativo,
                                         Status.dataHora, LocalPa.descricaoPa).join(Computador, LocalPa.id == Computador.idLocalPa).join(Status, Status.id == Computador.idStatus).all()
         for computador in computadores:
@@ -32,7 +31,7 @@ class Monitora:
             self.listaComputadores.append(desktop)
 
     def computadoresView(self):
-        '''Retorna o status dos computadores'''
+        '''Retorna o Status: Conectado/Desconectado/Atenção, Data e Hora dos computadores que estão alocado no site'''
         computador = {
             'conectado': 0,
             'desconectado': 0,
@@ -43,22 +42,27 @@ class Monitora:
         for comp in self.listaComputadores:
             if comp['status']:
                 computador['conectado'] += 1
-                dataataualizacao = datetime
-                dataataualizacao = comp['data']
-                computador['data'] = dataataualizacao.strftime('%d/%m/%Y')
-                computador['hora'] = dataataualizacao.strftime('%H:%M:%S')
-            else:
-                '''Ainda falta fazer o calcula da Data para saber o tempo que está inativo'''
+                dataAtualizacao = datetime
+                dataAtualizacao = comp['data']
+                computador['data'] = dataAtualizacao.strftime('%d/%m/%Y')
+                computador['hora'] = dataAtualizacao.strftime('%H:%M:%S')
+            elif not comp['status'] and self.calculaDiasComputadorOffiline(comp['data']) >= 2:
                 computador['desconectado'] += 1
-                dataataualizacao = datetime
-                dataataualizacao = comp['data']
-                computador['data'] = dataataualizacao.strftime('%d/%m/%Y')
-                computador['hora'] = dataataualizacao.strftime('%H:%M:%S')
+                dataAtualizacao = datetime
+                dataAtualizacao = comp['data']
+                computador['data'] = dataAtualizacao.strftime('%d/%m/%Y')
+                computador['hora'] = dataAtualizacao.strftime('%H:%M:%S')               
+            else:
+                computador['atencao'] += 1
+                dataAtualizacao = datetime
+                dataAtualizacao = comp['data']
+                computador['data'] = dataAtualizacao.strftime('%d/%m/%Y')
+                computador['hora'] = dataAtualizacao.strftime('%H:%M:%S')
 
         return computador
 
     def consultaAtualizaStatusComputadores(self, listaComputador):
-        '''Realiza Ping em uma lista de computadores para saber se estão conectado corretamente na rede'''
+        '''Realiza Ping em uma lista de computadores para saber se estão conectado corretamente na rede e salva as informações em uma nova lista para uso posterior.'''
         status = {
             'idComputador': 0,
             'idStatus': 0,
@@ -76,15 +80,17 @@ class Monitora:
             self.listaStatusComputadores.append(status)
 
     def threadAtualizarStatusComputador(self) -> None:
-        result = self.executarThread(
-            self.consultaAtualizaStatusComputadores, self.listaComputadores)
+        '''Está função faz as chamadas dos metodos parar realizar a consulta via Thread do Status dos computadores na rede e atualizar o BD com os Status recebidos'''
+        result = self.executarThread(self.consultaAtualizaStatusComputadores, self.listaComputadores)
         self.atualizarStatusComputador(self.listaStatusComputadores)
 
     def executarThread(self, func, lista):
+        '''Criar e executa Thread'''
         with concurrent.futures.ThreadPoolExecutor() as executor:
             executor.map(func, lista)
 
     def atualizarStatusComputador(self, listaDeComputadores):
+        '''Atualiza o status dos computadores no BD ao receber uma lista com Status da consulta realizada por PIP nos computadores da rede'''
         try:
             for computador in listaDeComputadores:
                 status = db.session.query(Status).join(Computador, Status.id == Computador.idStatus).filter(
@@ -101,9 +107,16 @@ class Monitora:
             db.session.rollback()
             print(f'Error: {e}')
 
-    def horaAtual(self):
+    def horaAtual(self) -> datetime:
+        '''Retorna o dia e hora atual em São Paulo'''
         data_e_hora_atuais = datetime.now()
         fuso_horario = timezone('America/Sao_Paulo')
         data_e_hora_sao_paulo = data_e_hora_atuais.astimezone(fuso_horario)
-
         return data_e_hora_sao_paulo
+    
+    def calculaDiasComputadorOffiline(self, data) -> int:
+        '''Calcula e retorna a quantidade de dias que o computador está sem responder na rede'''
+        data1 = datetime.strptime(self.horaAtual().strftime("%d/%m/%Y %H:%M"), "%d/%m/%Y %H:%M")        
+        data2 =  datetime.strptime(data.strftime('%d/%m/%Y %H:%M'), '%d/%m/%Y %H:%M')
+        diferenca = data1 - data2
+        return diferenca.days

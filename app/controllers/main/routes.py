@@ -180,6 +180,6 @@ def updateLocal(id_local):
 @main.route('/home/AtualizarComputadorSite', methods=['GET'])
 def atualizarComputadorSite():
     monitora = Monitora()
-    monitora.atualizarStatusComputador()
+    monitora.threadAtualizarStatusComputador()
     flash('Dados Atualizado com sucesso!', 'success')
     return redirect(url_for('main.home'))
