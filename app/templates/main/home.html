@@ -18,7 +18,7 @@
                     {%endif%}
                 {%endwith%}
                 <h1 class="display-3 monitora"><i class="fa-solid fa-binoculars"></i> Monitora</h1>
-                <p>Para atualizar informações dos computadores no site selecione o botão atualizar e aguarde.</p>
+                <p class="monitoraInfo">Para atualizar informações dos computadores no site selecione o botão atualizar e aguarde.</p>
                 <p><a class="btn btn-primary btn-lg" href="{{url_for('main.atualizarComputadorSite')}}" role="button">Atualizar &raquo;</a></p>
             </div>
         </div>
@@ -29,26 +29,28 @@
                 <div class="col-md-4">
                     <img class="dashimg" src="{{url_for('static', filename='img/ok.png')}}" alt="">
                     <spam class="conectado"> Conectado</spam>
-                    <p class="dashdispositivo">Dispositivos:<spam class="dashqtd"> {{computador.conectado}}</spam></p>
-                    <p class="dashdispositivo">Atualizado:<spam class="data"> {{computador.data}}</spam></p>
-                    <p class="dashdispositivo">Hora:<spam class="data"> {{computador.hora}}</spam></p>
-                    <p><a class="btn btn-secondary" href="#" role="button">Ver delalhe &raquo;</a></p>
+                    <p class="dashdispositivo">Dispositivo(s):<spam class="dashqtd"> {{computador.conectado}}</spam></p>
+                    <p><a class="btn btn-secondary detalhe" href="{{url_for('equipamento.detalhe', tipo_relatorio='Conectado')}}" role="button">Ver delalhe &raquo;</a></p>
                 </div>
                 <div class="col-md-4">
                     <img class="dashimg" src="{{url_for('static', filename='img/erro.png')}}" alt="">
                     <span class="desconectado">Desconectado</span>
-                    <p class="dashdispositivo">Dispositivos:<spam class="dashqtd"> {{computador.desconectado}}</spam></p>
-                    <p class="dashdispositivo">Atualizado:<spam class="data"> {{computador.data}}</spam></p>
-                    <p class="dashdispositivo">Hora:<spam class="data"> {{computador.hora}}</spam></p>
-                    <p><a class="btn btn-secondary" href="#" role="button">Ver delalhe&raquo;</a></p>
+                    <p class="dashdispositivo">Dispositivo(s):<spam class="dashqtd"> {{computador.desconectado}}</spam></p>
+                    <p><a class="btn btn-secondary detalhe" href="{{url_for('equipamento.detalhe', tipo_relatorio='Desconectado')}}" role="button">Ver delalhe&raquo;</a></p>
                 </div>
                 <div class="col-md-4">
                     <img class="dashimg" src="{{url_for('static', filename='img/Atenção.png')}}" alt="">
                     <spam class="atencao">Atenção</spam>
-                    <p class="dashdispositivo">Dispositivos:<spam class="dashqtd"> {{computador.atencao}}</spam></p>
-                    <p class="dashdispositivo">Atualizado:<spam class="data"> {{computador.data}}</spam></p>
-                    <p class="dashdispositivo">Hora:<spam class="data"> {{computador.hora}}</spam></p>
-                    <p><a class="btn btn-secondary" href="#" role="button">Ver delalhe &raquo;</a></p>
+                    <p class="dashdispositivo">Dispositivo(s):<spam class="dashqtd"> {{computador.atencao}}</spam></p>
+                    <p><a class="btn btn-secondary detalhe" href="{{url_for('equipamento.detalhe', tipo_relatorio='Atenção')}}" role="button">Ver delalhe &raquo;</a></p>
+                </div>
+            </div>
+            <div class="row dataHora">
+                <div class="col-md-6">
+                    <p class="dashData">Atualizado:<spam class="data"> {{computador.data}}</spam></p>
+                </div>
+                <div class="col-md-6">
+                    <p class="dashHora">Hora:<spam class="data"> {{computador.hora}}</spam></p>
                 </div>
             </div>
         </div>

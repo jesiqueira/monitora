@@ -1,3 +1,4 @@
+from typing import List
 from app.models.bdMonitora import Computador, LocalPa, Status
 from app import db
 import subprocess
@@ -51,7 +52,7 @@ class Monitora:
                 dataAtualizacao = datetime
                 dataAtualizacao = comp['data']
                 computador['data'] = dataAtualizacao.strftime('%d/%m/%Y')
-                computador['hora'] = dataAtualizacao.strftime('%H:%M:%S')               
+                computador['hora'] = dataAtualizacao.strftime('%H:%M:%S')
             else:
                 computador['atencao'] += 1
                 dataAtualizacao = datetime
@@ -120,3 +121,24 @@ class Monitora:
         data2 =  datetime.strptime(data.strftime('%d/%m/%Y %H:%M'), '%d/%m/%Y %H:%M')
         diferenca = data1 - data2
         return diferenca.days
+
+    def computadoresAtencao(self) -> List:
+        '''Retorna os computadores que estão com Status marcado com Atenção'''
+        computadodresAtencao = {
+            'serial' : '',
+            'patrimonio' : '',
+            'hostname' : '',
+            'descricaoPa' : ''
+        }
+        listaComputadores = []
+        for computador in self.listaComputadores:
+            if not computador['status'] and self.calculaDiasComputadorOffiline(computador['data']) == 1:
+                computadodresAtencao['serial'] = computador['serial']
+                computadodresAtencao['patrimonio'] = computador['patrimonio']
+                computadodresAtencao['hostname'] = computador['hostname']
+                computadodresAtencao['descricaoPa'] = computador['descricaoPa']
+                listaComputadores.append(computadodresAtencao)
+        
+        return listaComputadores
+
+    

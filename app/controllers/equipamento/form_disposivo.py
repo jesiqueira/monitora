@@ -1,3 +1,4 @@
+from select import select
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField, HiddenField
 from wtforms.validators import DataRequired, Length, ValidationError
@@ -5,7 +6,12 @@ from app.models.bdMonitora import LocalPa, Computador, Tipo
 from app import db
 
 
-class InventariosForm(FlaskForm):
+class InventarioForm(FlaskForm):
+    consulta = StringField('Consulta', validators=[DataRequired()])
+    selection = SelectField(choices=['Serial', 'Patrimônio', 'Local'])
+
+
+class InventariosNovoForm(FlaskForm):
     serial = StringField('Serial', validators=[DataRequired()])
     patrimonio = StringField('Patromônio', validators=[DataRequired(), Length(
         min=1, max=40, message='Campo obrigatório, mínimo 1 máximo 30 caracteres.')])
@@ -33,7 +39,8 @@ class InventariosForm(FlaskForm):
             raise ValidationError('Hostname já cadastrado no sistema!')
 
     def validate_selection(self, selection):
-        inventario = db.session.query(Computador).join(LocalPa, Computador.idLocalPa == LocalPa.id).filter(LocalPa.descricaoPa == selection.data).first()
+        inventario = db.session.query(Computador).join(LocalPa, Computador.idLocalPa == LocalPa.id).filter(
+            LocalPa.descricaoPa == selection.data).first()
         if inventario:
             raise ValidationError(
                 'Local já tem equipamento. Atualize ou remova equipamento anterior!')

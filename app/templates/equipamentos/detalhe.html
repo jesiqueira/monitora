@@ -1,0 +1,31 @@
+{% extends 'layout2.html' %}
+{% block content %}
+<div class="jumbotron">
+  <div class="container">
+      <h1 class="display-3 monitora text-primary"><i class="fa-solid fa-desktop"></i> Desktop {{legenda}}</h1>
+      <p class="monitoraInfo">Informações dos Desktop {{legenda if legenda != 'Atenção' else 'que requer atenção'}} no site.</p>
+  </div>
+</div>
+<table class="table table-hover">
+  <thead>
+    <tr class="table-primary">
+      <!-- <th scope="col">ID</th> -->
+      <th scope="col">Serial</th>
+      <th scope="col">Patrimônio</th>
+      <th scope="col">Hostname</th>
+      <th scope="col">Local P.A</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for computador in computadores %}
+      <tr>
+        <!-- <th scope="row">{{computador.id}}</th> -->
+        <td>{{computador.serial}}</td>
+        <td>{{computador.patrimonio}}</td>
+        <td>{{computador.hostname}}</td>
+        <td>{{computador.descricaoPa}}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock content %}

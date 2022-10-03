@@ -2,21 +2,23 @@
     --vermelho:#e50914;
     --verde:#1fc01f;
     --laranja: rgb(223, 186, 85);
+    --black: #000000
 }
 
+.conectado, .desconectado, .atencao{
+    font-size: 2rem;
+    font-family: 'Courgette', cursive;
+}
 .conectado{
     color: var(--verde);
-    font-size: 40px;
 }
 
 .desconectado{
     color: var(--vermelho);
-    font-size: 40px;
 }
 
 .atencao{
     color: var(--laranja);
-    font-size: 40px;
 }
 
 .dashimg{
@@ -28,15 +30,40 @@
     font-size: 40px;
 }
 .dashdispositivo{
-    font-family: 'Courier New', Courier, monospace;
+    /* font-family: 'Courier New', Courier, monospace; */
+    font-family: 'Courgette', cursive;
     color: #e50914;
+    font-size: 19px;
 }
 
 .data{
     color: #1fc01f;
-    font-size: 20px;
+    font-size: 2rem;
 }
 
 .monitora{
     font-family: 'Courgette', cursive;
+}
+
+.monitoraInfo{
+    font-family: 'Courgette', cursive;
+    font-size: 18px;
+}
+
+.dashData, .dashHora {
+    font-family: 'Courgette', cursive;
+    color: var(--black);
+    font-size: 3rem;
+}
+
+.dashHora {
+    margin-left: 20px;
+}
+
+.detalhe{
+    margin-top: 19px;
+}
+
+.dataHora{
+    margin-top: 70px;
 }
