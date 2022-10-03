@@ -29,7 +29,7 @@ class Monitora:
                 'descricaoPa': computador.descricaoPa,
                 'data': computador.dataHora
             }
-            self.listaComputadores.append(desktop)
+            self.listaComputadores.append(desktop.copy())
 
     def computadoresView(self):
         '''Retorna o Status: Conectado/Desconectado/Atenção, Data e Hora dos computadores que estão alocado no site'''
@@ -47,7 +47,7 @@ class Monitora:
                 dataAtualizacao = comp['data']
                 computador['data'] = dataAtualizacao.strftime('%d/%m/%Y')
                 computador['hora'] = dataAtualizacao.strftime('%H:%M:%S')
-            elif not comp['status'] and self.calculaDiasComputadorOffiline(comp['data']) >= 2:
+            elif not comp['status'] and self.calculaDiasComputadorOffiline(comp['data']) > 2:
                 computador['desconectado'] += 1
                 dataAtualizacao = datetime
                 dataAtualizacao = comp['data']
@@ -82,7 +82,8 @@ class Monitora:
 
     def threadAtualizarStatusComputador(self) -> None:
         '''Está função faz as chamadas dos metodos parar realizar a consulta via Thread do Status dos computadores na rede e atualizar o BD com os Status recebidos'''
-        result = self.executarThread(self.consultaAtualizaStatusComputadores, self.listaComputadores)
+        result = self.executarThread(
+            self.consultaAtualizaStatusComputadores, self.listaComputadores)
         self.atualizarStatusComputador(self.listaStatusComputadores)
 
     def executarThread(self, func, lista):
@@ -114,31 +115,51 @@ class Monitora:
         fuso_horario = timezone('America/Sao_Paulo')
         data_e_hora_sao_paulo = data_e_hora_atuais.astimezone(fuso_horario)
         return data_e_hora_sao_paulo
-    
+
     def calculaDiasComputadorOffiline(self, data) -> int:
         '''Calcula e retorna a quantidade de dias que o computador está sem responder na rede'''
-        data1 = datetime.strptime(self.horaAtual().strftime("%d/%m/%Y %H:%M"), "%d/%m/%Y %H:%M")        
-        data2 =  datetime.strptime(data.strftime('%d/%m/%Y %H:%M'), '%d/%m/%Y %H:%M')
+        data1 = datetime.strptime(self.horaAtual().strftime(
+            "%d/%m/%Y %H:%M"), "%d/%m/%Y %H:%M")
+        data2 = datetime.strptime(data.strftime(
+            '%d/%m/%Y %H:%M'), '%d/%m/%Y %H:%M')
         diferenca = data1 - data2
         return diferenca.days
 
-    def computadoresAtencao(self) -> List:
+    def statusAtencao(self) -> List:
         '''Retorna os computadores que estão com Status marcado com Atenção'''
-        computadodresAtencao = {
-            'serial' : '',
-            'patrimonio' : '',
-            'hostname' : '',
-            'descricaoPa' : ''
+        atencao = {
+            'serial': '',
+            'patrimonio': '',
+            'hostname': '',
+            'descricaoPa': ''
         }
-        listaComputadores = []
+        computadores = []
         for computador in self.listaComputadores:
-            if not computador['status'] and self.calculaDiasComputadorOffiline(computador['data']) == 1:
-                computadodresAtencao['serial'] = computador['serial']
-                computadodresAtencao['patrimonio'] = computador['patrimonio']
-                computadodresAtencao['hostname'] = computador['hostname']
-                computadodresAtencao['descricaoPa'] = computador['descricaoPa']
-                listaComputadores.append(computadodresAtencao)
-        
-        return listaComputadores
+            atencao.clear()
+            if not computador['status'] and self.calculaDiasComputadorOffiline(computador['data']) <= 2:
+                atencao['serial'] = computador['serial']
+                atencao['patrimonio'] = computador['patrimonio']
+                atencao['hostname'] = computador['hostname']
+                atencao['descricaoPa'] = computador['descricaoPa']
+                computadores.append(atencao.copy())
 
-    
+        return computadores
+
+    def statusDesconectado(self) -> List:
+        '''Retorna os computadores que estão com Status marcado com Atenção'''
+        computadores = []
+        desconectado = {
+            'serial': '',
+            'patrimonio': '',
+            'hostname': '',
+            'descricaoPa': '',
+        }
+        for computador in self.listaComputadores:
+            desconectado.clear()
+            if not computador['status'] and self.calculaDiasComputadorOffiline(computador['data']) >=3:
+                desconectado['serial'] = computador['serial']
+                desconectado['patrimonio'] = computador['patrimonio']
+                desconectado['hostname'] = computador['hostname']
+                desconectado['descricaoPa'] = computador['descricaoPa']
+                computadores.append(desconectado.copy())
+        return computadores

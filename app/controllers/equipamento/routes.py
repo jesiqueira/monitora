@@ -25,7 +25,8 @@ def inventario():
                         Computador, LocalPa.id == Computador.idLocalPa).join(Computador.tipo).filter(Computador.serial.like(consult)).first_or_404()
                     inventarios.append(invent)
                     if not invent:
-                        flash('Verifique dados informados, nada foi localizado!', 'danger')
+                        flash(
+                            'Verifique dados informados, nada foi localizado!', 'danger')
                     form.consulta.data = ''
                 except Exception as e:
                     print(f'Erro! {e}')
@@ -36,7 +37,8 @@ def inventario():
                         Computador, LocalPa.id == Computador.idLocalPa).join(Computador.tipo).filter(Computador.patrimonio.like(consult)).first_or_404()
                     inventarios.append(invent)
                     if not invent:
-                        flash('Verifique dados informados, nada foi localizado!', 'danger')
+                        flash(
+                            'Verifique dados informados, nada foi localizado!', 'danger')
                         try:
                             inventarios = db.session.query(Computador.id, Computador.serial, Computador.hostname, Computador.patrimonio, LocalPa.descricaoPa, Tipo.nome).join(
                                 Computador.tipo).filter(Computador.idLocalPa == LocalPa.id).order_by(Computador.id).all()
@@ -54,7 +56,8 @@ def inventario():
                         Computador, LocalPa.id == Computador.idLocalPa).join(Computador.tipo).filter(LocalPa.descricaoPa.like(consult)).first_or_404()
                     inventarios.append(invent)
                     if not invent:
-                        flash('Verifique dados informados, nada foi localizado!', 'danger')
+                        flash(
+                            'Verifique dados informados, nada foi localizado!', 'danger')
                         try:
                             inventarios = db.session.query(Computador.id, Computador.serial, Computador.hostname, Computador.patrimonio, LocalPa.descricaoPa, Tipo.nome).join(
                                 Computador.tipo).filter(Computador.idLocalPa == LocalPa.id).order_by(Computador.id).all()
@@ -64,7 +67,7 @@ def inventario():
                         form.consulta.data = ''
                 except Exception as e:
                     print(f'Erro! {e}')
-            
+
         elif request.method == 'GET':
             try:
                 inventarios = db.session.query(Computador.id, Computador.serial, Computador.hostname, Computador.patrimonio, LocalPa.descricaoPa, Tipo.nome).join(
@@ -197,15 +200,14 @@ def criarEqupamento():
 @login_required
 def detalhe(tipo_relatorio):
     if current_user.admin and current_user.ativo:
+        monitora = Monitora()
         if tipo_relatorio == 'Conectado':
             computadores = db.session.query(Computador.id, Computador.serial, Computador.hostname, Computador.patrimonio, Status.ativo, LocalPa.descricaoPa).join(
                 Computador, Status.id == Computador.idStatus).join(LocalPa, Computador.idLocalPa == LocalPa.id).filter(Status.ativo == True).all()
         elif tipo_relatorio == 'Desconectado':
-            computadores = db.session.query(Computador.id, Computador.serial, Computador.hostname, Computador.patrimonio, Status.ativo, LocalPa.descricaoPa).join(
-                Computador, Status.id == Computador.idStatus).join(LocalPa, Computador.idLocalPa == LocalPa.id).filter(Status.ativo == False).all()
+            computadores = monitora.statusDesconectado()
         else:
-            monitora = Monitora()
-            computadores = monitora.computadoresAtencao()
+            computadores = monitora.statusAtencao()
 
         return render_template('equipamentos/detalhe.html', title='Informações - Dispositivos', legenda=f'{tipo_relatorio}', computadores=computadores)
     else:
