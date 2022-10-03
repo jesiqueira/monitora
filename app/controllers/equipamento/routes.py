@@ -17,16 +17,61 @@ def inventario():
     if current_user.admin and current_user.ativo:
         form = InventarioForm()
         if request.method == 'POST':
-            print(form.consulta.data)
-            print(form.selection.data)
-            form.consulta.data = ''
+            consult = '%'+form.consulta.data+'%'
+            if form.selection.data == 'Serial':
+                try:
+                    inventarios = []
+                    invent = db.session.query(Computador.id, Computador.serial, Computador.hostname, Computador.patrimonio, LocalPa.descricaoPa, Tipo.nome).join(
+                        Computador, LocalPa.id == Computador.idLocalPa).join(Computador.tipo).filter(Computador.serial.like(consult)).first_or_404()
+                    inventarios.append(invent)
+                    if not invent:
+                        flash('Verifique dados informados, nada foi localizado!', 'danger')
+                    form.consulta.data = ''
+                except Exception as e:
+                    print(f'Erro! {e}')
+            elif form.selection.data == 'Patrimônio':
+                try:
+                    inventarios = []
+                    invent = db.session.query(Computador.id, Computador.serial, Computador.hostname, Computador.patrimonio, LocalPa.descricaoPa, Tipo.nome).join(
+                        Computador, LocalPa.id == Computador.idLocalPa).join(Computador.tipo).filter(Computador.patrimonio.like(consult)).first_or_404()
+                    inventarios.append(invent)
+                    if not invent:
+                        flash('Verifique dados informados, nada foi localizado!', 'danger')
+                        try:
+                            inventarios = db.session.query(Computador.id, Computador.serial, Computador.hostname, Computador.patrimonio, LocalPa.descricaoPa, Tipo.nome).join(
+                                Computador.tipo).filter(Computador.idLocalPa == LocalPa.id).order_by(Computador.id).all()
+                        except Exception as e:
+                            # print(f"Erro! {e}")
+                            pass
+                        form.consulta.data = ''
+
+                except Exception as e:
+                    print(f'Erro! {e}')
+            elif form.selection.data == 'Local':
+                try:
+                    inventarios = []
+                    invent = db.session.query(Computador.id, Computador.serial, Computador.hostname, Computador.patrimonio, LocalPa.descricaoPa, Tipo.nome).join(
+                        Computador, LocalPa.id == Computador.idLocalPa).join(Computador.tipo).filter(LocalPa.descricaoPa.like(consult)).first_or_404()
+                    inventarios.append(invent)
+                    if not invent:
+                        flash('Verifique dados informados, nada foi localizado!', 'danger')
+                        try:
+                            inventarios = db.session.query(Computador.id, Computador.serial, Computador.hostname, Computador.patrimonio, LocalPa.descricaoPa, Tipo.nome).join(
+                                Computador.tipo).filter(Computador.idLocalPa == LocalPa.id).order_by(Computador.id).all()
+                        except Exception as e:
+                            # print(f"Erro! {e}")
+                            pass
+                        form.consulta.data = ''
+                except Exception as e:
+                    print(f'Erro! {e}')
             
-        try:
-            inventarios = db.session.query(Computador.id, Computador.serial, Computador.hostname, Computador.patrimonio, LocalPa.descricaoPa, Tipo.nome).join(
-                Computador.tipo).filter(Computador.idLocalPa == LocalPa.id).order_by(Computador.id).all()
-        except Exception as e:
-            # print(f"Erro! {e}")
-            pass
+        elif request.method == 'GET':
+            try:
+                inventarios = db.session.query(Computador.id, Computador.serial, Computador.hostname, Computador.patrimonio, LocalPa.descricaoPa, Tipo.nome).join(
+                    Computador.tipo).filter(Computador.idLocalPa == LocalPa.id).order_by(Computador.id).all()
+            except Exception as e:
+                # print(f"Erro! {e}")
+                pass
         return render_template('equipamentos/inventario.html', title='Inventário', equipamentos=inventarios, form=form)
     else:
         abort(403)
