@@ -51,14 +51,14 @@ class Monitora:
                 computador['desconectado'] += 1
                 dataAtualizacao = datetime
                 dataAtualizacao = comp['data']
-                computador['data'] = dataAtualizacao.strftime('%d/%m/%Y')
-                computador['hora'] = dataAtualizacao.strftime('%H:%M:%S')
+                # computador['data'] = dataAtualizacao.strftime('%d/%m/%Y')
+                # computador['hora'] = dataAtualizacao.strftime('%H:%M:%S')
             else:
                 computador['atencao'] += 1
                 dataAtualizacao = datetime
                 dataAtualizacao = comp['data']
-                computador['data'] = dataAtualizacao.strftime('%d/%m/%Y')
-                computador['hora'] = dataAtualizacao.strftime('%H:%M:%S')
+                # computador['data'] = dataAtualizacao.strftime('%d/%m/%Y')
+                # computador['hora'] = dataAtualizacao.strftime('%H:%M:%S')
 
         return computador
 

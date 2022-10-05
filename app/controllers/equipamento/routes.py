@@ -191,10 +191,13 @@ def criarEqupamento():
         abort(403)
 
 
-# @disposito.route('/inventario/<int:equipamento_id>/editar')
-# @login_required
-# def editar(equipamento_id):
-#     equipamento =
+@equipamento.route('/inventario/<int:idDesktop>/delete')
+@login_required
+def inventarioDelete(idDesktop):
+    if current_user.admin and current_user.ativo:
+        pass
+    else:
+        abort(403)
 
 @equipamento.route('/detalhe/<tipo_relatorio>', methods=['GET'])
 @login_required
@@ -208,7 +211,6 @@ def detalhe(tipo_relatorio):
             computadores = monitora.statusDesconectado()
         else:
             computadores = monitora.statusAtencao()
-
         return render_template('equipamentos/detalhe.html', title='Informações - Dispositivos', legenda=f'{tipo_relatorio}', computadores=computadores)
     else:
         abort(403)
