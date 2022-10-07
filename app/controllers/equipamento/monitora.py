@@ -1,5 +1,5 @@
 from typing import List
-from app.models.bdMonitora import Computador, LocalPa, Status
+from app.models.bdMonitora import Computadores, PontoAtendimentos, Status
 from app import db
 import subprocess
 import concurrent.futures
@@ -16,8 +16,8 @@ class Monitora:
 
     def consultaComputador(self):
         '''Realiza a consulta de todos os computadores cadastrado no BD que estão instalados em um site e salva o resultado em uma lista para uso posterior.'''
-        computadores = db.session.query(Computador.id, Computador.hostname, Computador.serial, Computador.patrimonio, Status.id.label('idStatus'), Status.ativo,
-                                        Status.dataHora, LocalPa.descricaoPa).join(Computador, LocalPa.id == Computador.idLocalPa).join(Status, Status.id == Computador.idStatus).all()
+        computadores = db.session.query(Computadores.id, Computadores.hostname, Computadores.serial, Computadores.patrimonio, Status.id.label('idStatus'), Status.ativo,
+                                        Status.dataHora, PontoAtendimentos.descricao).join(Computadores, PontoAtendimentos.id == Computadores.idPontoAtendimentos).join(Status, Status.id == Computadores.idStatus).all()
         for computador in computadores:
             desktop = {
                 'id': computador.id,

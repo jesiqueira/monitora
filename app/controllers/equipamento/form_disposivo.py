@@ -2,7 +2,7 @@ from select import select
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField, HiddenField
 from wtforms.validators import DataRequired, Length, ValidationError
-from app.models.bdMonitora import LocalPa, Computador, Tipo
+from app.models.bdMonitora import PontoAtendimentos, DispositivosEquipamentos, Tipos
 from app import db
 
 
@@ -22,33 +22,33 @@ class InventariosNovoForm(FlaskForm):
     submit = SubmitField('Cadastrar')
 
     def validate_serial(self, serial):
-        inventario = Computador.query.filter_by(serial=serial.data).first()
+        inventario = DispositivosEquipamentos.query.filter_by(serial=serial.data).first()
         if inventario:
             raise ValidationError('Serial já cadastrado no sistema!')
 
     def validate_patrimonio(self, patrimonio):
-        inventario = Computador.query.filter_by(
+        inventario = DispositivosEquipamentos.query.filter_by(
             patrimonio=patrimonio.data).first()
         if inventario:
             raise ValidationError('Patrimônio já cadastrado no sistema!')
 
     def validate_hostname(self, hostname):
-        inventario = Computador.query.filter_by(
+        inventario = DispositivosEquipamentos.query.filter_by(
             hostname=hostname.data).first()
         if inventario:
             raise ValidationError('Hostname já cadastrado no sistema!')
 
     def validate_selection(self, selection):
-        inventario = db.session.query(Computador).join(LocalPa, Computador.idLocalPa == LocalPa.id).filter(
-            LocalPa.descricaoPa == selection.data).first()
+        inventario = db.session.query(DispositivosEquipamentos).join(PontoAtendimentos, DispositivosEquipamentos.idLocalPa == PontoAtendimentos.id).filter(
+            PontoAtendimentos.descricaoPa == selection.data).first()
         if inventario:
             raise ValidationError(
                 'Local já tem equipamento. Atualize ou remova equipamento anterior!')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        locais = db.session.query(LocalPa.descricaoPa).all()
-        tipoDispositivos = db.session.query(Tipo.nome).all()
+        locais = db.session.query(PontoAtendimentos.descricaoPa).all()
+        tipoDispositivos = db.session.query(Tipos.nome).all()
         listaLocal = []
         listatipoDispositivo = []
         for local in locais:
@@ -74,7 +74,7 @@ class UpdateInventariosForm(FlaskForm):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        tipoDispositivos = db.session.query(Tipo.nome).all()
+        tipoDispositivos = db.session.query(Tipos.nome).all()
         listatipoDispositivo = []
 
         for tipo in tipoDispositivos:
@@ -88,6 +88,6 @@ class TipoInventarioForm(FlaskForm):
     submit = SubmitField('Cadastrar')
 
     def validate_nome(self, nome):
-        tipoInventario = Tipo.query.filter_by(nome=nome.data).first()
+        tipoInventario = Tipos.query.filter_by(nome=nome.data).first()
         if tipoInventario:
             raise ValidationError('Esse equipamento já está cadastrado!')

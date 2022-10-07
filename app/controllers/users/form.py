@@ -1,7 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, HiddenField
 from wtforms.validators import DataRequired, Length, EqualTo, Email, ValidationError
-from app.models.bdMonitora import Usuario, Site
+from app.models.bdMonitora import Users, Sites
 from app import db
 
 
@@ -24,35 +24,38 @@ class CreateUserForm(FlaskForm):
     ativo = BooleanField('Ativo')
     password = PasswordField('Senha', validators=[DataRequired(), Length(
         min=6, max=16, message='Se atentar ao criterio, senha deve ter no mínimo 6 e no máximo 16 caracter!')])
-    confiPassword = PasswordField('Confirme a Senha', validators=[DataRequired(), EqualTo('password', message="As senhas não são iguais.")])
+    confiPassword = PasswordField('Confirme a Senha', validators=[
+                                  DataRequired(), EqualTo('password', message="As senhas não são iguais.")])
     siteSelect = SelectField('Site', choices=[])
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        sites = db.session.query(Site.nome).all()
+        sites = db.session.query(Sites.nome).all()
         listaSite = []
         for site in sites:
             listaSite.append(site[0])
-        self.siteSelect.choices=listaSite
-    
+        self.siteSelect.choices = listaSite
+
     submit = SubmitField('Cadastrar')
 
     def validate_nome(self, nome):
-        user = Usuario.query.filter_by(nome=nome.data).first()
+        user = Users.query.filter_by(nome=nome.data).first()
         if user:
             raise ValidationError(
                 'Nome já Cadastrado, escolha nome diferente!')
 
     def validate_login(self, login):
-        user = Usuario.query.filter_by(login=login.data).first()
+        user = Users.query.filter_by(login=login.data).first()
         if user:
             raise ValidationError(
                 'Login já Cadastrado, escolha login diferente!')
 
     def validate_email(self, email):
-        user = Usuario.query.filter_by(email=email.data).first()
+        user = Users.query.filter_by(email=email.data).first()
         if user:
             raise ValidationError(
                 'Email já Cadastrado, escolha email diferente!')
+
 
 class UpdateUserForm(FlaskForm):
     nome = StringField('Nome',  validators=[DataRequired(), Length(
@@ -64,20 +67,23 @@ class UpdateUserForm(FlaskForm):
     admin = BooleanField('Administrador')
     ativo = BooleanField('Ativo')
     siteSelect = SelectField('Site', choices=[])
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        sites = db.session.query(Site.nome).all()
+        sites = db.session.query(Sites.nome).all()
         listaSite = []
         for site in sites:
             listaSite.append(site[0])
-        self.siteSelect.choices=listaSite
-    
+        self.siteSelect.choices = listaSite
+
     submit = SubmitField('Atualizar')
+
 
 class UpdatePassWordUserForm(FlaskForm):
     id_user = HiddenField()
     password = PasswordField('Senha', validators=[DataRequired(), Length(
         min=6, max=16, message='Se atentar ao criterio, senha deve ter no mínimo 6 e no máximo 16 caracter!')])
-    confiPassword = PasswordField('Confirme a Senha', validators=[DataRequired(), EqualTo('password', message="As senhas não são iguais.")])
+    confiPassword = PasswordField('Confirme a Senha', validators=[
+                                  DataRequired(), EqualTo('password', message="As senhas não são iguais.")])
 
     submit = SubmitField('Atualizar')

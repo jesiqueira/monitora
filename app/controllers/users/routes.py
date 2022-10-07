@@ -1,7 +1,8 @@
 from flask import render_template, flash, redirect, url_for, Blueprint, request, abort
-from app.controllers.users.form import (LoginForm, CreateUserForm, UpdateUserForm, UpdatePassWordUserForm)
+from app.controllers.users.form import (
+    LoginForm, CreateUserForm, UpdateUserForm, UpdatePassWordUserForm)
 from app import db, bcrypt
-from app.models.bdMonitora import (Usuario, Endereco, Site)
+from app.models.bdMonitora import (Users, Enderecos, Sites)
 from flask_login import login_user, current_user, logout_user, login_required
 
 
@@ -14,7 +15,7 @@ def login():
         return redirect(url_for('main.home'))
     form = LoginForm()
     try:
-        user = Usuario.query.filter_by(login=form.login.data).first()
+        user = Users.query.filter_by(login=form.login.data).first()
         if form.validate_on_submit():
             if user and bcrypt.check_password_hash(user.senha, form.password.data) and user.ativo:
                 login_user(user, remember=form.remember.data)
@@ -28,7 +29,7 @@ def login():
     except Exception as e:
         # print(f'Erro que vou ver qual é: {e}')
         abort(403)
-    
+
     return render_template('users/login.html', title='Login', form=form)
 
 
@@ -47,16 +48,16 @@ def createAdmin():
     hashed_password = bcrypt.generate_password_hash(
         '#mapfre@1234#').decode('utf-8')
 
-    admin = Usuario.query.all()
+    admin = Users.query.all()
 
     if len(admin) == 0:
-        endereco = Endereco()
+        endereco = Enderecos()
         db.session.add(endereco)
 
-        site = Site(idEndereco=1)
+        site = Sites(idEndereco=1)
         db.session.add(site)
 
-        user = Usuario('Administrador', 'Admin', hashed_password,
+        user = Users('Administrador', 'Admin', hashed_password,
                        'Administrador@email.com.br', True, True, 1)
         db.session.add(user)
         db.session.commit()
@@ -66,15 +67,18 @@ def createAdmin():
         flash('Login Administrador já existe!', 'danger')
         return redirect(url_for('main.home'))
 
+
 @user.route('/usuarios')
 @login_required
 def lista_usuario():
     if current_user.admin and current_user.ativo:
-        users = db.session.query(Usuario.id, Usuario.nome.label('userNome'), Usuario.login, Usuario.email, Site.nome.label('siteNome')).join(Usuario, Site.id == Usuario.idSite).all()
+        users = db.session.query(Users.id, Users.nome.label('userNome'), Users.login, Users.email, Sites.nome.label(
+            'siteNome')).join(Users, Sites.id == Users.idSite).all()
         # print(users[1]['siteNome'])
         return render_template('users/usuario.html', title='Usuários', usuarios=users)
     else:
         abort(403)
+
 
 @user.route('/usuario/novo',  methods=['GET', 'POST'])
 @login_required
@@ -82,28 +86,33 @@ def novo_usuario():
     if current_user.admin and current_user.ativo:
         form = CreateUserForm()
         if form.validate_on_submit():
-            hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
-            site = Site.query.filter_by(nome=form.siteSelect.data).first_or_404()
+            hashed_password = bcrypt.generate_password_hash(
+                form.password.data).decode('utf-8')
+            site = Sites.query.filter_by(
+                nome=form.siteSelect.data).first_or_404()
             if site:
-                user = Usuario(nome=form.nome.data, login=form.login.data, senha=hashed_password, email=form.email.data, admin=form.admin.data, ativo=form.ativo.data ,idSite=site.id)
+                user = Users(nome=form.nome.data, login=form.login.data, senha=hashed_password,
+                               email=form.email.data, admin=form.admin.data, ativo=form.ativo.data, idSite=site.id)
                 db.session.add(user)
                 db.session.commit()
-                flash(f'Conta criada com sucesso para: {form.nome.data}!', 'success')
+                flash(
+                    f'Conta criada com sucesso para: {form.nome.data}!', 'success')
             return redirect(url_for('user.lista_usuario'))
-        
+
         return render_template('users/criar_usuario.html', title='Novo usuário', form=form)
     else:
         abort(403)
+
 
 @user.route('/usuario/<int:id_user>/update',  methods=['GET', 'POST'])
 @login_required
 def update_usuario(id_user):
     if current_user.admin and current_user.ativo:
         try:
-            user = Usuario.query.get_or_404(id_user)
+            user = Users.query.get_or_404(id_user)
         except Exception as e:
             # print(f'Erro ao consultar usuário {e}')
-            abort(404)        
+            abort(404)
         form = UpdateUserForm()
         if form.validate_on_submit():
             user.userNome = form.nome.data
@@ -124,6 +133,7 @@ def update_usuario(id_user):
     else:
         abort(403)
 
+
 @user.route('/atualizarSenha',  methods=['POST'])
 @login_required
 def updatePassword():
@@ -135,17 +145,19 @@ def updatePassword():
     else:
         abort(403)
 
+
 @user.route('/atualizaSenhaUsuario',  methods=['POST'])
 @login_required
 def updatePassword_usuario():
     if current_user.admin and current_user.ativo:
         form = UpdatePassWordUserForm()
         try:
-            user = Usuario.query.get_or_404(form.id_user.data)
+            user = Users.query.get_or_404(form.id_user.data)
         except Exception as e:
-            abort(404)        
+            abort(404)
         if form.validate_on_submit():
-            user.senha = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
+            user.senha = bcrypt.generate_password_hash(
+                form.password.data).decode('utf-8')
             db.session.commit()
             flash('Senha atualizados com sucesso', 'success')
             return redirect(url_for('user.lista_usuario'))
