@@ -98,8 +98,6 @@ tipoComputador = db.Table(
     db.Column('idComputador', db.Integer, db.ForeignKey('Computador.id'))
 )
 
-
-
 class Funcionario(db.Model):
     __tablename__ = 'Funcionario'
     id = db.Column(db.Integer, primary_key=True)
@@ -146,11 +144,9 @@ class Emprestimo(db.Model):
     dataEmprestimo = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     dataDevolucao = db.Column(db.DateTime, default=datetime.utcnow)
     status = db.Column(db.Boolean, nullable=False, default=False)
-    idFuncionario = db.Column(db.Integer, db.ForeignKey(
-        'Funcionario.id'), nullable=False)
+    idFuncionario = db.Column(db.Integer, db.ForeignKey('Funcionario.id'), nullable=False)
     idSite = db.Column(db.Integer, db.ForeignKey('Site.id'), nullable=False)
-    computador = db.relationship(
-        'Computador', secondary=emprestimoComputador, backref='emprestimo')
+    computador = db.relationship('Computador', secondary=emprestimoComputador, backref='emprestimo')
 
     def __init__(self, dataEmprestimo=datetime.utcnow, dataDevolucao=datetime.utcnow, status=0, idFuncionario=0, idSite=0) -> None:
         self.dataEmprestimo = dataEmprestimo

@@ -2,7 +2,7 @@ from flask import render_template, flash, redirect, url_for, Blueprint, request,
 from app.controllers.users.form import (
     LoginForm, CreateUserForm, UpdateUserForm, UpdatePassWordUserForm)
 from app import db, bcrypt
-from app.models.bdMonitora import (Users, Enderecos, Sites)
+from app.models.bdMonitora import (Permissoes, Users, Enderecos, Sites)
 from flask_login import login_user, current_user, logout_user, login_required
 
 
@@ -45,22 +45,61 @@ def createAdmin():
     if current_user.is_authenticated:
         return redirect(url_for('main.home'))
 
-    hashed_password = bcrypt.generate_password_hash(
-        '#mapfre@1234#').decode('utf-8')
+    hashed_password = bcrypt.generate_password_hash('#mapfre@1234#').decode('utf-8')
 
-    admin = Users.query.all()
+    users = Users.query.all()
 
-    if len(admin) == 0:
-        endereco = Enderecos()
-        db.session.add(endereco)
+    if not users:
+        try:
+            endereco = Enderecos(rua='Coronel Jose Augusto de Oliveira Salles', cidade='São Carlos - SP', cep=13570820)
+            db.session.add(endereco)
+            db.session.commit()
+        except Exception as e:
+            db.session.flush()
+            db.session.rollback()
+            # print(f'Erro: {e}')
 
-        site = Sites(idEndereco=1)
-        db.session.add(site)
+        try:
+            site = Sites(idEndereco=1)
+            db.session.add(site)
+            db.session.commit()
+        except Exception as e:
+            db.session.flush()
+            db.session.rollback()
+            # print(f'Erro: {e}')
 
-        user = Users('Administrador', 'Admin', hashed_password,
-                       'Administrador@email.com.br', True, True, 1)
-        db.session.add(user)
-        db.session.commit()
+        try:
+            user = Users(nome='Administrador', login='admin', senha=hashed_password, email='admin@bbmapfre.com.br', ativo=True, idSite=site.id)
+            db.session.add(user)
+            db.session.commit()
+        except Exception as e:
+            db.session.flush()
+            db.session.rollback()
+            # print(f'Erro: {e}')
+        
+        try:
+            p = Permissoes.query.all()
+            if not p:
+                listaPermissoes = ['r', 'w']
+                for perm in listaPermissoes:
+                    permissao = Permissoes(permissao=perm)
+                    db.session.add(permissao)
+                    db.session.commit()
+        except Exception as e:
+            db.session.flush()
+            db.session.rollback()
+            print(f"Erro: {e}") 
+
+        try:
+            permissoes = Permissoes.query.get_or_404(2)
+            user = db.session.query(Users).filter(Users.login=='admin').first_or_404()
+            user.permissoes = [permissoes]
+            db.session.commit()
+        except Exception as e:
+            db.session.flush()
+            db.session.rollback()
+            # print(f'Erro: {e}')
+
         flash('Login Administrador criado com sucesso!', 'success')
         return redirect(url_for('main.home'))
     else:

@@ -1,5 +1,5 @@
 from typing import List
-from app.models.bdMonitora import Computadores, PontoAtendimentos, Status
+from app.models.bdMonitora import Computadores, PontoAtendimentos, Status, DispositivosEquipamentos
 from app import db
 import subprocess
 import concurrent.futures
@@ -16,8 +16,10 @@ class Monitora:
 
     def consultaComputador(self):
         '''Realiza a consulta de todos os computadores cadastrado no BD que estão instalados em um site e salva o resultado em uma lista para uso posterior.'''
-        computadores = db.session.query(Computadores.id, Computadores.hostname, Computadores.serial, Computadores.patrimonio, Status.id.label('idStatus'), Status.ativo,
-                                        Status.dataHora, PontoAtendimentos.descricao).join(Computadores, PontoAtendimentos.id == Computadores.idPontoAtendimentos).join(Status, Status.id == Computadores.idStatus).all()
+        # computadores = db.session.query(Computadores.id, Computadores.hostname, Computadores.serial, Computadores.patrimonio, Status.id.label('idStatus'), Status.ativo,
+        #                                 Status.dataHora, PontoAtendimentos.descricao).join(Computadores, PontoAtendimentos.id == Computadores.idPontoAtendimentos).join(Status, Status.id == Computadores.idStatus).all()
+        computadores = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.hostname, DispositivosEquipamentos.serial, DispositivosEquipamentos.patrimonio, Status.id.label('idStatus'), Status.ativo, Status.dataHora, PontoAtendimentos.descricao).join(
+            Computadores, PontoAtendimentos.id == Computadores.idPontoAtendimento).join(DispositivosEquipamentos, Computadores.idDispositosEquipamento == DispositivosEquipamentos.id).join(Status, Computadores.idStatus == Status.id).all()
         for computador in computadores:
             desktop = {
                 'id': computador.id,
@@ -95,8 +97,8 @@ class Monitora:
         '''Atualiza o status dos computadores no BD ao receber uma lista com Status da consulta realizada por PIP nos computadores da rede'''
         try:
             for computador in listaDeComputadores:
-                status = db.session.query(Status).join(Computador, Status.id == Computador.idStatus).filter(
-                    Computador.id == computador['idComputador'] and Status.id == computador['idStatus']).first_or_404()
+                status = db.session.query(Status).join(Computadores, Status.id == Computadores.idStatus).filter(
+                    Computadores.id == computador['idComputador'] and Status.id == computador['idStatus']).first_or_404()
                 if computador['statusComputador']:
                     status.ativo = computador['statusComputador']
                     status.dataHora = self.horaAtual()

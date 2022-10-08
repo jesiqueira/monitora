@@ -1,3 +1,9 @@
 -- SELECT * from status
 -- SELECT * from Computador
+-- SELECT * FROM Users
+-- SELECT * FROM Permissoes
+-- SELECT * from userPermissoes
+
 -- SELECT Computador.serial, Computador.hostname, status.ativo, status.dataHora, LocalPa.descricaoPa FROM Computador JOIN LocalPa on Computador.idLocalPa = LocalPa.id JOIN status on status.id = Computador.idStatus
+
+SELECT Users.nome, Permissoes.permissao FROM Users JOIN userPermissoes on Users.id = userPermissoes.idUser JOIN Permissoes on Permissoes.id = userPermissoes.idPermissoes
