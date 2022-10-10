@@ -1,7 +1,8 @@
+from tkinter.tix import Tree
 from flask_wtf import FlaskForm
-from wtforms import StringField, SubmitField, SelectField, HiddenField
+from wtforms import StringField, SubmitField, SelectField
 from wtforms.validators import DataRequired, Length, ValidationError
-from app.models.bdMonitora import Sites, Enderecos, PontoAtendimentos
+from app.models.bdMonitora import Sites, Enderecos, PontoAtendimentos, Areas
 from app import db
 
 
@@ -60,7 +61,8 @@ class LocalAtendimento(FlaskForm):
     submit = SubmitField('Cadastrar')
 
     def validate_nome(self, localPa):
-        local = PontoAtendimentos.query.filter_by(descricao=localPa.data).first()
+        local = PontoAtendimentos.query.filter_by(
+            descricao=localPa.data).first()
         if local:
             raise ValidationError(
                 'Ponto de Atendimento já está cadastrado no sistema!')
@@ -80,3 +82,31 @@ class UpdateLocal(FlaskForm):
             self.localSelect.choices = listaSite
 
     submit = SubmitField('Update')
+
+
+class AreaForm(FlaskForm):
+    area = StringField('Area', validators=[DataRequired(), Length(
+        min=5, max=30, message='Campo obrigatório, mínimo 5, máximo 30 caracteres!')])
+    localSelect = SelectField('Site', choices=[])
+
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        sites = db.session.query(Sites.nome).all()
+        listaSite = []
+        for site in sites:
+            listaSite.append(site[0])
+            self.localSelect.choices = listaSite
+
+    submit = SubmitField('Cadastrar')
+
+    # def validate_localSelect(self, localSelect):
+    #     # area = Areas.query.filter_by(nome=area.data).filter().first()
+    #     print('Dentro do FORM AreaForm')
+    #     print(f'Area: {self.area.data}, Site: {localSelect.data}')
+    #     try:
+    #         area = db.session.query(Areas).join(Areas.site).filter(Areas.nome == self.area.data and Sites.nome == localSelect.data).first()
+    #     except Exception as e:
+    #         print(f'Error: {e}')
+    #     print(f'Local: {area}')
+    #     if area:
+    #         raise ValidationError('Área já está cadastrado no sistema!')

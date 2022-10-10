@@ -21,6 +21,18 @@ userPermissoes = db.Table(
     db.Column('idPermissoes', db.Integer, db.ForeignKey('Permissoes.id'))
 )
 
+tipoEquipamentoSites = db.Table(
+    'tipoEquipamentoSites',
+    db.Column('idSites', db.Integer, db.ForeignKey('Sites.id')),
+    db.Column('idTipos', db.Integer, db.ForeignKey('TipoEquipamentos.id'))
+)
+
+areaSites = db.Table(
+    'areaSites',
+    db.Column('idSites', db.Integer, db.ForeignKey('Sites.id')),
+    db.Column('idAreas', db.Integer, db.ForeignKey('Areas.id'))
+)
+
 
 class Enderecos(db.Model):
     __tablename__ = 'Enderecos'
@@ -50,11 +62,8 @@ class Sites(db.Model):
         'Enderecos.id'), nullable=False)
 
     users = db.relationship('Users', backref='sites', lazy=True)
-    pontoAtentimento = db.relationship(
-        'PontoAtendimentos', backref='sites', lazy=True)
-    localizadoEm = db.relationship('LocadoEm', backref='sites', lazy=True)
-    dispositivoEquipamento = db.relationship(
-        'DispositivosEquipamentos', backref='sites', lazy=True)
+    pontoAtentimento = db.relationship('PontoAtendimentos', backref='sites', lazy=True)
+    dispositivoEquipamento = db.relationship('DispositivosEquipamentos', backref='sites', lazy=True)
     emprestimos = db.relationship('Emprestimos', backref='sites', lazy=True)
 
     def __init__(self, nome='', idEndereco=0) -> None:
@@ -62,7 +71,7 @@ class Sites(db.Model):
         self.idEndereco = idEndereco
 
     def __repr__(self) -> str:
-        return f"Sites: {self.nome}"
+        return f"Sites({self.nome})"
 
 
 class Permissoes(db.Model):
@@ -77,7 +86,7 @@ class Permissoes(db.Model):
         return f"Permissoes('{self.permissao}')"
 
 
-class Users(db.Model):
+class Users(db.Model, UserMixin):
     __tablename__ = 'Users'
     id = db.Column(db.Integer, primary_key=True)
     nome = db.Column(db.String(40), unique=True, nullable=False)
@@ -137,36 +146,35 @@ class PontoAtendimentos(db.Model):
         return f"PontoAtendimentos(Descricao: {self.descricao})"
 
 
-class LocadoEm(db.Model):
-    __tablename__ = 'LocadoEm'
+class Areas(db.Model):
+    __tablename__ = 'Areas'
     id = db.Column(db.Integer, primary_key=True)
-    nome = db.Column(db.String(40), unique=True, nullable=False)
-    idSite = db.Column(db.Integer, db.ForeignKey('Sites.id'), nullable=False)
+    nome = db.Column(db.String(40), nullable=False)
 
-    dispositivoEquipamento = db.relationship(
-        'DispositivosEquipamentos', backref='locadoem', lazy=True)
+    dispositivoEquipamento = db.relationship('DispositivosEquipamentos', backref='areas', lazy=True)
+    site = db.relationship('Sites', secondary=areaSites, backref='areas')
 
-    def __init__(self, nome='', idSite=0) -> None:
+    def __init__(self, nome='', site=[]) -> None:
         self.nome = nome
-        self.idSite = idSite
+        self.site = site
 
     def __repr__(self) -> str:
-        return f"LocadoEm: {self.nome}"
+        return f"Area({self.nome})"
 
 
-class Tipos(db.Model):
-    __tablename__ = 'Tipos'
+class TipoEquipamentos(db.Model):
+    __tablename__ = 'TipoEquipamentos'
     id = db.Column(db.Integer, primary_key=True)
-    nome = db.Column(db.String(40), unique=True, nullable=False)
+    nome = db.Column(db.String(40), nullable=False)
 
-    dispositivoEquipamento = db.relationship(
-        'DispositivosEquipamentos', backref='tipos', lazy=True)
+    dispositivoEquipamento = db.relationship('DispositivosEquipamentos', backref='tipos', lazy=True)
+    site = db.relationship('Sites', secondary=tipoEquipamentoSites, backref='tipoEquipamentos')
 
     def __init__(self, nome='') -> None:
         self.nome = nome
 
     def __repr__(self) -> str:
-        return f"Tipos: {self.nome}"
+        return f"Tipos({self.nome})"
 
 
 class DispositivosEquipamentos(db.Model):
@@ -175,10 +183,9 @@ class DispositivosEquipamentos(db.Model):
     serial = db.Column(db.String(40), unique=True)
     hostname = db.Column(db.String(40), unique=True)
     patrimonio = db.Column(db.String(40), unique=True)
-    idLocadoEm = db.Column(db.Integer, db.ForeignKey(
-        'LocadoEm.id'), nullable=False)
+    idArea = db.Column(db.Integer, db.ForeignKey('Areas.id'), nullable=False)
     idSite = db.Column(db.Integer, db.ForeignKey('Sites.id'), nullable=False)
-    idTipo = db.Column(db.Integer, db.ForeignKey('Tipos.id'), nullable=False)
+    idTipo = db.Column(db.Integer, db.ForeignKey('TipoEquipamentos.id'), nullable=False)
 
     computador = db.relationship(
         'Computadores', backref='dispositivosEquipamentos', lazy=True)
@@ -187,11 +194,11 @@ class DispositivosEquipamentos(db.Model):
     relatorios = db.relationship(
         'Relatorios', backref='dispositivosEquipamentos', lazy=True)
 
-    def __init__(self, serial='', hostname='', patrimonio='', idLocadoEm=0, idSite=0, idTipo=0) -> None:
+    def __init__(self, serial='', hostname='', patrimonio='', idArea=0, idSite=0, idTipo=0) -> None:
         self.serial = serial
         self.hostname = hostname
         self.patrimonio = patrimonio
-        self.idLocadoEm = idLocadoEm
+        self.idArea = idArea
         self.idSite = idSite
         self.idTipo = idTipo
 

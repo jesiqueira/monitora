@@ -18,20 +18,23 @@ class Monitora:
         '''Realiza a consulta de todos os computadores cadastrado no BD que estão instalados em um site e salva o resultado em uma lista para uso posterior.'''
         # computadores = db.session.query(Computadores.id, Computadores.hostname, Computadores.serial, Computadores.patrimonio, Status.id.label('idStatus'), Status.ativo,
         #                                 Status.dataHora, PontoAtendimentos.descricao).join(Computadores, PontoAtendimentos.id == Computadores.idPontoAtendimentos).join(Status, Status.id == Computadores.idStatus).all()
-        computadores = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.hostname, DispositivosEquipamentos.serial, DispositivosEquipamentos.patrimonio, Status.id.label('idStatus'), Status.ativo, Status.dataHora, PontoAtendimentos.descricao).join(
-            Computadores, PontoAtendimentos.id == Computadores.idPontoAtendimento).join(DispositivosEquipamentos, Computadores.idDispositosEquipamento == DispositivosEquipamentos.id).join(Status, Computadores.idStatus == Status.id).all()
-        for computador in computadores:
-            desktop = {
-                'id': computador.id,
-                'hostname': computador.hostname,
-                'serial': computador.serial,
-                'patrimonio': computador.patrimonio,
-                'idStatus': computador.idStatus,
-                'status': computador.ativo,
-                'descricaoPa': computador.descricaoPa,
-                'data': computador.dataHora
-            }
-            self.listaComputadores.append(desktop.copy())
+        try:
+            computadores = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.hostname, DispositivosEquipamentos.serial, DispositivosEquipamentos.patrimonio, Status.id.label('idStatus'), Status.ativo, Status.dataHora, PontoAtendimentos.descricao).join(
+                Computadores, PontoAtendimentos.id == Computadores.idPontoAtendimento).join(DispositivosEquipamentos, Computadores.idDispositosEquipamento == DispositivosEquipamentos.id).join(Status, Computadores.idStatus == Status.id).all()
+            for computador in computadores:
+                desktop = {
+                    'id': computador.id,
+                    'hostname': computador.hostname,
+                    'serial': computador.serial,
+                    'patrimonio': computador.patrimonio,
+                    'idStatus': computador.idStatus,
+                    'status': computador.ativo,
+                    'descricaoPa': computador.descricaoPa,
+                    'data': computador.dataHora
+                }
+                self.listaComputadores.append(desktop.copy())
+        except Exception as e:
+            print(f'Erro: {e}')
 
     def computadoresView(self):
         '''Retorna o Status: Conectado/Desconectado/Atenção, Data e Hora dos computadores que estão alocado no site'''

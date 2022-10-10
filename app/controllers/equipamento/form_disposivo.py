@@ -2,7 +2,7 @@ from select import select
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField, HiddenField
 from wtforms.validators import DataRequired, Length, ValidationError
-from app.models.bdMonitora import PontoAtendimentos, DispositivosEquipamentos, Tipos
+from app.models.bdMonitora import PontoAtendimentos, DispositivosEquipamentos, TipoEquipamentos
 from app import db
 
 
@@ -22,7 +22,8 @@ class InventariosNovoForm(FlaskForm):
     submit = SubmitField('Cadastrar')
 
     def validate_serial(self, serial):
-        inventario = DispositivosEquipamentos.query.filter_by(serial=serial.data).first()
+        inventario = DispositivosEquipamentos.query.filter_by(
+            serial=serial.data).first()
         if inventario:
             raise ValidationError('Serial já cadastrado no sistema!')
 
@@ -40,15 +41,15 @@ class InventariosNovoForm(FlaskForm):
 
     def validate_selection(self, selection):
         inventario = db.session.query(DispositivosEquipamentos).join(PontoAtendimentos, DispositivosEquipamentos.idLocalPa == PontoAtendimentos.id).filter(
-            PontoAtendimentos.descricaoPa == selection.data).first()
+            PontoAtendimentos.descricao == selection.data).first()
         if inventario:
             raise ValidationError(
                 'Local já tem equipamento. Atualize ou remova equipamento anterior!')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        locais = db.session.query(PontoAtendimentos.descricaoPa).all()
-        tipoDispositivos = db.session.query(Tipos.nome).all()
+        locais = db.session.query(PontoAtendimentos.descricao).all()
+        tipoDispositivos = db.session.query(TipoEquipamentos.nome).all()
         listaLocal = []
         listatipoDispositivo = []
         for local in locais:
@@ -74,7 +75,7 @@ class UpdateInventariosForm(FlaskForm):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        tipoDispositivos = db.session.query(Tipos.nome).all()
+        tipoDispositivos = db.session.query(TipoEquipamentos.nome).all()
         listatipoDispositivo = []
 
         for tipo in tipoDispositivos:
@@ -88,6 +89,7 @@ class TipoInventarioForm(FlaskForm):
     submit = SubmitField('Cadastrar')
 
     def validate_nome(self, nome):
-        tipoInventario = Tipos.query.filter_by(nome=nome.data).first()
+        tipoInventario = TipoEquipamentos.query.filter_by(
+            nome=nome.data).first()
         if tipoInventario:
             raise ValidationError('Esse equipamento já está cadastrado!')

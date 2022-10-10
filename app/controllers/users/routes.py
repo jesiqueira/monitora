@@ -15,19 +15,18 @@ def login():
         return redirect(url_for('main.home'))
     form = LoginForm()
     try:
-        user = Users.query.filter_by(login=form.login.data).first()
         if form.validate_on_submit():
-            if user and bcrypt.check_password_hash(user.senha, form.password.data) and user.ativo:
-                login_user(user, remember=form.remember.data)
+            user = Users.query.filter_by(login=form.login.data.lower()).first_or_404()
+            if user and bcrypt.check_password_hash(user.senha, form.password.data.lower()) and user.ativo:
+                login_user(user=user, remember=form.remember.data)
                 next_page = request.args.get('next')
                 return redirect(next_page) if next_page else redirect(url_for('main.home'))
             elif not user.ativo:
                 abort(403)
             else:
                 flash('Error, Verifique Login/Senha!', 'danger')
-
     except Exception as e:
-        # print(f'Erro que vou ver qual é: {e}')
+        print(f'Erro que vou ver qual é: {e}')
         abort(403)
 
     return render_template('users/login.html', title='Login', form=form)
@@ -60,7 +59,7 @@ def createAdmin():
             # print(f'Erro: {e}')
 
         try:
-            site = Sites(idEndereco=1)
+            site = Sites(nome='Mapfre - (São Carlos)', idEndereco=endereco.id)
             db.session.add(site)
             db.session.commit()
         except Exception as e:
@@ -110,7 +109,9 @@ def createAdmin():
 @user.route('/usuarios')
 @login_required
 def lista_usuario():
-    if current_user.admin and current_user.ativo:
+    permissao = db.session.query(Permissoes.permissao).join(Users.permissoes).filter(Users.id==current_user.id).first_or_404()
+    print(permissao)
+    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
         users = db.session.query(Users.id, Users.nome.label('userNome'), Users.login, Users.email, Sites.nome.label(
             'siteNome')).join(Users, Sites.id == Users.idSite).all()
         # print(users[1]['siteNome'])
@@ -122,7 +123,7 @@ def lista_usuario():
 @user.route('/usuario/novo',  methods=['GET', 'POST'])
 @login_required
 def novo_usuario():
-    if current_user.admin and current_user.ativo:
+    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
         form = CreateUserForm()
         if form.validate_on_submit():
             hashed_password = bcrypt.generate_password_hash(
@@ -146,7 +147,7 @@ def novo_usuario():
 @user.route('/usuario/<int:id_user>/update',  methods=['GET', 'POST'])
 @login_required
 def update_usuario(id_user):
-    if current_user.admin and current_user.ativo:
+    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
         try:
             user = Users.query.get_or_404(id_user)
         except Exception as e:
@@ -176,7 +177,7 @@ def update_usuario(id_user):
 @user.route('/atualizarSenha',  methods=['POST'])
 @login_required
 def updatePassword():
-    if current_user.admin and current_user.ativo:
+    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
         form = UpdatePassWordUserForm()
         if request.method == 'POST':
             form.id_user.data = request.form.get('id_users')
@@ -188,7 +189,7 @@ def updatePassword():
 @user.route('/atualizaSenhaUsuario',  methods=['POST'])
 @login_required
 def updatePassword_usuario():
-    if current_user.admin and current_user.ativo:
+    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
         form = UpdatePassWordUserForm()
         try:
             user = Users.query.get_or_404(form.id_user.data)

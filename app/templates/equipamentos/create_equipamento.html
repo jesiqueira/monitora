@@ -81,7 +81,7 @@
         </div>
         <div class="form-group mt-4">
           {{ form.submit(class='btn btn-outline-primary')}}
-          <a href="{{url_for('equipamento.inventario')}}" class="btn btn-outline-danger ml-3">Cancelar</a>
+          <a href="{{url_for('equipamento.consultaInventario', idInventario=idInventario)}}" class="btn btn-outline-danger ml-3">Cancelar</a>
         </div>
       </fieldset>
     </form>

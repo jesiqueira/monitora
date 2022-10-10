@@ -2,7 +2,7 @@ from flask import render_template, Blueprint, flash, redirect, url_for, request,
 from flask_login import login_required, current_user
 from app.controllers.equipamento.form_disposivo import InventariosNovoForm, TipoInventarioForm, UpdateInventariosForm, InventarioForm
 from app.controllers.equipamento.monitora import Monitora
-from app.models.bdMonitora import PontoAtendimentos, Tipos, DispositivosEquipamentos, Sites, Status
+from app.models.bdMonitora import Areas, PontoAtendimentos, TipoEquipamentos, DispositivosEquipamentos, Sites, Status
 from app import db
 from sqlalchemy import exc
 from datetime import datetime
@@ -11,17 +11,48 @@ from pytz import timezone
 equipamento = Blueprint('equipamento', __name__)
 
 
+@equipamento.route('/inventarios/view')
+@login_required
+def inventarioView():
+    if (current_user.permissoes[0].permissao == 'w' or current_user.permissoes[0].permissao == 'r') and current_user.ativo:
+        form = InventarioForm()
+        try:
+            inventarios = db.session.query(Sites.id, Sites.nome).join(Areas.site).filter(Areas.nome == 'Inventário').all()
+            print(inventarios)
+        except Exception as e:
+            print(f'Error: {e}')
+        return render_template('equipamentos/inventario_view.html', title='Inventários', legenda='Inventários cadastrados', descricao='Relação de todos os Inventarios no Sistema', inventarios=inventarios, form=form)
+    else:
+        abort(403)
+
+
+@equipamento.route('/inventario/<int:idInventario>/consulta')
+@login_required
+def consultaInventario(idInventario):
+    if (current_user.permissoes[0].permissao == 'w' or current_user.permissoes[0].permissao == 'r') and current_user.ativo:
+        form = InventarioForm()
+        try:
+            # inventarios = db.session.query(Areas.id, Sites.nome).join(Areas, Sites.id == Areas.idSite).filter(Areas.nome == 'Inventário').all()
+            print(idInventario)
+            inventarios = []
+        except Exception as e:
+            print(f'Error: {e}')
+        return render_template('equipamentos/inventario.html', title='Inventários', legenda='Inventários cadastrados', descricao='Relação de todos os Inventarios no Sistema', inventarios=inventarios, form=form, idInventario=idInventario)
+    else:
+        abort(403)
+
+
 @equipamento.route('/inventario', methods=['GET', 'POST'])
 @login_required
 def inventario():
-    if current_user.admin and current_user.ativo:
+    if (current_user.permissoes[0].permissao == 'w' or current_user.permissoes[0].permissao == 'r') and current_user.ativo:
         form = InventarioForm()
         if request.method == 'POST':
             consult = '%'+form.consulta.data+'%'
             if form.selection.data == 'Serial':
                 try:
                     inventarios = []
-                    invent = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.hostname, DispositivosEquipamentos.patrimonio, PontoAtendimentos.descricaoPa, Tipos.nome).join(
+                    invent = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.hostname, DispositivosEquipamentos.patrimonio, PontoAtendimentos.descricaoPa, TipoEquipamentos.nome).join(
                         DispositivosEquipamentos, PontoAtendimentos.id == DispositivosEquipamentos.idLocalPa).join(DispositivosEquipamentos.tipo).filter(DispositivosEquipamentos.serial.like(consult)).first_or_404()
                     inventarios.append(invent)
                     if not invent:
@@ -33,14 +64,14 @@ def inventario():
             elif form.selection.data == 'Patrimônio':
                 try:
                     inventarios = []
-                    invent = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.hostname, DispositivosEquipamentos.patrimonio, PontoAtendimentos.descricaoPa, Tipos.nome).join(
+                    invent = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.hostname, DispositivosEquipamentos.patrimonio, PontoAtendimentos.descricaoPa, TipoEquipamentos.nome).join(
                         DispositivosEquipamentos, PontoAtendimentos.id == DispositivosEquipamentos.idLocalPa).join(DispositivosEquipamentos.tipo).filter(DispositivosEquipamentos.patrimonio.like(consult)).first_or_404()
                     inventarios.append(invent)
                     if not invent:
                         flash(
                             'Verifique dados informados, nada foi localizado!', 'danger')
                         try:
-                            inventarios = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.hostname, DispositivosEquipamentos.patrimonio, PontoAtendimentos.descricaoPa, Tipos.nome).join(
+                            inventarios = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.hostname, DispositivosEquipamentos.patrimonio, PontoAtendimentos.descricaoPa, TipoEquipamentos.nome).join(
                                 DispositivosEquipamentos.tipo).filter(DispositivosEquipamentos.idLocalPa == PontoAtendimentos.id).order_by(DispositivosEquipamentos.id).all()
                         except Exception as e:
                             # print(f"Erro! {e}")
@@ -52,14 +83,14 @@ def inventario():
             elif form.selection.data == 'Local':
                 try:
                     inventarios = []
-                    invent = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.hostname, DispositivosEquipamentos.patrimonio, PontoAtendimentos.descricaoPa, Tipos.nome).join(
+                    invent = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.hostname, DispositivosEquipamentos.patrimonio, PontoAtendimentos.descricaoPa, TipoEquipamentos.nome).join(
                         DispositivosEquipamentos, PontoAtendimentos.id == DispositivosEquipamentos.idLocalPa).join(DispositivosEquipamentos.tipo).filter(PontoAtendimentos.descricaoPa.like(consult)).first_or_404()
                     inventarios.append(invent)
                     if not invent:
                         flash(
                             'Verifique dados informados, nada foi localizado!', 'danger')
                         try:
-                            inventarios = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.hostname, DispositivosEquipamentos.patrimonio, PontoAtendimentos.descricaoPa, Tipos.nome).join(
+                            inventarios = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.hostname, DispositivosEquipamentos.patrimonio, PontoAtendimentos.descricaoPa, TipoEquipamentos.nome).join(
                                 DispositivosEquipamentos.tipo).filter(DispositivosEquipamentos.idLocalPa == PontoAtendimentos.id).order_by(DispositivosEquipamentos.id).all()
                         except Exception as e:
                             # print(f"Erro! {e}")
@@ -70,8 +101,9 @@ def inventario():
 
         elif request.method == 'GET':
             try:
-                inventarios = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.hostname, DispositivosEquipamentos.patrimonio, PontoAtendimentos.descricaoPa, Tipos.nome).join(
-                    DispositivosEquipamentos.tipo).filter(DispositivosEquipamentos.idLocalPa == PontoAtendimentos.id).order_by(DispositivosEquipamentos.id).all()
+                # inventarios = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.hostname, DispositivosEquipamentos.patrimonio, PontoAtendimentos.descricaoPa, Tipos.nome).join(
+                #     DispositivosEquipamentos.tipo).filter(DispositivosEquipamentos.idLocalPa == PontoAtendimentos.id).order_by(DispositivosEquipamentos.id).all()
+                inventarios = []
             except Exception as e:
                 # print(f"Erro! {e}")
                 pass
@@ -80,15 +112,15 @@ def inventario():
         abort(403)
 
 
-@equipamento.route('/dispotivo/novo', methods=['GET', 'POST'])
+@equipamento.route('/dispotivo/<int:idSite>/novo', methods=['GET', 'POST'])
 @login_required
-def novo_equipamento():
-    if current_user.admin and current_user.ativo:
+def novo_equipamento(idSite):
+    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
         form = InventariosNovoForm()
         if form.validate_on_submit():
             try:
                 local = PontoAtendimentos.query.filter_by(
-                    descricaoPa=form.selection.data).first()
+                    descricao=form.selection.data).first()
                 site = Sites.query.filter_by(id=local.idSite).first_or_404()
                 data_e_hora_atuais = datetime.now()
                 fuso_horario = timezone('America/Sao_Paulo')
@@ -104,8 +136,8 @@ def novo_equipamento():
 
             try:
                 computador = DispositivosEquipamentos(serial=form.serial.data, hostname=form.hostname.data,
-                                        patrimonio=form.patrimonio.data, idSite=site.id, idStatus=status.id, idlocalPa=local.id)
-                tipo = Tipos.query.filter_by(
+                                                      patrimonio=form.patrimonio.data, idSite=site.id, idStatus=status.id, idlocalPa=local.id)
+                tipo = TipoEquipamentos.query.filter_by(
                     nome=form.tipoDispositivo.data).first_or_404()
                 computador.tipo.append(tipo)
                 db.session.add(computador)
@@ -118,8 +150,23 @@ def novo_equipamento():
                 # print(f'Erro ao Obter Pa! {e}')
                 db.session.flush()
                 db.session.rollback()
+        if request.method == 'GET':
+            try:
+                pontoAtendimentos = db.session.query(PontoAtendimentos.descricao).join(
+                    Sites, PontoAtendimentos.idSite == Sites.id).filter(Sites.id == idSite).all()
+                # print(pontoAtendimento)
+            except Exception as e:
+                print(f'Error: {e}')
 
-        return render_template('equipamentos/create_equipamento.html', title='Novo Computador', form=form)
+            try:
+                # tiposEquipamentos =
+                pass
+            except Exception as e:
+                print(f'Error: {e}')
+            # form.selection.choices = [ponto.descricao for ponto in pontoAtendimentos]
+            form.selection.choices = list(
+                map(lambda ponto: ponto.descricao, pontoAtendimentos))
+            return render_template('equipamentos/create_equipamento.html', title='Novo Computador', form=form, idInventario=idSite)
     else:
         abort(403)
 
@@ -127,12 +174,12 @@ def novo_equipamento():
 @equipamento.route('/atualizarInventario', methods=['POST'])
 @login_required
 def atualizarInventario():
-    if current_user.admin and current_user.ativo:
+    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
         form = UpdateInventariosForm()
 
         if request.method == 'POST' and request.form.get('id_inventario'):
             form.idHidden.data = request.form.get('id_inventario')
-            inventarios = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.hostname, DispositivosEquipamentos.patrimonio, PontoAtendimentos.descricaoPa, Tipos.nome).join(
+            inventarios = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.hostname, DispositivosEquipamentos.patrimonio, PontoAtendimentos.descricaoPa, TipoEquipamentos.nome).join(
                 DispositivosEquipamentos.tipo).join(PontoAtendimentos, PontoAtendimentos.id == DispositivosEquipamentos.id).filter(DispositivosEquipamentos.id == form.idHidden.data).first_or_404()
             form.serial.data = inventarios.serial
             form.patrimonio.data = inventarios.patrimonio
@@ -145,7 +192,7 @@ def atualizarInventario():
             try:
                 inventario = db.session.query(DispositivosEquipamentos).filter_by(
                     id=form.idHidden.data).filter(DispositivosEquipamentos.tipo).first_or_404()
-                tipo = Tipos.query.filter_by(
+                tipo = TipoEquipamentos.query.filter_by(
                     nome=form.tipoDispositivo.data).first_or_404()
                 inventario.serial = form.serial.data
                 inventario.patrimonio = form.patrimonio.data
@@ -168,8 +215,8 @@ def atualizarInventario():
 
 @equipamento.route('/equipamento/view')
 def viewEqupamento():
-    if current_user.admin and current_user.ativo:
-        tipoEquipamentos = Tipos.query.all()
+    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
+        tipoEquipamentos = TipoEquipamentos.query.all()
         return render_template('equipamentos/lista_tipoEquipamento.html', title='View Equipamento', tipoEquipamentos=tipoEquipamentos)
     else:
         abort(403)
@@ -177,10 +224,10 @@ def viewEqupamento():
 
 @equipamento.route('/equipamento/novo', methods=['GET', 'POST'])
 def criarEqupamento():
-    if current_user.admin and current_user.ativo:
+    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
         form = TipoInventarioForm()
         if form.validate_on_submit():
-            tipo = Tipos(form.nome.data)
+            tipo = TipoEquipamentos(form.nome.data)
             db.session.add(tipo)
             db.session.commit()
             flash('Equipamento cadastrado com sucesso.', 'success')
@@ -194,7 +241,7 @@ def criarEqupamento():
 @equipamento.route('/inventario/<int:idDesktop>/delete')
 @login_required
 def inventarioDelete(idDesktop):
-    if current_user.admin and current_user.ativo:
+    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
         pass
     else:
         abort(403)
@@ -203,7 +250,7 @@ def inventarioDelete(idDesktop):
 @equipamento.route('/detalhe/<tipo_relatorio>', methods=['GET'])
 @login_required
 def detalhe(tipo_relatorio):
-    if current_user.admin and current_user.ativo:
+    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
         monitora = Monitora()
         if tipo_relatorio == 'Conectado':
             computadores = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.hostname, DispositivosEquipamentos.patrimonio, Status.ativo, PontoAtendimentos.descricaoPa).join(
@@ -212,6 +259,7 @@ def detalhe(tipo_relatorio):
             computadores = monitora.statusDesconectado()
         else:
             computadores = monitora.statusAtencao()
-        return render_template('equipamentos/detalhe.html', title='Informações - Dispositivos', legenda=f'{tipo_relatorio}') #DispositivosEquipamentoses=DispositivosEquipamentoses
+        # DispositivosEquipamentoses=DispositivosEquipamentoses
+        return render_template('equipamentos/detalhe.html', title='Informações - Dispositivos', legenda=f'{tipo_relatorio}')
     else:
         abort(403)

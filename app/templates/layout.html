@@ -40,8 +40,8 @@
                         <ul class="list-unstyled">
                             {% if current_user.is_authenticated %}
                                 <li><a href="{{url_for('user.logout')}}" class="text-white"> <i class="fa-solid fa-right-from-bracket"></i> Sair</a></li>
-                                {% if current_user.admin and current_user.ativo%}
-                                    <li><a href="{{url_for('equipamento.inventario')}}" class="text-white"><i class="fa-solid fa-gears"></i> Tela Administrativa</a></li>
+                                {% if current_user.permissoes[0].permissao == 'w' and current_user.ativo%}
+                                    <li><a href="{{url_for('equipamento.inventarioView')}}" class="text-white"><i class="fa-solid fa-gears"></i> Tela Administrativa</a></li>
                                 {% endif %}
                             {% else %}
                                 <li><a href="{{url_for('user.login')}}" class="text-white"><i class="fa-solid fa-right-from-bracket"></i> Logar</a></li>

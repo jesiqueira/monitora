@@ -38,7 +38,7 @@
         {% for local in locais%}
           <tr>
             <th scope="row">{{local.id}}</th>
-            <td>{{local.descricaoPa}}</td>
+            <td>{{local.descricao}}</td>
             <td>{{local.nome}}</td>
             <td>
               <a class="btn btn-info" href="{{url_for('main.updateLocal', id_local=local.id)}}" role="button"><i class="fa-solid fa-pen-to-square"></i> Editar</a>

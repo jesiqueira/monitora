@@ -6,7 +6,7 @@ est = Blueprint('est', __name__)
 @est.route('/estoque')
 @login_required
 def estoque():
-  if current_user.admin and current_user.ativo:
+  if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
     return render_template('estoque/estoque.html', title='Estoque', legenda='Equipamento no estoque')
   else:
     abort(403)
