@@ -3,10 +3,8 @@
   <header>
     <div class="jumbotron jumbotron-fluid mt-4">
       <div class="container">
-        <h1 class="display-4"><i class="fa-solid fa-table-columns"></i> Pontos atendimentos no site</h1>
-        <p class="lead">
-          Relação de todos os Locais onde é possível equipamento ficar.
-        </p>
+        <h1 class="display-4"><i class="fa-solid fa-table-columns"></i> {{legenda}}</h1>
+        <p class="lead">{{descricao}}</p>
       </div>
     </div>
     <form action="#" class="ml-3 mb-4">
@@ -18,7 +16,7 @@
             <option value="site">Site</option>
           </select>
           <button type="submit" class="btn btn-success ml-4"><i class="fa-solid fa-magnifying-glass"></i> Consultar</button>
-          <a class="btn btn-primary ml-3" href="{{url_for('main.registrarLocal')}}" role="button"><i class="fa-solid fa-plus"></i> Novo</a>
+          <a class="btn btn-primary ml-3" href="{{url_for('main.registrarLocal', idSite=idSite)}}" role="button"><i class="fa-solid fa-plus"></i> Novo</a>
           <a class="btn btn-warning ml-3" href=" " role="button"><i class="fa-regular fa-file-pdf"></i> PDF</a>
         </div>
       </div>

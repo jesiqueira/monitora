@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, url_for, Blueprint, request, abort
 from app.controllers.main.form import (
-    SiteForm, LocalAtendimento, SiteUpdateForm, UpdateLocal, AreaForm)
+    SiteForm, LocalAtendimento, SiteUpdateForm, UpdateLocal, AreaForm, localViewForm)
 from flask_login import current_user, login_required
 from app.models.bdMonitora import Enderecos, Sites, PontoAtendimentos, Areas
 from app import db
@@ -99,27 +99,42 @@ def delete_site():
         abort(403)
 
 
-@main.route('/local', methods=['GET', 'POST'])
+@main.route('/local/<int:idSite>/consulta', methods=['GET', 'POST'])
 @login_required
-def localizarPA():
+def localizarPA(idSite):
     if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
+        print(f'Site ID: {idSite}')
         locais = db.session.query(PontoAtendimentos.id, PontoAtendimentos.descricao, Sites.nome).join(
-            PontoAtendimentos, Sites.id == PontoAtendimentos.idSite).all()
-        return render_template('main/local.html', title='Ponto Atendimento', locais=locais)
+            PontoAtendimentos, Sites.id == PontoAtendimentos.idSite).filter(Sites.id == idSite).all()
+        return render_template('main/local.html', title='Ponto Atendimento', locais=locais, idSite=idSite, legenda='Pontos de  Atendimentos', descricao=f'Relação de todos as P.A.s cadastradas no Site: {locais[0].nome}')
+    else:
+        abort(403)
+
+@main.route('/local/view')
+@login_required
+def localView():
+    if (current_user.permissoes[0].permissao == 'w' or current_user.permissoes[0].permissao == 'r') and current_user.ativo:
+        form = localViewForm()
+        try:
+            sites = db.session.query(Sites).all()
+        except Exception as e:
+            print(f'Error: {e}')
+        return render_template('main/local_view.html', title='Ponto Atendimento', legenda='Pontos de Atendimentos', descricao='Seleciono o Site que deseja acessar', sites=sites, form=form)
     else:
         abort(403)
 
 
-@main.route('/local/registrarLocal', methods=['GET', 'POST'])
+
+# @main.route('/local/registrarLocal', methods=['GET', 'POST'])
+@main.route('/local/<int:idSite>/novo', methods=['GET', 'POST'])
 @login_required
-def registrarLocal():
+def registrarLocal(idSite):
     if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
         form = LocalAtendimento()
         if form.validate_on_submit():
             site = Sites.query.filter_by(nome=form.localSelect.data).first()
             if site:
-                local = PontoAtendimentos(
-                    descricao=form.localPa.data, idSite=site.id)
+                local = PontoAtendimentos(descricao=form.localPa.data, idSite=site.id)
                 db.session.add(local)
                 db.session.commit()
                 flash('Ponto de atendimento cadastrado com sucesso', 'success')
@@ -127,10 +142,17 @@ def registrarLocal():
             else:
                 flash('Ponto de atendimento cadastrado com sucesso', 'danger')
                 return redirect(url_for('main.registrarPa'))
+        elif request.method == 'GET':
+            try:
+                site = Sites.query.get(idSite)
+            except Exception as e:
+                print(f'Error: {e}')
+            form.localSelect.choices = [site.nome]
+            return render_template('main/create_ponto_atendimento.html', title='Novo Ponto Atendimento', legenda='Ponto Atendento (P.A)', descricao=f'Preencha a descrição da P.A para realizar o cadastro no site: {site.nome}', form=form, idSite=idSite)
+
     else:
         abort(403)
 
-    return render_template('main/create_ponto_atendimento.html', title='Novo Ponto Atendimento', form=form)
 
 
 @main.route('/local/<int:id_local>/update', methods=['GET', 'POST'])
@@ -139,7 +161,7 @@ def updateLocal(id_local):
     if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
         form = UpdateLocal()
         try:
-            localForm = db.session.query(PontoAtendimentos.descricaoPa, PontoAtendimentos.idSite, PontoAtendimentos.id, Sites.nome).join(
+            localForm = db.session.query(PontoAtendimentos.descricao, PontoAtendimentos.idSite, PontoAtendimentos.id, Sites.nome).join(
                 Sites, Sites.id == PontoAtendimentos.idSite).filter(PontoAtendimentos.id == id_local).first_or_404()
             # print(local)
             # precisa verificar a consulta para atualizar local e o site
@@ -166,10 +188,9 @@ def updateLocal(id_local):
                 db.session.rollback()
 
         elif request.method == 'GET':
-            form.localPa.data = localForm.descricaoPa
-            form.localSelect.data = localForm.nome
-
-        return render_template('main/update_local.html', title='Update Ponto Atendimento', form=form)
+            form.localPa.data = localForm.descricao
+            form.localSelect.choices = [localForm.nome]
+            return render_template('main/update_local.html', title='Update Ponto Atendimento', legenda='Update Ponto Atendento (P.A)', descricao=f'Editar os dados abaixo para atualizar (P.A) no site: {localForm.nome}', idSite=localForm.idSite, form=form)
     else:
         abort(403)
 

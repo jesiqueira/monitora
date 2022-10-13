@@ -6,6 +6,10 @@ from app.models.bdMonitora import Sites, Enderecos, PontoAtendimentos, Areas
 from app import db
 
 
+class localViewForm(FlaskForm):
+    consulta = StringField('Consulta', validators=[DataRequired()])
+    selection = SelectField(choices=['Serial', 'Patrimônio', 'Local'])
+
 class SiteForm(FlaskForm):
     nome = StringField('Nome', validators=[DataRequired(), Length(
         min=5, max=30, message='Atenção a quantidade de caracter, mínimo 5, máximo: 30')])

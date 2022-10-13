@@ -3,8 +3,8 @@
   <header>
     <div class="jumbotron jumbotron-fluid mt-4">
       <div class="container">
-        <h1 class="display-4">Local - dispositivos</h1>
-        <p class="lead">Preenchar todos os campos para cadastrar novo local no site.</p>
+        <h1 class="display-4"><i class="fa-solid fa-table-columns"></i> {{legenda}}</h1>
+        <p class="lead">{{descricao}}</p>
       </div>
     </div>
   </header>
@@ -34,7 +34,7 @@
         </div>
         <div class="form-group mt-4">
           {{ form.submit(class='btn btn-outline-primary')}}
-          <a href="{{url_for('main.localizarPA')}}" class="btn btn-outline-danger ml-3">Cancelar</a>
+          <a href="{{url_for('main.localizarPA', idSite=idSite)}}" class="btn btn-outline-danger ml-3">Cancelar</a>
           
         </div>
       </fieldset>

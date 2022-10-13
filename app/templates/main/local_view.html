@@ -1,0 +1,79 @@
+{% extends 'layout2.html' %}
+{% block content %}
+<header>
+  <div class="jumbotron jumbotron-fluid mt-4">
+    <div class="container">
+      <h1 class="display-4"><i class="fa-solid fa-clipboard-list"></i> {{legenda}}</h1>
+      <p class="lead">{{descricao}}</p>
+    </div>
+  </div>
+  <!-- <h2 class="my-3">Listagem</h2> -->
+  <form action="" method="POST" class="ml-3 mb-4">
+    <div class="form-group">
+      <div class="row">
+        {{form.consulta(class='form-control col-md-5', placeholder='Digita aqui a consulta')}}
+        {{form.selection(class='form-control col-md-2 ml-3')}}
+        <button type="submit" class="btn btn-success ml-4"><i class="fa-solid fa-magnifying-glass"></i> Consultar</button>
+        <a class="btn btn-warning ml-3" href=" " role="button"><i class="fa-regular fa-file-pdf"></i> PDF</a>
+      </div>
+    </div>
+  </form>
+</header>
+<main>
+  <table class="table table-hover text-center">
+    <thead>
+      <tr class="table-secondary">
+        <th scope="col"><a href="#">Id</a></th>
+        <th scope="col"><a href="#">Local do Site</a></th>
+        <th scope="col">Ação</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for site in sites%}
+      <tr>
+        <th scope="row">{{site.id}}</th>
+        <td>{{site.nome}}</td>
+        {% if site %}
+          <!-- <td><a href="" onclick="editarInventario('{{site.id}}')" role="button" class="btn btn-danger ml-3" data-toggle="modal" data-target="#editarInventario"><i class="fa-solid fa-pen-to-square"></i></a></td> -->
+          <td><a class="btn btn-info" href="{{url_for('main.localizarPA', idSite=site.id)}}" role="button"><i class="fa-solid fa-pen-to-square"></i> Acessar</a></td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</main>
+
+<!-- Modal -->
+<div class="modal fade" id="editarInventario" tabindex="-1" role="dialog" aria-labelledby="editarInventarioTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLongTitle">O que deseja fazer?</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" name="id_inventario" id="id_inventario">
+        <div class="form-row">
+          <div class="col-md-3">
+            <a href="" class="btn btn-primary ml-3" onclick="window.location = updateURLUser()" role="button"><i class="fa-solid fa-arrows-rotate"></i> M.Layout</a>
+          </div>
+          <div class="col-md-3">
+            <a href="" class="btn btn-primary ml-3" onclick="trocarSenhaURLUser()" role="button"><i class="fa-solid fa-boxes-stacked"></i> M.Extoque</a>
+          </div>
+          <div class="col-md-3">
+            <a class="btn btn-warning ml-3" onclick="ediatarDadosEquipamentoInventario()" role="button"><i class="fa-solid fa-pen-to-square"></i> Atualizar</a>
+          </div>
+          <div class="col-md-3">
+            <a href="" class="btn btn-danger ml-3" onclick="trocarSenhaURLUser()" role="button"><i class="fa-solid fa-trash-can"></i> Descarte</a>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock content %}

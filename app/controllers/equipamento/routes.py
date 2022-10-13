@@ -33,6 +33,7 @@ def consultaInventario(idInventario):
         form = InventarioForm()
         try:
             # inventarios = db.session.query(Areas.id, Sites.nome).join(Areas, Sites.id == Areas.idSite).filter(Areas.nome == 'Inventário').all()
+
             print(idInventario)
             inventarios = []
         except Exception as e:
@@ -163,10 +164,14 @@ def novo_equipamento(idSite):
                 pass
             except Exception as e:
                 print(f'Error: {e}')
+            
+            try:
+                site = Sites.query.get(idSite)
+            except Exception as e:
+                print(f'Error: {e}')
             # form.selection.choices = [ponto.descricao for ponto in pontoAtendimentos]
-            form.selection.choices = list(
-                map(lambda ponto: ponto.descricao, pontoAtendimentos))
-            return render_template('equipamentos/create_equipamento.html', title='Novo Computador', form=form, idInventario=idSite)
+            form.selection.choices = list(map(lambda ponto: ponto.descricao, pontoAtendimentos))
+            return render_template('equipamentos/create_equipamento.html', title='Novo Computador', form=form, legenda='Cadastrar novo dispositivo', idInventario=idSite, descricao=f'Cadastrar novo Computador no site: {site.nome}')
     else:
         abort(403)
 
