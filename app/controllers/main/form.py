@@ -88,6 +88,10 @@ class UpdateLocal(FlaskForm):
     submit = SubmitField('Update')
 
 
+class AreaViewForm(FlaskForm):
+    consulta = StringField('Consulta', validators=[DataRequired()])
+    selection = SelectField(choices=['Serial', 'Patrimônio', 'Local'])
+
 class AreaForm(FlaskForm):
     area = StringField('Area', validators=[DataRequired(), Length(
         min=5, max=30, message='Campo obrigatório, mínimo 5, máximo 30 caracteres!')])

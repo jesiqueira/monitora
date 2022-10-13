@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, url_for, Blueprint, request, abort
 from app.controllers.main.form import (
-    SiteForm, LocalAtendimento, SiteUpdateForm, UpdateLocal, AreaForm, localViewForm)
+    SiteForm, LocalAtendimento, SiteUpdateForm, UpdateLocal, AreaForm, localViewForm, AreaViewForm)
 from flask_login import current_user, login_required
 from app.models.bdMonitora import Enderecos, Sites, PontoAtendimentos, Areas
 from app import db
@@ -243,7 +243,20 @@ def area():
 @login_required
 def areaView():
     if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
-        areas = db.session.query(Areas.id, Areas.nome, Sites.nome.label('site')).join(Areas.site).all()
-        return render_template('main/listar_area.html', title='Area', descricao='Relação das área', areas=areas)
+        form = AreaViewForm()
+        try:
+            sites = db.session.query(Sites).all()
+        except Exception as e:
+            print(f'Error: {e}')
+        return render_template('main/area_view.html', title='Area', legenda='Áreas cadastradas no sistema', descricao='Selecione o Site abaixo para acessar as áreas.', sites=sites, form=form)
+    else:
+        abort(403)
+
+@main.route('/area/<int:idSite>/consulta', methods=['GET'])
+@login_required
+def areaConsula(idSite):
+    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
+        areas = db.session.query(Areas.id, Areas.nome, Sites.nome.label('site')).join(Areas.site).filter(Sites.id==idSite).all()
+        return render_template('main/listar_area.html', title='Area', legenda='Relação das áreas', descricao=f'Relação de todos as áreas cadastrado no sistema para {areas[0].site}', areas=areas)
     else:
         abort(403)
