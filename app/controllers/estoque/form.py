@@ -6,3 +6,10 @@ from wtforms.validators import DataRequired, Length, ValidationError
 class EstoqueViewForm(FlaskForm):
     consulta = StringField('Consulta', validators=[DataRequired()])
     selection = SelectField(choices=['Serial', 'Patrimônio', 'Local'])
+
+class EstoqueCadastroForm(FlaskForm):
+    serial = StringField('Serial')
+    patrimonio = StringField('Patrimônio')
+    tipo = SelectField(choices=[], validate_choice=False)
+    
+    submit = SubmitField('Cadastrar')
