@@ -55,16 +55,26 @@
             <li class="nav-item px-3 active">
               <a class="nav-link" href="{{url_for('equipamento.inventarioView')}}"><i class="fa-solid fa-clipboard-list"></i> Inventários<span class="sr-only">(current)</span></a>
             </li>
-            <li class="nav-item px-3">
-              <a class="nav-link" href="{{url_for('est.estoque')}}"><i class="fa-solid fa-table"></i> Estoque</a>
+            <li class="nav-item px-3 dropdown">
+              <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-expanded="false"><i class="fa fa-sliders"></i> Controles</a>
+              <div class="dropdown-menu">
+                <a class="dropdown-item" href="{{url_for('est.estoque')}}"><i class="fa-solid fa-table"></i> Estoque</a>
+                <a class="dropdown-item" href="#"><i class="fa-solid fa-laptop-code"></i> Notebook</a>
+                <a class="dropdown-item" href="#"><i class="fa fa-trash"></i> Descarte</a>
+                <!-- <a class="dropdown-item" href="{{url_for('main.localView')}}"><i class="fa-solid fa-magnifying-glass-location"></i> Local-Atendimento</a>
+                <a class="dropdown-item" href="{{url_for('main.areaView')}}"><i class="fa-solid fa-warehouse"></i> Área</a> -->
+              </div>
             </li>
+            <!-- <li class="nav-item px-3">
+              <a class="nav-link" href="{{url_for('est.estoque')}}"><i class="fa-solid fa-table"></i> Controles</a>
+            </li> -->
             <li class="nav-item px-3 dropdown">
               <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-gears"></i> Adm-site</a>
               <div class="dropdown-menu">
-                <a class="dropdown-item" href="{{url_for('est.estoque')}}"><i class="fa-solid fa-table"></i> Estoque</a>
+                <!-- <a class="dropdown-item" href="{{url_for('est.estoque')}}"><i class="fa-solid fa-table"></i> Estoque</a> -->
                 <a class="dropdown-item" href="{{url_for('main.site')}}"><i class="fa-solid fa-map-location"></i> Site</a>
                 <a class="dropdown-item" href="{{url_for('main.localView')}}"><i class="fa-solid fa-magnifying-glass-location"></i> Local-Atendimento</a>
-                <a class="dropdown-item" href="{{url_for('equipamento.viewEqupamento')}}"><i class="fa-solid fa-laptop-code"></i> Equipamento</a>
+                <a class="dropdown-item" href="{{url_for('equipamento.equipamentoView')}}"><i class="fa-solid fa-laptop-code"></i> Equipamento</a>
                 <a class="dropdown-item" href="{{url_for('main.areaView')}}"><i class="fa-solid fa-warehouse"></i> Área</a>
               </div>
             </li>

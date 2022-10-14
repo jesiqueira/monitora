@@ -1,3 +1,4 @@
+from turtle import title
 from flask import render_template, Blueprint, flash, redirect, url_for, request, abort
 from flask_login import login_required, current_user
 from app.controllers.equipamento.form_disposivo import InventariosNovoForm, TipoInventarioForm, UpdateInventariosForm, InventarioForm
@@ -219,15 +220,29 @@ def atualizarInventario():
 
 
 @equipamento.route('/equipamento/view')
-def viewEqupamento():
+@login_required
+def equipamentoView():
     if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
-        tipoEquipamentos = TipoEquipamentos.query.all()
-        return render_template('equipamentos/lista_tipoEquipamento.html', title='View Equipamento', tipoEquipamentos=tipoEquipamentos)
+        form = InventarioForm()
+        return render_template('equipamentos/tipo_view.html', title='View Equipamentos', legenda='Tipos dispositivos', descricao='Selecione o Site para acessar.', form=form)
+    else:
+        abort(403)
+
+@equipamento.route('/equipamento/<int:idSite>/consulta')
+@login_required
+def equipamentoConsulta(idSite):
+    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
+        try:
+            tipoEquipamentos = TipoEquipamentos.query.all()
+            return render_template('equipamentos/lista_tipoEquipamento.html', title='View Equipamento', tipoEquipamentos=tipoEquipamentos)
+        except Exception as e:
+            print('Erro ao realizar consulta: {e}')
     else:
         abort(403)
 
 
 @equipamento.route('/equipamento/novo', methods=['GET', 'POST'])
+@login_required
 def criarEqupamento():
     if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
         form = TipoInventarioForm()
@@ -237,8 +252,8 @@ def criarEqupamento():
             db.session.commit()
             flash('Equipamento cadastrado com sucesso.', 'success')
             return redirect(url_for('equipamento.viewEqupamento'))
-
-        return render_template('equipamentos/create_tipoEquipamento.html', title='Cadastrar Novo Equipamento', form=form)
+        else:
+            return render_template('equipamentos/create_tipoEquipamento.html', title='Cadastrar Novo Equipamento', form=form)
     else:
         abort(403)
 

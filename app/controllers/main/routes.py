@@ -209,11 +209,16 @@ def atualizarComputadorSite():
         abort(403)
 
 
-@main.route('/area/nova', methods=['GET', 'POST'])
+@main.route('/area/<int:idSite>/nova', methods=['GET', 'POST'])
 @login_required
-def area():
+def area(idSite):
     if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
         form = AreaForm()
+        try:
+            site = Sites.query.filter_by(id=idSite).first()
+        except Exception as e:
+            print(f'Erro ao consultar: {e}')
+        
         if form.validate_on_submit():
             try:
                 print(f'Area: {form.area.data}, Site: {form.localSelect.data}')
@@ -222,7 +227,6 @@ def area():
                     flash(f'{form.area.data} já está cadastrada para  {form.localSelect.data}', 'danger')
                 else:
                     try:
-                        site = Sites.query.filter_by(nome=form.localSelect.data).first()
                         area = Areas(nome=form.area.data, site=[site])
                         db.session.add(area)
                         db.session.commit()
@@ -233,8 +237,9 @@ def area():
                 print(f'Error: {e}')
             
             return redirect(url_for('main.areaView'))
-
-        return render_template('main/create_area.html', title='Area', descricao='Cadastrar nova área', form=form)
+        elif request.method == 'GET':
+            form.localSelect.choices = [site.nome]
+            return render_template('main/create_area.html', title='Area', descricao='Cadastrar nova área', form=form)
     else:
         abort(403)
 
@@ -257,6 +262,6 @@ def areaView():
 def areaConsula(idSite):
     if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
         areas = db.session.query(Areas.id, Areas.nome, Sites.nome.label('site')).join(Areas.site).filter(Sites.id==idSite).all()
-        return render_template('main/listar_area.html', title='Area', legenda='Relação das áreas', descricao=f'Relação de todos as áreas cadastrado no sistema para {areas[0].site}', areas=areas)
+        return render_template('main/listar_area.html', title='Area', legenda='Relação das áreas', descricao=f'Relação de todos as áreas cadastrado no sistema para {areas[0].site}', areas=areas, idSite=idSite)
     else:
         abort(403)

@@ -86,6 +86,8 @@ class UpdateInventariosForm(FlaskForm):
 class TipoInventarioForm(FlaskForm):
     nome = StringField('Nome', validators=[DataRequired(), Length(
         min=1, max=40, message='Campo Obrigatório, mínimo 1 máximo de 40 caracteres.')])
+    site = SelectField('Site', choices=[])
+
     submit = SubmitField('Cadastrar')
 
     def validate_nome(self, nome):
