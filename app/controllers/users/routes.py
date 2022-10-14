@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, url_for, Blueprint, request, abort
-from app.controllers.users.form import (
-    LoginForm, CreateUserForm, UpdateUserForm, UpdatePassWordUserForm)
+from app.controllers.users.form import (LoginForm, CreateUserForm, UpdateUserForm, UpdatePassWordUserForm)
+from app.controllers.main.form import Areas
 from app import db, bcrypt
 from app.models.bdMonitora import (Permissoes, Users, Enderecos, Sites)
 from flask_login import login_user, current_user, logout_user, login_required
@@ -62,6 +62,12 @@ def createAdmin():
             site = Sites(nome='Mapfre - (São Carlos)', idEndereco=endereco.id)
             db.session.add(site)
             db.session.commit()
+            areas = ['Estoque', 'Inventario', 'Descarte']
+            for area in areas:
+                a = Areas(nome=area, site=[site])
+                db.session.add(a)
+                db.session.commit()
+                
         except Exception as e:
             db.session.flush()
             db.session.rollback()

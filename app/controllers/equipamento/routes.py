@@ -1,11 +1,10 @@
-from turtle import title
 from flask import render_template, Blueprint, flash, redirect, url_for, request, abort
 from flask_login import login_required, current_user
 from app.controllers.equipamento.form_disposivo import InventariosNovoForm, TipoInventarioForm, UpdateInventariosForm, InventarioForm
 from app.controllers.equipamento.monitora import Monitora
 from app.models.bdMonitora import Areas, PontoAtendimentos, TipoEquipamentos, DispositivosEquipamentos, Sites, Status
 from app import db
-from sqlalchemy import exc
+from sqlalchemy import exc, and_
 from datetime import datetime
 from pytz import timezone
 
@@ -224,7 +223,11 @@ def atualizarInventario():
 def equipamentoView():
     if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
         form = InventarioForm()
-        return render_template('equipamentos/tipo_view.html', title='View Equipamentos', legenda='Tipos dispositivos', descricao='Selecione o Site para acessar.', form=form)
+        try:
+            sites = db.session.query(Sites).all()
+        except Exception as e:
+            print(f'Error: {e}')
+        return render_template('equipamentos/tipo_view.html', title='Equipamentos', legenda='Tipo Dispositivos/equipamento', descricao='Selecione o Site para acessar.', form=form, sites=sites)
     else:
         abort(403)
 
@@ -233,27 +236,42 @@ def equipamentoView():
 def equipamentoConsulta(idSite):
     if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
         try:
-            tipoEquipamentos = TipoEquipamentos.query.all()
-            return render_template('equipamentos/lista_tipoEquipamento.html', title='View Equipamento', tipoEquipamentos=tipoEquipamentos)
+            # tipoEquipamentos = TipoEquipamentos.query.all()
+            try:
+                tipoEquipamentos = db.session.query(TipoEquipamentos.nome, Sites.nome.label('site')).join(TipoEquipamentos.site).filter(Sites.id==idSite).all()
+                return render_template('equipamentos/lista_tipoEquipamento.html', title='View Equipamento', legenda='Tipos Dispositos/Equipamentos',descricao=f'Relação de todos tipos dispositivos/equipamentos cadastrado para: {tipoEquipamentos[0].site}.', tipoEquipamentos=tipoEquipamentos, idSite=idSite)
+            except TypeError as t:
+                print(f'Tipo de erro: {t}')
         except Exception as e:
-            print('Erro ao realizar consulta: {e}')
+            print(f'Erro ao realizar consulta: {e}')
+        return render_template('equipamentos/lista_tipoEquipamento.html', title='View Equipamento', legenda='Tipos Dispositos/Equipamentos',descricao='Relação de todos tipos dispositivos/equipamentos cadastrado no site', tipoEquipamentos=tipoEquipamentos, idSite=idSite)
     else:
         abort(403)
 
 
-@equipamento.route('/equipamento/novo', methods=['GET', 'POST'])
+@equipamento.route('/equipamento/<int:idSite>/novo', methods=['GET', 'POST'])
 @login_required
-def criarEqupamento():
+def criarEquipamento(idSite):
     if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
         form = TipoInventarioForm()
+        try:
+            site = Sites.query.get(idSite)
+        except Exception as e:
+            print(f'Erro: {e}')
         if form.validate_on_submit():
-            tipo = TipoEquipamentos(form.nome.data)
-            db.session.add(tipo)
-            db.session.commit()
-            flash('Equipamento cadastrado com sucesso.', 'success')
-            return redirect(url_for('equipamento.viewEqupamento'))
+            equipamento = db.session.query(TipoEquipamentos).join(TipoEquipamentos.site).filter(and_(TipoEquipamentos.nome==form.nome.data, Sites.id==idSite)).first()
+            if not equipamento:            
+                tipo = TipoEquipamentos(form.nome.data, site=[site])
+                db.session.add(tipo)
+                db.session.commit()
+                flash('Equipamento cadastrado com sucesso.', 'success')
+                return redirect(url_for('equipamento.equipamentoConsulta', idSite=idSite))
+            else:
+                flash(f'Dispositivo/Equipamento: {form.nome.data}, já está cadastrado!', 'danger')
+                return redirect(url_for('equipamento.criarEquipamento', idSite=idSite))
         else:
-            return render_template('equipamentos/create_tipoEquipamento.html', title='Cadastrar Novo Equipamento', form=form)
+            form.site.choices = [site.nome]
+            return render_template('equipamentos/create_tipoEquipamento.html', title='Cadastrar Novo Equipamento', legenda='Cadastrar Tipo Equipamento', descricao='Preenchar todos os campos para cadastrar novo tipo.', form=form)
     else:
         abort(403)
 

@@ -85,13 +85,7 @@ class UpdateInventariosForm(FlaskForm):
 
 class TipoInventarioForm(FlaskForm):
     nome = StringField('Nome', validators=[DataRequired(), Length(
-        min=1, max=40, message='Campo Obrigatório, mínimo 1 máximo de 40 caracteres.')])
-    site = SelectField('Site', choices=[])
+        min=2, max=40, message='Campo Obrigatório, mínimo 2 máximo de 40 caracteres.')])
+    site = SelectField('Site', choices=[], validate_choice=False)
 
     submit = SubmitField('Cadastrar')
-
-    def validate_nome(self, nome):
-        tipoInventario = TipoEquipamentos.query.filter_by(
-            nome=nome.data).first()
-        if tipoInventario:
-            raise ValidationError('Esse equipamento já está cadastrado!')

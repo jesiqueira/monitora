@@ -170,11 +170,12 @@ class TipoEquipamentos(db.Model):
     dispositivoEquipamento = db.relationship('DispositivosEquipamentos', backref='tipos', lazy=True)
     site = db.relationship('Sites', secondary=tipoEquipamentoSites, backref='tipoEquipamentos')
 
-    def __init__(self, nome='') -> None:
+    def __init__(self, nome='', site=[]) -> None:
         self.nome = nome
+        self.site = site
 
     def __repr__(self) -> str:
-        return f"Tipos({self.nome})"
+        return f"Tipos({self.nome}, {self.site})"
 
 
 class DispositivosEquipamentos(db.Model):

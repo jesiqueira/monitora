@@ -35,7 +35,7 @@
         <td>{{site.nome}}</td>
         {% if site %}
           <!-- <td><a href="" onclick="editarInventario('{{site.id}}')" role="button" class="btn btn-danger ml-3" data-toggle="modal" data-target="#editarInventario"><i class="fa-solid fa-pen-to-square"></i></a></td> -->
-          <td><a class="btn btn-info" href="{{url_for('equipamento.equipamentoConsulta', idSite=site.id)}}" role="button"><i class="fa-solid fa-pen-to-square"></i> Acessar</a></td>
+          <td><a class="btn btn-info" href="{{url_for('est.estoqueConsulta', idSite=site.id)}}" role="button"><i class="fa-solid fa-pen-to-square"></i> Acessar</a></td>
         {% endif %}
       </tr>
       {% endfor %}

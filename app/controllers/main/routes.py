@@ -27,7 +27,6 @@ def site():
     if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
         sites = db.session.query(Sites.id, Sites.nome, Enderecos.rua, Enderecos.cep, Enderecos.cidade).join(
             Sites, Enderecos.id == Sites.id).all()
-        print(sites)
         return render_template('main/site.html', title='Site', sites=sites)
     else:
         abort(403)
@@ -45,6 +44,12 @@ def registrar_site():
             site = Sites(form.nome.data, endereco.id)
             db.session.add(site)
             db.session.commit()
+            areas = ['Estoque', 'Inventario', 'Descarte']
+            for area in areas:
+                a = Areas(nome=area, site=[site])
+                db.session.add(a)
+                db.session.commit()
+            
             flash('Site Cadastrado com sucesso!', 'success')
             return redirect(url_for('main.site'))
         return render_template('main/registrar_site.html', title='Registrar Site', form=form)
@@ -106,7 +111,10 @@ def localizarPA(idSite):
         print(f'Site ID: {idSite}')
         locais = db.session.query(PontoAtendimentos.id, PontoAtendimentos.descricao, Sites.nome).join(
             PontoAtendimentos, Sites.id == PontoAtendimentos.idSite).filter(Sites.id == idSite).all()
-        return render_template('main/local.html', title='Ponto Atendimento', locais=locais, idSite=idSite, legenda='Pontos de  Atendimentos', descricao=f'Relação de todos as P.A.s cadastradas no Site: {locais[0].nome}')
+        if locais:
+            return render_template('main/local.html', title='Ponto Atendimento', locais=locais, idSite=idSite, legenda='Pontos de  Atendimentos', descricao=f'Relação de todos as P.A.s cadastradas no Site: {locais[0].nome}')
+        else:
+            return render_template('main/local.html', title='Ponto Atendimento', locais=locais, idSite=idSite, legenda='Pontos de  Atendimentos', descricao='Não existe Ponto atendimento para Local selecionado.')
     else:
         abort(403)
 
@@ -138,7 +146,7 @@ def registrarLocal(idSite):
                 db.session.add(local)
                 db.session.commit()
                 flash('Ponto de atendimento cadastrado com sucesso', 'success')
-                return redirect(url_for('main.localizarPA'))
+                return redirect(url_for('main.localizarPA', idSite=idSite))
             else:
                 flash('Ponto de atendimento cadastrado com sucesso', 'danger')
                 return redirect(url_for('main.registrarPa'))
@@ -262,6 +270,9 @@ def areaView():
 def areaConsula(idSite):
     if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
         areas = db.session.query(Areas.id, Areas.nome, Sites.nome.label('site')).join(Areas.site).filter(Sites.id==idSite).all()
-        return render_template('main/listar_area.html', title='Area', legenda='Relação das áreas', descricao=f'Relação de todos as áreas cadastrado no sistema para {areas[0].site}', areas=areas, idSite=idSite)
+        if areas:
+            return render_template('main/listar_area.html', title='Area', legenda='Relação das áreas', descricao=f'Relação de todos as áreas cadastrado no sistema para {areas[0].site}', areas=areas, idSite=idSite)
+        else:
+            return render_template('main/listar_area.html', title='Area', legenda='Relação das áreas', descricao='Não existe áreas cadastradas', areas=areas, idSite=idSite)
     else:
         abort(403)
