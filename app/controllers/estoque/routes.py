@@ -24,7 +24,7 @@ def estoqueView():
             sites = db.session.query(Sites).all()
         except Exception as e:
             print(f'Error: {e}')
-        return render_template('estoque/estoque_view.html', title='Area', legenda='Estoques', descricao='Selecione o Site abaixo para acessar estoque.', sites=sites, form=form)
+        return render_template('estoque/estoque_view.html', title='Area', legenda='Estoques - Mapfre(BR)', descricao='Selecione o Site abaixo para acessar estoque.', sites=sites, form=form)
     else:
         abort(403)
 
@@ -59,7 +59,9 @@ def estoqueCadastro(idSite):
                 return redirect(url_for('est.estoqueCadastro', idSite=idSite))
             else:
                 try:
-                    equipamento = db.session.query(DispositivosEquipamentos).join(TipoEquipamentos.site).filter(or_(DispositivosEquipamentos.serial==form.serial.data, DispositivosEquipamentos.patrimonio== form.patrimonio.data)).first()
+                    # Verifica se já existe equipamento cadastrado
+                    equipamento = db.session.query(DispositivosEquipamentos.serial, DispositivosEquipamentos.patrimonio, Areas.nome, Sites.nome.label('site')).join(DispositivosEquipamentos, Areas.id == DispositivosEquipamentos.idArea).join(Sites, DispositivosEquipamentos.idSite==Sites.id).filter(and_(Areas.nome=='Estoque', or_(DispositivosEquipamentos.serial==form.serial.data, DispositivosEquipamentos.patrimonio==form.patrimonio.data))).first()
+                    # print(equipamento)
                     if not equipamento:
                         try:
                             area = db.session.query(Areas).filter_by(nome='Estoque').first()
@@ -76,6 +78,10 @@ def estoqueCadastro(idSite):
                             db.session.commit()
                             flash('Equipamento cadastrado com sucesso.', 'success')
                             return redirect(url_for('est.estoqueConsulta', idSite=idSite))
+                    else:
+                        flash(f'Equipamento já cadastrado no Estoque em {equipamento.site}!', 'danger')
+                        return redirect(url_for('est.estoqueCadastro', idSite=idSite))
+
                 except Exception as e:
                     print(f'Error ao buscar: {e}')
                 return redirect(url_for('est.estoqueConsulta', idSite=idSite))

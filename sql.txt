@@ -10,7 +10,10 @@
 -- SELECT * from areaSites
 -- SELECT * FROM PontoAtendimentos
 
-SELECT DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.patrimonio, TipoEquipamentos.nome FROM DispositivosEquipamentos JOIN TipoEquipamentos on DispositivosEquipamentos.idTipo=TipoEquipamentos.id JOIN Areas on DispositivosEquipamentos.idArea=Areas.id WHERE DispositivosEquipamentos.idSite=1 AND Areas.nome='Estoque'
+-- SELECT DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.patrimonio, TipoEquipamentos.nome FROM DispositivosEquipamentos JOIN TipoEquipamentos on DispositivosEquipamentos.idTipo=TipoEquipamentos.id JOIN Areas on DispositivosEquipamentos.idArea=Areas.id WHERE DispositivosEquipamentos.idSite=1 AND Areas.nome='Estoque'
+
+SELECT * FROM DispositivosEquipamentos JOIN Areas on DispositivosEquipamentos.idArea=Areas.id WHERE DispositivosEquipamentos.idSite=1 AND Areas.nome='Estoque' AND (DispositivosEquipamentos.serial='' OR DispositivosEquipamentos.patrimonio='')
+
 
 -- SELECT * from TipoEquipamentos join tipoEquipamentoSites on TipoEquipamentos.id == tipoEquipamentoSites.idTipos WHERE TipoEquipamentos.nome='Notebook' AND tipoEquipamentoSites.idSites = 1
 

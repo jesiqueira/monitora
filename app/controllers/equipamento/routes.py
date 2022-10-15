@@ -238,7 +238,7 @@ def equipamentoConsulta(idSite):
         try:
             # tipoEquipamentos = TipoEquipamentos.query.all()
             try:
-                tipoEquipamentos = db.session.query(TipoEquipamentos.nome, Sites.nome.label('site')).join(TipoEquipamentos.site).filter(Sites.id==idSite).all()
+                tipoEquipamentos = db.session.query(TipoEquipamentos.id, TipoEquipamentos.nome, Sites.nome.label('site')).join(TipoEquipamentos.site).filter(Sites.id==idSite).all()
                 return render_template('equipamentos/lista_tipoEquipamento.html', title='View Equipamento', legenda='Tipos Dispositos/Equipamentos',descricao=f'Relação de todos tipos dispositivos/equipamentos cadastrado para: {tipoEquipamentos[0].site}.', tipoEquipamentos=tipoEquipamentos, idSite=idSite)
             except TypeError as t:
                 print(f'Tipo de erro: {t}')

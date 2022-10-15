@@ -181,9 +181,9 @@ class TipoEquipamentos(db.Model):
 class DispositivosEquipamentos(db.Model):
     __tablename__ = 'DispositivosEquipamentos'
     id = db.Column(db.Integer, primary_key=True)
-    serial = db.Column(db.String(40), unique=True)
-    hostname = db.Column(db.String(40), unique=True)
-    patrimonio = db.Column(db.String(40), unique=True)
+    serial = db.Column(db.String(40))
+    hostname = db.Column(db.String(40))
+    patrimonio = db.Column(db.String(40))
     idArea = db.Column(db.Integer, db.ForeignKey('Areas.id'), nullable=False)
     idSite = db.Column(db.Integer, db.ForeignKey('Sites.id'), nullable=False)
     idTipo = db.Column(db.Integer, db.ForeignKey('TipoEquipamentos.id'), nullable=False)
