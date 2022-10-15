@@ -37,10 +37,9 @@ def estoqueConsulta(idSite):
         site = Sites.query.get(idSite)
       except Exception as e:
         print(f'Erro: {e}')
-      
-      dispositivosEstoque = db.session.query(DispositivosEquipamentos).filter(and_(DispositivosEquipamentos.idSite==Sites.id, ))
-      if site:
-        return render_template('estoque/estoque.html', title='Estoque', legenda=f'Estoque - {site.nome}', descricao='Relação de todos os Dispositivos/Equipamentos cadastrado no estoque.', idSite=idSite, form=form)
+      dispositivosEstoque = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.patrimonio, TipoEquipamentos.nome).join(DispositivosEquipamentos, TipoEquipamentos.id==DispositivosEquipamentos.idTipo).join(Areas, DispositivosEquipamentos.idArea==Areas.id).filter(and_(DispositivosEquipamentos.idSite==idSite, Areas.nome=='Estoque')).all()
+    #   print(dispositivosEstoque)
+      return render_template('estoque/estoque.html', title='Estoque', legenda=f'Estoque - {site.nome}', descricao='Relação de todos os Dispositivos/Equipamentos cadastrado no estoque.', idSite=idSite, form=form, dispositivosEstoque=dispositivosEstoque)
     else:
         abort(403)
 

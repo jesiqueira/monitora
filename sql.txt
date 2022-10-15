@@ -3,15 +3,19 @@
 -- SELECT * FROM Users
 -- SELECT * FROM Permissoes
 -- SELECT * from userPermissoes
-SELECT * FROM DispositivosEquipamentos
+-- SELECT * FROM DispositivosEquipamentos
+-- SELECT * FROM TipoEquipamentos
 -- SELECT * from Sites
 -- SELECT * FROM Areas
 -- SELECT * from areaSites
 -- SELECT * FROM PontoAtendimentos
+
+SELECT DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.patrimonio, TipoEquipamentos.nome FROM DispositivosEquipamentos JOIN TipoEquipamentos on DispositivosEquipamentos.idTipo=TipoEquipamentos.id JOIN Areas on DispositivosEquipamentos.idArea=Areas.id WHERE DispositivosEquipamentos.idSite=1 AND Areas.nome='Estoque'
+
 -- SELECT * from TipoEquipamentos join tipoEquipamentoSites on TipoEquipamentos.id == tipoEquipamentoSites.idTipos WHERE TipoEquipamentos.nome='Notebook' AND tipoEquipamentoSites.idSites = 1
 
 -- SELECT Areas.nome, Sites.nome FROM Areas JOIN areaSites on Areas.id = areaSites.idAreas JOIN Sites on Sites.id = areaSites.idSites WHERE Sites.nome = 'Mapfre - (São Carlos)' AND Areas.nome = 'Estoque'
--- 
+
 -- SELECT PontoAtendimentos.descricao FROM PontoAtendimentos JOIN Sites on PontoAtendimentos.idSite = Sites.id WHERE Sites.id=1
 
 -- SELECT Areas.nome, Sites.nome FROM Areas JOIN Sites on Areas.idSite = Sites.id WHERE Areas.nome = 'Inventário'

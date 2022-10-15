@@ -39,18 +39,17 @@
       </tr>
     </thead>
     <tbody>
-      {% for equipamento in equipamentos%}
+      {% for estoque in dispositivosEstoque%}
       <tr>
-        <th scope="row">{{equipamento.id}}</th>
-        <td>{{equipamento.serial}}</td>
-        <td>{{equipamento.patrimonio}}</td>
-        <td>{{equipamento.nome}}</td>
-        <!-- <td><a class="btn btn-info" href="{{url_for('equipamento.atualizarInventario', id=equipamento.id)}}" role="button"><i class="fa-solid fa-pen-to-square"></i> Editar</a></td> -->
-        {% if equipamento %}
+        <th scope="row">{{estoque.id}}</th>
+        <td>{{estoque.serial}}</td>
+        <td>{{estoque.patrimonio}}</td>
+        <td>{{estoque.nome}}</td>
+        {% if estoque %}
         <td>
           <a
             href=""
-            onclick="editarInventario('{{equipamento.id}}')"
+            onclick="editarInventario('{{estoque.id}}')"
             role="button"
             class="btn btn-danger ml-3"
             data-toggle="modal"
