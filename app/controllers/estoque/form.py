@@ -10,6 +10,9 @@ class EstoqueViewForm(FlaskForm):
 class EstoqueCadastroForm(FlaskForm):
     serial = StringField('Serial')
     patrimonio = StringField('Patrimônio')
+    modelo = StringField('Modelo')
+    processador = StringField('Processador')
+    fabricante = StringField('Fabricante')
     tipo = SelectField(choices=[], validate_choice=False)
     
     submit = SubmitField('Cadastrar')

@@ -73,7 +73,7 @@ def estoqueCadastro(idSite):
                             print(f'Error: {e}')
 
                         if area and tipo:
-                            estoque = DispositivosEquipamentos(serial=form.serial.data,hostname='', patrimonio=form.patrimonio.data, idArea=area.id, idSite=site.id, idTipo=tipo.id)
+                            estoque = DispositivosEquipamentos(serial=form.serial.data,hostname='', patrimonio=form.patrimonio.data, modelo=form.modelo.data, processador=form.processador.data, fabricante=form.fabricante.data, idArea=area.id, idSite=site.id, idTipo=tipo.id)
                             db.session.add(estoque)
                             db.session.commit()
                             flash('Equipamento cadastrado com sucesso.', 'success')

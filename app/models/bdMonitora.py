@@ -33,6 +33,12 @@ areaSites = db.Table(
     db.Column('idAreas', db.Integer, db.ForeignKey('Areas.id'))
 )
 
+trasfDispSites = db.Table(
+    'trasfDispSites',
+    db.Column('idSites', db.Integer, db.ForeignKey('Sites.id')),
+    db.Column('idDispositivosEquipamentos', db.Integer, db.ForeignKey('DispositivosEquipamentos.id'))
+)
+
 
 class Enderecos(db.Model):
     __tablename__ = 'Enderecos'
@@ -51,7 +57,7 @@ class Enderecos(db.Model):
         self.cep = cep
 
     def __repr__(self) -> str:
-        return f"Endereco(Rua: {self.rua}, Cidade: {self.cidade}, Cep: {self.cep})"
+        return f"Endereco('{self.rua}', '{self.cidade}', '{self.cep}')"
 
 
 class Sites(db.Model):
@@ -71,7 +77,7 @@ class Sites(db.Model):
         self.idEndereco = idEndereco
 
     def __repr__(self) -> str:
-        return f"Sites({self.nome})"
+        return f"Sites('{self.nome}')"
 
 
 class Permissoes(db.Model):
@@ -96,8 +102,7 @@ class Users(db.Model, UserMixin):
     ativo = db.Column(db.Boolean, nullable=False, default=False)
     idSite = db.Column(db.Integer, db.ForeignKey('Sites.id'), nullable=False)
 
-    permissoes = db.relationship(
-        'Permissoes', secondary=userPermissoes, backref='users')
+    permissoes = db.relationship('Permissoes', secondary=userPermissoes, backref='users')
 
     relatorios = db.relationship('Relatorios', backref='users', lazy=True)
 
@@ -110,7 +115,7 @@ class Users(db.Model, UserMixin):
         self.idSite = idSite
 
     def __repr__(self) -> str:
-        return f"Users('Nome: {self.nome}', 'Login: {self.login}', 'Senha: {self.senha}', 'Email: {self.email}', 'Ativo: {self.ativo}', 'Permissoes: {self.permissoes}')"
+        return f"Users('{self.nome}', '{self.login}', '{self.senha}', '{self.email}', '{self.ativo}', '{self.permissoes}')"
 
 
 class Status(db.Model):
@@ -126,7 +131,7 @@ class Status(db.Model):
         self.dataHora = dataHora
 
     def __repr__(self) -> str:
-        return f"Status(Ativo: {self.ativo}, DataHora: {self.dataHora})"
+        return f"Status('{self.ativo}',' {self.dataHora}')"
 
 
 class PontoAtendimentos(db.Model):
@@ -143,7 +148,7 @@ class PontoAtendimentos(db.Model):
         self.idSite = idSite
 
     def __repr__(self) -> str:
-        return f"PontoAtendimentos(Descricao: {self.descricao})"
+        return f"PontoAtendimentos('{self.descricao}')"
 
 
 class Areas(db.Model):
@@ -159,7 +164,7 @@ class Areas(db.Model):
         self.site = site
 
     def __repr__(self) -> str:
-        return f"Area({self.nome})"
+        return f"Area('{self.nome}')"
 
 
 class TipoEquipamentos(db.Model):
@@ -175,7 +180,7 @@ class TipoEquipamentos(db.Model):
         self.site = site
 
     def __repr__(self) -> str:
-        return f"Tipos({self.nome}, {self.site})"
+        return f"Tipos('{self.nome}', '{self.site}')"
 
 
 class DispositivosEquipamentos(db.Model):
@@ -184,27 +189,33 @@ class DispositivosEquipamentos(db.Model):
     serial = db.Column(db.String(40))
     hostname = db.Column(db.String(40))
     patrimonio = db.Column(db.String(40))
+    modelo = db.Column(db.String(40))
+    processador = db.Column(db.String(40))
+    fabricante = db.Column(db.String(40))
+    
+    site = db.relationship('Sites', secondary=trasfDispSites, backref='dispositivosEquipamentos')
+    
     idArea = db.Column(db.Integer, db.ForeignKey('Areas.id'), nullable=False)
     idSite = db.Column(db.Integer, db.ForeignKey('Sites.id'), nullable=False)
     idTipo = db.Column(db.Integer, db.ForeignKey('TipoEquipamentos.id'), nullable=False)
 
-    computador = db.relationship(
-        'Computadores', backref='dispositivosEquipamentos', lazy=True)
-    equipamentoEmprestimo = db.relationship(
-        'EquipamentoEmprestimos', backref='dispositivosEquipamentos', lazy=True)
-    relatorios = db.relationship(
-        'Relatorios', backref='dispositivosEquipamentos', lazy=True)
+    computador = db.relationship('Computadores', backref='dispositivosEquipamentos', lazy=True)
+    equipamentoEmprestimo = db.relationship('EquipamentoEmprestimos', backref='dispositivosEquipamentos', lazy=True)
+    relatorios = db.relationship('Relatorios', backref='dispositivosEquipamentos', lazy=True)
 
-    def __init__(self, serial='', hostname='', patrimonio='', idArea=0, idSite=0, idTipo=0) -> None:
+    def __init__(self, serial='', hostname='', patrimonio='', modelo='', processador='', fabricante='', idArea=0, idSite=0, idTipo=0) -> None:
         self.serial = serial
         self.hostname = hostname
         self.patrimonio = patrimonio
+        self.modelo = modelo
+        self.processador = processador
+        self.fabricante = fabricante
         self.idArea = idArea
         self.idSite = idSite
         self.idTipo = idTipo
 
     def __repr__(self) -> str:
-        return f"DispositivosEquipamentos(Serial: {self.serial}, Hostname: {self.hostname}, Patrimonio: {self.patrimonio})"
+        return f"DispositivosEquipamentos('{self.serial}','{self.hostname}', '{self.patrimonio}', '{self.modelo}', '{self.processador}', '{self.fabricante}')"
 
 
 class Computadores(db.Model):
@@ -223,7 +234,7 @@ class Computadores(db.Model):
         self.idStatus = idStatus
 
     def __repr__(self) -> str:
-        return f"Computador(ID_Computador: {self.idDispositoEquipamento}, ID_PontoAtendimento: {self.idPontoAtendimento}, ID_Status: {self.idStatus})"
+        return f"Computador('{self.idDispositoEquipamento}','{self.idPontoAtendimento}',' {self.idStatus}')"
 
 
 class EquipamentoEmprestimos(db.Model):
@@ -236,7 +247,7 @@ class EquipamentoEmprestimos(db.Model):
         self.idDispositosEquipamento = idDispositosEquipamento
 
     def __repr__(self) -> str:
-        return f"EquipamentoEmprestimos(ID_EquipamentoEmprestado: {self.idDispositosEquipamento})"
+        return f"EquipamentoEmprestimos('{self.idDispositosEquipamento}')"
 
 
 class Funcionarios(db.Model):
@@ -258,7 +269,7 @@ class Funcionarios(db.Model):
         self.idEndereco = idEndereco
 
     def __repr__(self) -> str:
-        return f"Funcionarios(Nome: {self.nome}, Cpf: {self.cpf})"
+        return f"Funcionarios('{self.nome}', '{self.cpf}')"
 
 
 class Emprestimos(db.Model):
@@ -283,7 +294,7 @@ class Emprestimos(db.Model):
         self.idFuncionario = idFuncionario
 
     def __repr__(self) -> str:
-        return f"Emprestimos(DataEmprestimo: {self.dataEmprestimo}, DataDevolucao: {self.dataDevolucao}, Status: {self.status})"
+        return f"Emprestimos('{self.dataEmprestimo}','{self.dataDevolucao}', '{self.status}')"
 
 
 class TelefoneFuncionarios(db.Model):
@@ -300,7 +311,7 @@ class TelefoneFuncionarios(db.Model):
         self.idFuncionario = idFuncionario
 
     def __repr__(self) -> str:
-        return f"TelefoneFuncionarios(DDD: {self.ddd}, Numero: {self.numero})"
+        return f"TelefoneFuncionarios('{self.ddd}', '{self.numero}')"
 
 
 class Acoes(db.Model):
@@ -314,7 +325,7 @@ class Acoes(db.Model):
         self.nome = nome
 
     def __repr__(self) -> str:
-        return f"Acoes(Nome: {self.nome})"
+        return f"Acoes('{self.nome}')"
 
 
 class Relatorios(db.Model):
@@ -333,4 +344,4 @@ class Relatorios(db.Model):
         self.idAcao = idAcao
 
     def __repr__(self) -> str:
-        return f"Relatorios(Data: {self.data})"
+        return f"Relatorios('{self.data}')"

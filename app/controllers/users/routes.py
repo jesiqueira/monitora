@@ -134,11 +134,9 @@ def novo_usuario():
         if form.validate_on_submit():
             hashed_password = bcrypt.generate_password_hash(
                 form.password.data).decode('utf-8')
-            site = Sites.query.filter_by(
-                nome=form.siteSelect.data).first_or_404()
+            site = Sites.query.filter_by(nome=form.siteSelect.data).first_or_404()
             if site:
-                user = Users(nome=form.nome.data, login=form.login.data, senha=hashed_password,
-                               email=form.email.data, admin=form.admin.data, ativo=form.ativo.data, idSite=site.id)
+                user = Users(nome=form.nome.data, login=form.login.data, senha=hashed_password, email=form.email.data, ativo=form.ativo.data, idSite=site.id)
                 db.session.add(user)
                 db.session.commit()
                 flash(
@@ -173,7 +171,6 @@ def update_usuario(id_user):
             form.nome.data = user.nome
             form.login.data = user.login
             form.email.data = user.email
-            form.admin.data = user.admin
             form.ativo.data = user.ativo
         return render_template('users/update_usuario.html', title='Editar usuário', legenda='Update dados do Usuário', form=form)
     else:
