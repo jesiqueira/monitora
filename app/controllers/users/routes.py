@@ -1,7 +1,9 @@
+from operator import and_, or_
 from flask import render_template, flash, redirect, url_for, Blueprint, request, abort
 from app.controllers.users.form import (LoginForm, CreateUserForm, UpdateUserForm, UpdatePassWordUserForm)
 from app.controllers.main.form import Areas
 from app import db, bcrypt
+from sqlalchemy import or_, and_
 from app.models.bdMonitora import (Permissoes, Users, Enderecos, Sites)
 from flask_login import login_user, current_user, logout_user, login_required
 
@@ -49,61 +51,56 @@ def createAdmin():
     users = Users.query.all()
 
     if not users:
-        try:
-            endereco = Enderecos(rua='Coronel Jose Augusto de Oliveira Salles', cidade='São Carlos - SP', cep=13570820)
-            db.session.add(endereco)
-            db.session.commit()
-        except Exception as e:
-            db.session.flush()
-            db.session.rollback()
-            # print(f'Erro: {e}')
+        # try:
+        #     endereco = Enderecos(rua='Coronel Jose Augusto de Oliveira Salles', cidade='São Carlos - SP', cep=13570820)
+        #     db.session.add(endereco)
+        #     db.session.commit()
+        # except Exception as e:
+        #     db.session.flush()
+        #     db.session.rollback()
+        #     # print(f'Erro: {e}')
+
+        # try:
+        #     site = Sites(nome='Mapfre - (São Carlos)', idEndereco=endereco.id)
+        #     db.session.add(site)
+        #     db.session.commit()
+        #     areas = ['Estoque', 'Inventario', 'Descarte']
+        #     for area in areas:
+        #         a = Areas(nome=area, site=[site])
+        #         db.session.add(a)
+        #         db.session.commit()                
+        # except Exception as e:
+        #     db.session.flush()
+        #     db.session.rollback()
+        #     # print(f'Erro: {e}')
 
         try:
-            site = Sites(nome='Mapfre - (São Carlos)', idEndereco=endereco.id)
-            db.session.add(site)
-            db.session.commit()
-            areas = ['Estoque', 'Inventario', 'Descarte']
-            for area in areas:
-                a = Areas(nome=area, site=[site])
-                db.session.add(a)
-                db.session.commit()
-                
-        except Exception as e:
-            db.session.flush()
-            db.session.rollback()
-            # print(f'Erro: {e}')
-
-        try:
-            user = Users(nome='Administrador', login='admin', senha=hashed_password, email='admin@bbmapfre.com.br', ativo=True, idSite=site.id)
-            db.session.add(user)
+            permissao = Permissoes(leitura=True, escrita=True, adminUser=True)
+            db.session.add(permissao)
             db.session.commit()
         except Exception as e:
             db.session.flush()
             db.session.rollback()
-            # print(f'Erro: {e}')
+            print(f"Erro: {e}")
         
-        try:
-            p = Permissoes.query.all()
-            if not p:
-                listaPermissoes = ['r', 'w']
-                for perm in listaPermissoes:
-                    permissao = Permissoes(permissao=perm)
-                    db.session.add(permissao)
-                    db.session.commit()
-        except Exception as e:
-            db.session.flush()
-            db.session.rollback()
-            print(f"Erro: {e}") 
+        # try:
+        #     permissoes = Permissoes.query.all()
+        # except Exception as e:
+        #     db.session.flush()
+        #     db.session.rollback()
+        #     # print(f'Erro: {e}')
 
         try:
-            permissoes = Permissoes.query.get_or_404(2)
-            user = db.session.query(Users).filter(Users.login=='admin').first_or_404()
-            user.permissoes = [permissoes]
-            db.session.commit()
+            print(permissao)
+            # user = Users(nome='Administrador', login='admin', senha=hashed_password, email='admin@bbmapfre.com.br', permissoes=permissoes, ativo=True, idSite=site.id)
+            # db.session.add(user)
+            # db.session.commit()
         except Exception as e:
             db.session.flush()
             db.session.rollback()
-            # print(f'Erro: {e}')
+            print(f'Erro: {e}')
+        
+
 
         flash('Login Administrador criado com sucesso!', 'success')
         return redirect(url_for('main.home'))
@@ -115,9 +112,7 @@ def createAdmin():
 @user.route('/usuarios')
 @login_required
 def lista_usuario():
-    permissao = db.session.query(Permissoes.permissao).join(Users.permissoes).filter(Users.id==current_user.id).first_or_404()
-    print(permissao)
-    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
+    if current_user.permissoes[2].permissao == 'u' and current_user.ativo:
         users = db.session.query(Users.id, Users.nome.label('userNome'), Users.login, Users.email, Sites.nome.label(
             'siteNome')).join(Users, Sites.id == Users.idSite).all()
         # print(users[1]['siteNome'])
@@ -129,18 +124,18 @@ def lista_usuario():
 @user.route('/usuario/novo',  methods=['GET', 'POST'])
 @login_required
 def novo_usuario():
-    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
-        form = CreateUserForm()
+    form = CreateUserForm()
+    permissoes = db.session.query(Permissoes.permissao).join(Users.permissoes).filter(or_(Permissoes.permissao==form.r.data, Permissoes.permissao==form.w.data, Permissoes.permissao==form.adminUser.data))
+    print(permissoes)
+    if  current_user.permissoes[2].permissao == 'u' and current_user.ativo:
         if form.validate_on_submit():
-            hashed_password = bcrypt.generate_password_hash(
-                form.password.data).decode('utf-8')
+            hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
             site = Sites.query.filter_by(nome=form.siteSelect.data).first_or_404()
             if site:
-                user = Users(nome=form.nome.data, login=form.login.data, senha=hashed_password, email=form.email.data, ativo=form.ativo.data, idSite=site.id)
-                db.session.add(user)
-                db.session.commit()
-                flash(
-                    f'Conta criada com sucesso para: {form.nome.data}!', 'success')
+                # user = Users(nome=form.nome.data, login=form.login.data, senha=hashed_password, email=form.email.data, ativo=form.ativo.data, idSite=site.id)
+                # db.session.add(user)
+                # db.session.commit()
+                flash(f'Conta criada com sucesso para: {form.nome.data}!', 'success')
             return redirect(url_for('user.lista_usuario'))
 
         return render_template('users/criar_usuario.html', title='Novo usuário', form=form)
@@ -151,7 +146,7 @@ def novo_usuario():
 @user.route('/usuario/<int:id_user>/update',  methods=['GET', 'POST'])
 @login_required
 def update_usuario(id_user):
-    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
+    if  current_user.permissoes[2].permissao == 'u' and current_user.ativo:
         try:
             user = Users.query.get_or_404(id_user)
         except Exception as e:
@@ -180,7 +175,7 @@ def update_usuario(id_user):
 @user.route('/atualizarSenha',  methods=['POST'])
 @login_required
 def updatePassword():
-    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
+    if  current_user.permissoes[2].permissao == 'u' and current_user.ativo:
         form = UpdatePassWordUserForm()
         if request.method == 'POST':
             form.id_user.data = request.form.get('id_users')
@@ -192,7 +187,7 @@ def updatePassword():
 @user.route('/atualizaSenhaUsuario',  methods=['POST'])
 @login_required
 def updatePassword_usuario():
-    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
+    if  current_user.permissoes[2].permissao == 'u' and current_user.ativo:
         form = UpdatePassWordUserForm()
         try:
             user = Users.query.get_or_404(form.id_user.data)

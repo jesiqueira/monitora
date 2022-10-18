@@ -38,9 +38,9 @@
                     <div class="col-sm-4 offset-md-1 py-4">
                         <h4 class="text-white">Opções</h4>
                         <ul class="list-unstyled">
-                            {% if current_user.is_authenticated %}
+                            {% if (current_user.permissoes[1].permissao == 'w' or current_user.permissoes[0].permissao == 'r') and current_user.is_authenticated %}
                                 <li><a href="{{url_for('user.logout')}}" class="text-white"> <i class="fa-solid fa-right-from-bracket"></i> Sair</a></li>
-                                {% if current_user.permissoes[0].permissao == 'w' and current_user.ativo%}
+                                {% if current_user.ativo%}
                                     <li><a href="{{url_for('equipamento.inventarioView')}}" class="text-white"><i class="fa-solid fa-gears"></i> Tela Administrativa</a></li>
                                 {% endif %}
                             {% else %}

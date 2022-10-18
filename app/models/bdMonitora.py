@@ -83,13 +83,17 @@ class Sites(db.Model):
 class Permissoes(db.Model):
     __tablename__ = 'Permissoes'
     id = db.Column(db.Integer, primary_key=True)
-    permissao = db.Column(db.String(10), unique=True, nullable=False)
+    leitura = db.Column(db.Boolean, nullable=False, default=False)
+    escrita = db.Column(db.Boolean, nullable=False, default=False)
+    adminUser = db.Column(db.Boolean, nullable=False, default=False)
 
-    def __init__(self, permissao='') -> None:
-        self.permissao = permissao
+    def __init__(self, leitura=0, escrita=0, adminUser=0) -> None:
+        self.leitura = leitura
+        self.escrita = escrita
+        self.adminUser = adminUser
 
     def __repr__(self) -> str:
-        return f"Permissoes('{self.permissao}')"
+        return f"Permissoes('{self.leitura}', '{self.escrita}', '{self.adminUser}')"
 
 
 class Users(db.Model, UserMixin):
@@ -106,13 +110,14 @@ class Users(db.Model, UserMixin):
 
     relatorios = db.relationship('Relatorios', backref='users', lazy=True)
 
-    def __init__(self, nome='', login='', senha='', email='', ativo=1, idSite=0) -> None:
+    def __init__(self, nome='', login='', senha='', email='', ativo=1, permissoes=[], idSite=0) -> None:
         self.nome = nome
         self.login = login
         self.senha = senha
         self.email = email
         self.ativo = ativo
         self.idSite = idSite
+        self.permissoes = permissoes
 
     def __repr__(self) -> str:
         return f"Users('{self.nome}', '{self.login}', '{self.senha}', '{self.email}', '{self.ativo}', '{self.permissoes}')"

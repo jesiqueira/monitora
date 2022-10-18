@@ -20,7 +20,9 @@ class CreateUserForm(FlaskForm):
         min=4, max=15, message='Login não corresponde aos criterios! Tem que ter entre 4 a 15 caracter.')])
     email = StringField('Email', validators=[DataRequired(), Email(
         message='Verificar e-mail informado!')])
-    admin = BooleanField('Administrador')
+    adminUser = BooleanField('Administrar Acessos')
+    r = BooleanField('Acesso a Leitura')
+    w = BooleanField('Acesso a Escrita')
     ativo = BooleanField('Ativo')
     password = PasswordField('Senha', validators=[DataRequired(), Length(
         min=6, max=16, message='Se atentar ao criterio, senha deve ter no mínimo 6 e no máximo 16 caracter!')])

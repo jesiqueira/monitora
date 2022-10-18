@@ -24,7 +24,7 @@ def home():
 @main.route('/site')
 @login_required
 def site():
-    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
+    if (current_user.permissoes[0].permissao == 'r' or current_user.permissoes[1].permissao == 'w') and current_user.ativo:
         sites = db.session.query(Sites.id, Sites.nome, Enderecos.rua, Enderecos.cep, Enderecos.cidade).join(
             Sites, Enderecos.id == Sites.id).all()
         return render_template('main/site.html', title='Site', sites=sites)
@@ -35,10 +35,11 @@ def site():
 @main.route('/site/new', methods=['GET', 'POST'])
 @login_required
 def registrar_site():
-    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
+    if (current_user.permissoes[0].permissao == 'r' or current_user.permissoes[1].permissao == 'w') and current_user.ativo:
         form = SiteForm()
         if form.validate_on_submit():
-            endereco = Enderecos(cidade=form.cidade.data, rua=form.rua.data, cep=form.cep.data)
+            endereco = Enderecos(cidade=form.cidade.data,
+                                 rua=form.rua.data, cep=form.cep.data)
             db.session.add(endereco)
             db.session.commit()
             site = Sites(form.nome.data, endereco.id)
@@ -49,7 +50,7 @@ def registrar_site():
                 a = Areas(nome=area, site=[site])
                 db.session.add(a)
                 db.session.commit()
-            
+
             flash('Site Cadastrado com sucesso!', 'success')
             return redirect(url_for('main.site'))
         return render_template('main/registrar_site.html', title='Registrar Site', form=form)
@@ -60,7 +61,7 @@ def registrar_site():
 @main.route('/site/<int:id_site>/update', methods=['GET', 'POST'])
 @login_required
 def update_site(id_site):
-    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
+    if (current_user.permissoes[0].permissao == 'r' or current_user.permissoes[1].permissao == 'w') and current_user.ativo:
         try:
             endereco = Enderecos.query.get_or_404(id_site)
             site = Sites.query.filter_by(idEndereco=endereco.id).first_or_404()
@@ -88,7 +89,7 @@ def update_site(id_site):
 @main.route('/site/delete', methods=['POST'])
 @login_required
 def delete_site():
-    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
+    if (current_user.permissoes[0].permissao == 'r' or current_user.permissoes[1].permissao == 'w') and current_user.ativo:
         id_site = request.form.get('id_site')
         endereco = Enderecos.query.get_or_404(id_site)
         site = Sites.query.filter_by(idEndereco=endereco.id).first_or_404()
@@ -107,7 +108,7 @@ def delete_site():
 @main.route('/local/<int:idSite>/consulta', methods=['GET', 'POST'])
 @login_required
 def localizarPA(idSite):
-    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
+    if (current_user.permissoes[0].permissao == 'r' or current_user.permissoes[1].permissao == 'w') and current_user.ativo:
         print(f'Site ID: {idSite}')
         locais = db.session.query(PontoAtendimentos.id, PontoAtendimentos.descricao, Sites.nome).join(
             PontoAtendimentos, Sites.id == PontoAtendimentos.idSite).filter(Sites.id == idSite).all()
@@ -118,10 +119,11 @@ def localizarPA(idSite):
     else:
         abort(403)
 
+
 @main.route('/local/view')
 @login_required
 def localView():
-    if (current_user.permissoes[0].permissao == 'w' or current_user.permissoes[0].permissao == 'r') and current_user.ativo:
+    if (current_user.permissoes[0].permissao == 'r' or current_user.permissoes[1].permissao == 'w') and current_user.ativo:
         form = localViewForm()
         try:
             sites = db.session.query(Sites).all()
@@ -132,17 +134,17 @@ def localView():
         abort(403)
 
 
-
 # @main.route('/local/registrarLocal', methods=['GET', 'POST'])
 @main.route('/local/<int:idSite>/novo', methods=['GET', 'POST'])
 @login_required
 def registrarLocal(idSite):
-    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
+    if (current_user.permissoes[0].permissao == 'r' or current_user.permissoes[1].permissao == 'w') and current_user.ativo:
         form = LocalAtendimento()
         if form.validate_on_submit():
             site = Sites.query.filter_by(nome=form.localSelect.data).first()
             if site:
-                local = PontoAtendimentos(descricao=form.localPa.data, idSite=site.id)
+                local = PontoAtendimentos(
+                    descricao=form.localPa.data, idSite=site.id)
                 db.session.add(local)
                 db.session.commit()
                 flash('Ponto de atendimento cadastrado com sucesso', 'success')
@@ -162,11 +164,10 @@ def registrarLocal(idSite):
         abort(403)
 
 
-
 @main.route('/local/<int:id_local>/update', methods=['GET', 'POST'])
 @login_required
 def updateLocal(id_local):
-    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
+    if (current_user.permissoes[0].permissao == 'r' or current_user.permissoes[1].permissao == 'w') and current_user.ativo:
         form = UpdateLocal()
         try:
             localForm = db.session.query(PontoAtendimentos.descricao, PontoAtendimentos.idSite, PontoAtendimentos.id, Sites.nome).join(
@@ -179,7 +180,8 @@ def updateLocal(id_local):
         if form.validate_on_submit():
             try:
                 local = PontoAtendimentos.query.get_or_404(id_local)
-                site = Sites.query.filter(Sites.nome == form.localSelect.data).first_or_404()
+                site = Sites.query.filter(
+                    Sites.nome == form.localSelect.data).first_or_404()
             except Exception as e:
                 # print(f'Erro ao realizar consulta: {e}')
                 abort(404)
@@ -208,7 +210,7 @@ def updateLocal(id_local):
 @main.route('/home/AtualizarComputadorSite', methods=['GET'])
 @login_required
 def atualizarComputadorSite():
-    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
+    if (current_user.permissoes[0].permissao == 'r' or current_user.permissoes[1].permissao == 'w') and current_user.ativo:
         monitora = Monitora()
         monitora.threadAtualizarStatusComputador()
         flash('Dados Atualizado com sucesso!', 'success')
@@ -220,19 +222,21 @@ def atualizarComputadorSite():
 @main.route('/area/<int:idSite>/nova', methods=['GET', 'POST'])
 @login_required
 def area(idSite):
-    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
+    if (current_user.permissoes[0].permissao == 'r' or current_user.permissoes[1].permissao == 'w') and current_user.ativo:
         form = AreaForm()
         try:
             site = Sites.query.filter_by(id=idSite).first()
         except Exception as e:
             print(f'Erro ao consultar: {e}')
-        
+
         if form.validate_on_submit():
             try:
                 print(f'Area: {form.area.data}, Site: {form.localSelect.data}')
-                area = db.session.query(Areas.nome, Sites.nome).join(Areas.site).filter(and_(Sites.nome == form.localSelect.data, Areas.nome == form.area.data)).first()
+                area = db.session.query(Areas.nome, Sites.nome).join(Areas.site).filter(
+                    and_(Sites.nome == form.localSelect.data, Areas.nome == form.area.data)).first()
                 if area:
-                    flash(f'{form.area.data} já está cadastrada para  {form.localSelect.data}', 'danger')
+                    flash(
+                        f'{form.area.data} já está cadastrada para  {form.localSelect.data}', 'danger')
                 else:
                     try:
                         area = Areas(nome=form.area.data, site=[site])
@@ -243,7 +247,7 @@ def area(idSite):
                         print(f'Error: {e}')
             except Exception as e:
                 print(f'Error: {e}')
-            
+
             return redirect(url_for('main.areaView'))
         elif request.method == 'GET':
             form.localSelect.choices = [site.nome]
@@ -255,7 +259,7 @@ def area(idSite):
 @main.route('/area/view', methods=['GET'])
 @login_required
 def areaView():
-    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
+    if (current_user.permissoes[0].permissao == 'r' or current_user.permissoes[1].permissao == 'w') and current_user.ativo:
         form = AreaViewForm()
         try:
             sites = db.session.query(Sites).all()
@@ -265,11 +269,13 @@ def areaView():
     else:
         abort(403)
 
+
 @main.route('/area/<int:idSite>/consulta', methods=['GET'])
 @login_required
 def areaConsula(idSite):
-    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
-        areas = db.session.query(Areas.id, Areas.nome, Sites.nome.label('site')).join(Areas.site).filter(Sites.id==idSite).all()
+    if (current_user.permissoes[0].permissao == 'r' or current_user.permissoes[1].permissao == 'w') and current_user.ativo:
+        areas = db.session.query(Areas.id, Areas.nome, Sites.nome.label(
+            'site')).join(Areas.site).filter(Sites.id == idSite).all()
         if areas:
             return render_template('main/listar_area.html', title='Area', legenda='Relação das áreas', descricao=f'Relação de todos as áreas cadastrado no sistema para {areas[0].site}', areas=areas, idSite=idSite)
         else:

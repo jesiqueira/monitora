@@ -10,9 +10,13 @@
 -- SELECT * from areaSites
 -- SELECT * FROM PontoAtendimentos
 
+-- SELECT Users.nome, userPermissoes.idPermissoes, Permissoes.permissao FROM Users JOIN userPermissoes on Users.id=userPermissoes.idUser JOIN Permissoes on userPermissoes.idPermissoes=Permissoes.id WHERE Permissoes.permissao='r' or Permissoes.permissao='w' or Permissoes.permissao=''
+
+SELECT Permissoes.permissao FROM Permissoes JOIN userPermissoes on Permissoes.id=userPermissoes.idPermissoes WHERE Permissoes.permissao='u' or Permissoes.permissao='r' or Permissoes.permissao='w'
+
 -- SELECT DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.patrimonio, TipoEquipamentos.nome FROM DispositivosEquipamentos JOIN TipoEquipamentos on DispositivosEquipamentos.idTipo=TipoEquipamentos.id JOIN Areas on DispositivosEquipamentos.idArea=Areas.id WHERE DispositivosEquipamentos.idSite=1 AND Areas.nome='Estoque'
 
-SELECT * FROM DispositivosEquipamentos JOIN Areas on DispositivosEquipamentos.idArea=Areas.id WHERE DispositivosEquipamentos.idSite=1 AND Areas.nome='Estoque' AND (DispositivosEquipamentos.serial='' OR DispositivosEquipamentos.patrimonio='')
+-- SELECT * FROM DispositivosEquipamentos JOIN Areas on DispositivosEquipamentos.idArea=Areas.id WHERE DispositivosEquipamentos.idSite=1 AND Areas.nome='Estoque' AND (DispositivosEquipamentos.serial='' OR DispositivosEquipamentos.patrimonio='')
 
 
 -- SELECT * from TipoEquipamentos join tipoEquipamentoSites on TipoEquipamentos.id == tipoEquipamentoSites.idTipos WHERE TipoEquipamentos.nome='Notebook' AND tipoEquipamentoSites.idSites = 1
