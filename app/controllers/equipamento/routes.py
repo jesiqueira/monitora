@@ -14,7 +14,7 @@ equipamento = Blueprint('equipamento', __name__)
 @equipamento.route('/inventarios/view')
 @login_required
 def inventarioView():
-    if (current_user.permissoes[0].permissao == 'w' or current_user.permissoes[0].permissao == 'r') and current_user.ativo:
+    if (current_user.permissoes[0].leitura or current_user.permissoes[0].escrita) and current_user.ativo:
         form = InventarioForm()
         try:
             inventarios = db.session.query(Sites.id, Sites.nome).join(Areas.site).filter(Areas.nome == 'Inventário').all()
@@ -29,7 +29,7 @@ def inventarioView():
 @equipamento.route('/inventario/<int:idInventario>/consulta')
 @login_required
 def consultaInventario(idInventario):
-    if (current_user.permissoes[0].permissao == 'w' or current_user.permissoes[0].permissao == 'r') and current_user.ativo:
+    if (current_user.permissoes[0].leitura or current_user.permissoes[0].escrita) and current_user.ativo:
         form = InventarioForm()
         try:
             # inventarios = db.session.query(Areas.id, Sites.nome).join(Areas, Sites.id == Areas.idSite).filter(Areas.nome == 'Inventário').all()
@@ -46,7 +46,7 @@ def consultaInventario(idInventario):
 @equipamento.route('/inventario', methods=['GET', 'POST'])
 @login_required
 def inventario():
-    if (current_user.permissoes[0].permissao == 'w' or current_user.permissoes[0].permissao == 'r') and current_user.ativo:
+    if (current_user.permissoes[0].leitura or current_user.permissoes[0].escrita) and current_user.ativo:
         form = InventarioForm()
         if request.method == 'POST':
             consult = '%'+form.consulta.data+'%'
@@ -116,7 +116,7 @@ def inventario():
 @equipamento.route('/dispotivo/<int:idSite>/novo', methods=['GET', 'POST'])
 @login_required
 def novo_equipamento(idSite):
-    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
+    if (current_user.permissoes[0].leitura or current_user.permissoes[0].escrita) and current_user.ativo:
         form = InventariosNovoForm()
         if form.validate_on_submit():
             try:
@@ -179,7 +179,7 @@ def novo_equipamento(idSite):
 @equipamento.route('/atualizarInventario', methods=['POST'])
 @login_required
 def atualizarInventario():
-    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
+    if (current_user.permissoes[0].leitura or current_user.permissoes[0].escrita) and current_user.ativo:
         form = UpdateInventariosForm()
 
         if request.method == 'POST' and request.form.get('id_inventario'):
@@ -221,7 +221,7 @@ def atualizarInventario():
 @equipamento.route('/equipamento/view')
 @login_required
 def equipamentoView():
-    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
+    if (current_user.permissoes[0].leitura or current_user.permissoes[0].escrita) and current_user.ativo:
         form = InventarioForm()
         try:
             sites = db.session.query(Sites).all()
@@ -234,7 +234,7 @@ def equipamentoView():
 @equipamento.route('/equipamento/<int:idSite>/consulta')
 @login_required
 def equipamentoConsulta(idSite):
-    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
+    if (current_user.permissoes[0].leitura or current_user.permissoes[0].escrita) and current_user.ativo:
         try:
             # tipoEquipamentos = TipoEquipamentos.query.all()
             try:
@@ -252,7 +252,7 @@ def equipamentoConsulta(idSite):
 @equipamento.route('/equipamento/<int:idSite>/novo', methods=['GET', 'POST'])
 @login_required
 def criarEquipamento(idSite):
-    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
+    if (current_user.permissoes[0].leitura or current_user.permissoes[0].escrita) and current_user.ativo:
         form = TipoInventarioForm()
         try:
             site = Sites.query.get(idSite)
@@ -261,7 +261,7 @@ def criarEquipamento(idSite):
         if form.validate_on_submit():
             equipamento = db.session.query(TipoEquipamentos).join(TipoEquipamentos.site).filter(and_(TipoEquipamentos.nome==form.nome.data, Sites.id==idSite)).first()
             if not equipamento:            
-                tipo = TipoEquipamentos(form.nome.data, site=[site])
+                tipo = TipoEquipamentos(nome=form.nome.data.title(), site=[site])
                 db.session.add(tipo)
                 db.session.commit()
                 flash('Equipamento cadastrado com sucesso.', 'success')
@@ -279,7 +279,7 @@ def criarEquipamento(idSite):
 @equipamento.route('/inventario/<int:idDesktop>/delete')
 @login_required
 def inventarioDelete(idDesktop):
-    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
+    if (current_user.permissoes[0].leitura or current_user.permissoes[0].escrita) and current_user.ativo:
         pass
     else:
         abort(403)
@@ -288,7 +288,7 @@ def inventarioDelete(idDesktop):
 @equipamento.route('/detalhe/<tipo_relatorio>', methods=['GET'])
 @login_required
 def detalhe(tipo_relatorio):
-    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
+    if (current_user.permissoes[0].leitura or current_user.permissoes[0].escrita) and current_user.ativo:
         monitora = Monitora()
         if tipo_relatorio == 'Conectado':
             computadores = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.hostname, DispositivosEquipamentos.patrimonio, Status.ativo, PontoAtendimentos.descricaoPa).join(

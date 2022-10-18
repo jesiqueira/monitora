@@ -10,7 +10,7 @@ est = Blueprint('est', __name__)
 @est.route('/estoque')
 @login_required
 def estoque():
-  if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
+  if (current_user.permissoes[0].leitura or current_user.permissoes[0].escrita) and current_user.ativo:
     return render_template('estoque/estoque.html', title='Estoque', legenda='Equipamento no estoque')
   else:
     abort(403)
@@ -18,7 +18,7 @@ def estoque():
 @est.route('/estoque/view', methods=['GET'])
 @login_required
 def estoqueView():
-    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
+    if (current_user.permissoes[0].leitura or current_user.permissoes[0].escrita) and current_user.ativo:
         form = EstoqueViewForm()
         try:
             sites = db.session.query(Sites).all()
@@ -31,7 +31,7 @@ def estoqueView():
 @est.route('/estoque/<int:idSite>/consulta', methods=['GET'])
 @login_required
 def estoqueConsulta(idSite):
-    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
+    if (current_user.permissoes[0].leitura or current_user.permissoes[0].escrita) and current_user.ativo:
       form = EstoqueViewForm()
       try:
         site = Sites.query.get(idSite)
@@ -46,7 +46,7 @@ def estoqueConsulta(idSite):
 @est.route('/estoque/<int:idSite>/cadastro', methods=['GET', 'POST'])
 @login_required
 def estoqueCadastro(idSite):
-    if current_user.permissoes[0].permissao == 'w' and current_user.ativo:
+    if (current_user.permissoes[0].leitura or current_user.permissoes[0].escrita) and current_user.ativo:
         form = EstoqueCadastroForm()
         try:
             site = Sites.query.get(idSite)
@@ -60,7 +60,7 @@ def estoqueCadastro(idSite):
             else:
                 try:
                     # Verifica se já existe equipamento cadastrado
-                    equipamento = db.session.query(DispositivosEquipamentos.serial, DispositivosEquipamentos.patrimonio, Areas.nome, Sites.nome.label('site')).join(DispositivosEquipamentos, Areas.id == DispositivosEquipamentos.idArea).join(Sites, DispositivosEquipamentos.idSite==Sites.id).filter(and_(Areas.nome=='Estoque', or_(DispositivosEquipamentos.serial==form.serial.data, DispositivosEquipamentos.patrimonio==form.patrimonio.data))).first()
+                    equipamento = db.session.query(DispositivosEquipamentos.serial, DispositivosEquipamentos.patrimonio, Areas.nome, Sites.nome.label('site')).join(DispositivosEquipamentos, Areas.id == DispositivosEquipamentos.idArea).join(Sites, DispositivosEquipamentos.idSite==Sites.id).filter(and_(Areas.nome=='Estoque', or_(DispositivosEquipamentos.serial==form.serial.data.upper(), DispositivosEquipamentos.patrimonio==form.patrimonio.data.upper()))).first()
                     # print(equipamento)
                     if not equipamento:
                         try:
@@ -73,7 +73,7 @@ def estoqueCadastro(idSite):
                             print(f'Error: {e}')
 
                         if area and tipo:
-                            estoque = DispositivosEquipamentos(serial=form.serial.data,hostname='', patrimonio=form.patrimonio.data, modelo=form.modelo.data, processador=form.processador.data, fabricante=form.fabricante.data, idArea=area.id, idSite=site.id, idTipo=tipo.id)
+                            estoque = DispositivosEquipamentos(serial=form.serial.data.upper(),hostname='', patrimonio=form.patrimonio.data.upper(), modelo=form.modelo.data.title(), processador=form.processador.data.title(), fabricante=form.fabricante.data.title(), idArea=area.id, idSite=site.id, idTipo=tipo.id)
                             db.session.add(estoque)
                             db.session.commit()
                             flash('Equipamento cadastrado com sucesso.', 'success')

@@ -79,7 +79,7 @@
                 <a class="dropdown-item" href="{{url_for('main.areaView')}}"><i class="fa-solid fa-warehouse"></i> Área</a>
               </div>
             </li>
-            {% if current_user.permissoes[2].permissao == 'u' %}
+            {% if current_user.permissoes[0].adminUser %}
               <li class="nav-item px-3 dropdown">
                 <a class="nav-link dropdown-toggle" href="#" data-toggle="dropdown" aria-expanded="false"><i class="fa-solid fa-users-gear"></i> Usuários</a>
                 <div class="dropdown-menu">

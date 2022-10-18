@@ -38,7 +38,7 @@
       </thead>
       <tbody>
         {% for users in usuarios%}
-          {% if users.login == 'Admin'%}
+          {% if users.login == 'admin'%}
           {% else %}
             <tr>
               <th scope="row">{{users.id}}</th>
@@ -70,14 +70,11 @@
         <div class="modal-body">
           <input type="hidden" name="id_user" id="id_user">
           <div class="form-row">
-            <div class="col-md-4">
-              <a class="btn btn-info ml-4" onclick="window.location = updateURLUser()" role="button"><i class="fa-solid fa-pen-to-square"></i> Editar</a>
+            <div class="col-md-6">
+              <a class="btn btn-warning ml-4" onclick="window.location = updateURLUser()" role="button"><i class="fa-solid fa-pen-to-square"></i> Atualizar Dados</a>
             </div>
-            <div class="col-md-4">
-              <a class="btn btn-info ml-1" onclick="trocarSenhaURLUser()" role="button"><i class="fa-solid fa-pen-to-square"></i> Permissões</a>
-            </div>
-            <div class="col-md-4">
-              <a class="btn btn-info ml-2" onclick="trocarSenhaURLUser()" role="button"><i class="fa-solid fa-pen-to-square"></i> Trocar Senha</a>
+            <div class="col-md-6">
+              <a class="btn btn-warning ml-4" onclick="trocarSenhaURLUser()" role="button"><i class="fa-solid fa-pen-to-square"></i> Trocar Senha</a>
             </div>
           </div>
         </div>
