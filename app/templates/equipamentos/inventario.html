@@ -61,13 +61,7 @@
         <!-- <td><a class="btn btn-info" href="{{url_for('equipamento.atualizarInventario', id=equipamento.id)}}" role="button"><i class="fa-solid fa-pen-to-square"></i> Editar</a></td> -->
         {% if equipamento %}
         <td>
-          <a
-            href=""
-            onclick="editarInventario('{{equipamento.id}}')"
-            role="button"
-            class="btn btn-danger ml-3"
-            data-toggle="modal"
-            data-target="#editarInventario"
+          <a href="" onclick="editarInventario('{{equipamento.id}}')" role="button" class="btn btn-danger ml-3" data-toggle="modal" data-target="#editarInventario"
             ><i class="fa-solid fa-pen-to-square"></i
           ></a>
         </td>

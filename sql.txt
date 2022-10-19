@@ -10,16 +10,22 @@
 -- SELECT * from areaSites
 -- SELECT * FROM PontoAtendimentos
 
+SELECT DispositivosEquipamentos.serial, TipoEquipamentos.nome, Areas.nome FROM DispositivosEquipamentos JOIN TipoEquipamentos on TipoEquipamentos.id=DispositivosEquipamentos.idTipo JOIN Areas on DispositivosEquipamentos.idArea=Areas.id WHERE DispositivosEquipamentos.idSite=2 AND Areas.nome='Estoque'
+
+-- SELECT tipoEquipamentoSites.idTipos, tipoEquipamentoSites.idSites FROM tipoEquipamentoSites
+
+-- UPDATE DispositivosEquipamentos SET idTipo=5 WHERE DispositivosEquipamentos.id=1
+
 -- SELECT Users.nome, userPermissoes.idPermissoes, Permissoes.permissao FROM Users JOIN userPermissoes on Users.id=userPermissoes.idUser JOIN Permissoes on userPermissoes.idPermissoes=Permissoes.id WHERE Permissoes.permissao='r' or Permissoes.permissao='w' or Permissoes.permissao=''
 
-SELECT Users.nome, Permissoes.escrita, Permissoes.leitura, Permissoes.adminUser FROM Users JOIN userPermissoes on Users.id == userPermissoes.idUser JOIN Permissoes on Permissoes.id==userPermissoes.idPermissoes WHERE Users.id=2
+-- SELECT Users.nome, Permissoes.escrita, Permissoes.leitura, Permissoes.adminUser FROM Users JOIN userPermissoes on Users.id == userPermissoes.idUser JOIN Permissoes on Permissoes.id==userPermissoes.idPermissoes WHERE Users.id=2
 
 -- SELECT DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.patrimonio, TipoEquipamentos.nome FROM DispositivosEquipamentos JOIN TipoEquipamentos on DispositivosEquipamentos.idTipo=TipoEquipamentos.id JOIN Areas on DispositivosEquipamentos.idArea=Areas.id WHERE DispositivosEquipamentos.idSite=1 AND Areas.nome='Estoque'
 
 -- SELECT * FROM DispositivosEquipamentos JOIN Areas on DispositivosEquipamentos.idArea=Areas.id WHERE DispositivosEquipamentos.idSite=1 AND Areas.nome='Estoque' AND (DispositivosEquipamentos.serial='' OR DispositivosEquipamentos.patrimonio='')
 
 
--- SELECT * from TipoEquipamentos join tipoEquipamentoSites on TipoEquipamentos.id == tipoEquipamentoSites.idTipos WHERE TipoEquipamentos.nome='Notebook' AND tipoEquipamentoSites.idSites = 1
+-- SELECT * from TipoEquipamentos join tipoEquipamentoSites on TipoEquipamentos.id == tipoEquipamentoSites.idTipos WHERE TipoEquipamentos.nome='Notebook' AND tipoEquipamentoSites.idSites = 2
 
 -- SELECT Areas.nome, Sites.nome FROM Areas JOIN areaSites on Areas.id = areaSites.idAreas JOIN Sites on Sites.id = areaSites.idSites WHERE Sites.nome = 'Mapfre - (São Carlos)' AND Areas.nome = 'Estoque'
 
