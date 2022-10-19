@@ -1,7 +1,7 @@
 from turtle import title
 from flask import render_template, Blueprint, flash, redirect, url_for, request, abort
 from flask_login import login_required, current_user
-from app.controllers.estoque.form import EstoqueViewForm, EstoqueCadastroForm, EstoqueUpdateForm
+from app.controllers.estoque.form import EstoqueViewForm, EstoqueCadastroForm, EstoqueUpdateForm, EstoqueDeleteForm
 from app import db
 from sqlalchemy import or_, and_
 from app.models.bdMonitora import Areas, Sites, TipoEquipamentos, DispositivosEquipamentos
@@ -145,3 +145,34 @@ def updateEstoque():
             except Exception as e:
                 print(f'Error: {e}')
             return render_template('estoque/estoque_update.html', title='Atualizar Estoque', legenda='Atualizar Estoque', descricao='Modificar os dados dos campos abaixo para atualizar', form=form, idSite=request.form.get('idSite'))
+
+
+@est.route('/deleteEstoque', methods=['POST'])
+@login_required
+def deleteEstoque():
+    if (current_user.permissoes[0].leitura or current_user.permissoes[0].escrita) and current_user.ativo:
+        form = EstoqueDeleteForm()
+        db.session.flush()
+        if form.validate_on_submit():
+            estoque = db.session.query(DispositivosEquipamentos).filter(and_(DispositivosEquipamentos.id == form.idEstoque.data, DispositivosEquipamentos.idSite == form.idSite.data)).first()
+            db.session.delete(estoque)
+            db.session.commit()
+            flash('Equipamento/Dispositivo removido com sucesso.', 'success')
+            return redirect(url_for('est.estoqueConsulta', idSite=form.idSite.data))
+        elif request.method == 'POST' and request.form.get('idEstoque') and request.form.get('idSite'):
+            try:
+                estoque = db.session.query(DispositivosEquipamentos).filter(and_(DispositivosEquipamentos.id == request.form.get(
+                    'idEstoque'), DispositivosEquipamentos.idSite == request.form.get('idSite'))).first()
+                tipo = db.session.query(TipoEquipamentos).join(
+                    TipoEquipamentos.site).filter(Sites.id == request.form.get('idSite')).all()
+                form.idSite.data = request.form.get('idSite')
+                form.idEstoque.data = request.form.get('idEstoque')
+                form.serial.data = estoque.serial
+                form.patrimonio.data = estoque.patrimonio
+                form.fabricante.data = estoque.fabricante
+                form.modelo.data = estoque.modelo
+                form.processador.data = estoque.processador
+                form.tipo.choices = list(map(lambda tipo: tipo.nome, tipo))
+            except Exception as e:
+                print(f'Error: {e}')
+            return render_template('estoque/estoque_delete.html', title='Atualizar Estoque', legenda='Remover Dispositivo Estoque', descricao='Está certo que deseja remover Equipamento/Dispositivo do Estoque', form=form, idSite=request.form.get('idSite'))

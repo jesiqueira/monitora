@@ -30,3 +30,15 @@ class EstoqueUpdateForm(FlaskForm):
     tipo = SelectField(choices=[], validate_choice=False)
 
     submit = SubmitField('Atualizar')
+
+class EstoqueDeleteForm(FlaskForm):
+    idSite = HiddenField()
+    idEstoque = HiddenField()
+    serial = StringField('Serial')
+    patrimonio = StringField('Patrimônio')
+    modelo = StringField('Modelo')
+    processador = StringField('Processador')
+    fabricante = StringField('Fabricante')
+    tipo = SelectField(choices=[], validate_choice=False)
+
+    submit = SubmitField('Remover')
