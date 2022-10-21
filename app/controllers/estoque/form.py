@@ -31,6 +31,16 @@ class EstoqueUpdateForm(FlaskForm):
 
     submit = SubmitField('Atualizar')
 
+class EstoqueMudarLocalForm(FlaskForm):
+    serial = StringField('Serial')
+    patrimonio = StringField('Patrimônio')
+    modelo = StringField('Modelo')
+    site = StringField('Site')
+    tipo = StringField('Tipo')
+    local = SelectField(choices=[], validate_choice=False)
+
+    submit = SubmitField('Atualizar')
+
 class EstoqueDeleteForm(FlaskForm):
     idSite = HiddenField()
     idEstoque = HiddenField()

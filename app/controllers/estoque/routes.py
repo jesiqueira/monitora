@@ -1,19 +1,33 @@
-from turtle import title
 from flask import render_template, Blueprint, flash, redirect, url_for, request, abort
 from flask_login import login_required, current_user
-from app.controllers.estoque.form import EstoqueViewForm, EstoqueCadastroForm, EstoqueUpdateForm, EstoqueDeleteForm
+from app.controllers.estoque.form import EstoqueViewForm, EstoqueCadastroForm, EstoqueUpdateForm, EstoqueDeleteForm, EstoqueMudarLocalForm
 from app import db
-from sqlalchemy import or_, and_
+from sqlalchemy import or_, and_, not_
 from app.models.bdMonitora import Areas, Sites, TipoEquipamentos, DispositivosEquipamentos
 
 est = Blueprint('est', __name__)
 
 
-@est.route('/estoque')
+@est.route('/mudarLocal', methods=['POST'])
 @login_required
-def estoque():
+def mudarLocal():
     if (current_user.permissoes[0].leitura or current_user.permissoes[0].escrita) and current_user.ativo:
-        return render_template('estoque/estoque.html', title='Estoque', legenda='Equipamento no estoque')
+        idDispositivo = request.form.get('idEstoque')
+        siteId = request.form.get('idSite')
+        if request.method == 'POST' and idDispositivo and siteId:
+            form = EstoqueMudarLocalForm()
+            try:
+                dispositivo = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.patrimonio, DispositivosEquipamentos.modelo, Sites.nome.label('site'), TipoEquipamentos.nome.label('tipo')).join(DispositivosEquipamentos, Sites.id==DispositivosEquipamentos.idSite).join(TipoEquipamentos, DispositivosEquipamentos.idTipo==TipoEquipamentos.id).filter(and_(DispositivosEquipamentos.id==idDispositivo), DispositivosEquipamentos.idSite==siteId).first()
+                areas = db.session.query(Areas).join(Areas.site).filter(and_(Sites.id==siteId,not_(Areas.nome=='Estoque'))).all()
+
+            except Exception as e:
+                print(f'Error: {e}')
+            form.serial.data = dispositivo.serial
+            form.patrimonio.data = dispositivo.patrimonio
+            form.modelo.data = dispositivo.modelo
+            form.tipo.data = dispositivo.tipo
+            form.local.choices = list(map(lambda area: area.nome, areas))
+            return render_template('estoque/estoque_mudarLocal.html', title='Mudar local', legenda='Mudar Local do Equipamento', descricao=f'{dispositivo.site} - Selecione o local para onde vai mudar esse Dispositivo/Equipamento.', form=form)
     else:
         abort(403)
 
@@ -27,7 +41,7 @@ def estoqueView():
             sites = db.session.query(Sites).all()
         except Exception as e:
             print(f'Error: {e}')
-        return render_template('estoque/estoque_view.html', title='Area', legenda='Estoques - Mapfre(BR)', descricao='Selecione o Site abaixo para acessar estoque.', sites=sites, form=form)
+        return render_template('estoque/estoque_view.html', title='Local Estoque', legenda='Estoques - Mapfre(BR)', descricao='Selecione o Site abaixo para acessar estoque.', sites=sites, form=form)
     else:
         abort(403)
 
