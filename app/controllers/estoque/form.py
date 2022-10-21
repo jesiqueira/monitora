@@ -32,15 +32,17 @@ class EstoqueUpdateForm(FlaskForm):
     submit = SubmitField('Atualizar')
 
 class EstoqueMudarLocalForm(FlaskForm):
+    idSite = HiddenField()
+    idEquipamento = HiddenField()
     serial = StringField('Serial')
     patrimonio = StringField('Patrimônio')
     modelo = StringField('Modelo')
     site = StringField('Site')
     tipo = StringField('Tipo')
     local = SelectField('Selecione para onde será movido esse equipamento/dispositivo', choices=[], validate_choice=False)
-    pa = SelectField('Local Atendimento',choices=[], validate_choice=False)
+    pa = StringField('Ponto de Atendimento')
 
-    submit = SubmitField('Atualizar')
+    submit = SubmitField('Efetuar mudança')
 
 class EstoqueDeleteForm(FlaskForm):
     idSite = HiddenField()

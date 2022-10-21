@@ -3,31 +3,80 @@ from flask_login import login_required, current_user
 from app.controllers.estoque.form import EstoqueViewForm, EstoqueCadastroForm, EstoqueUpdateForm, EstoqueDeleteForm, EstoqueMudarLocalForm
 from app import db
 from sqlalchemy import or_, and_, not_
-from app.models.bdMonitora import Areas, Sites, TipoEquipamentos, DispositivosEquipamentos
+from app.models.bdMonitora import Areas, PontoAtendimentos, Sites, TipoEquipamentos, DispositivosEquipamentos, Computadores
 
 est = Blueprint('est', __name__)
 
 
-@est.route('/mudarLocal', methods=['POST'])
+@est.route('/mudarLocal', methods=['GET', 'POST'])
 @login_required
 def mudarLocal():
     if (current_user.permissoes[0].leitura or current_user.permissoes[0].escrita) and current_user.ativo:
         idDispositivo = request.form.get('idEstoque')
         siteId = request.form.get('idSite')
-        if request.method == 'POST' and idDispositivo and siteId:
-            form = EstoqueMudarLocalForm()
+        form = EstoqueMudarLocalForm()
+
+        if form.validate_on_submit():
+            if form.local.data == 'Inventario':
+                if not form.pa.data:
+                    flash('Por favor, preencher o campo Ponto de Atendimento', 'warning')
+                    try:
+                        dispositivo = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.patrimonio, DispositivosEquipamentos.modelo, Sites.nome.label('site'), Sites.id.label('idSite'), TipoEquipamentos.nome.label('tipo')).join(
+                            DispositivosEquipamentos, Sites.id == DispositivosEquipamentos.idSite).join(TipoEquipamentos, DispositivosEquipamentos.idTipo == TipoEquipamentos.id).filter(and_(DispositivosEquipamentos.id == form.idEquipamento.data), DispositivosEquipamentos.idSite == form.idSite.data).first()
+                        areas = db.session.query(Areas).join(Areas.site).filter(
+                            and_(Sites.id == dispositivo.idSite, not_(Areas.nome == 'Estoque'))).all()
+                    except Exception as e:
+                        print(f'Error: {e}')
+                    form.idSite.data = siteId
+                    form.idEquipamento.data = dispositivo.id
+                    form.serial.data = dispositivo.serial
+                    form.patrimonio.data = dispositivo.patrimonio
+                    form.modelo.data = dispositivo.modelo
+                    form.tipo.data = dispositivo.tipo
+                    form.local.choices = list(map(lambda area: area.nome, areas))
+                    return render_template('estoque/estoque_mudarLocal.html', title='Mudar local', legenda='Mudar Local do Equipamento', descricao=f'{dispositivo.site} - Selecione o local para onde vai mudar esse Dispositivo/Equipamento.', form=form, idSite=dispositivo.idSite)
+                else:
+                    try:
+                        pa = db.session.query(PontoAtendimentos).filter_by(descricao=form.pa.data).first()
+                        if not pa:
+                            flash('Ponto de Atendimento não Cadastrado', 'danger')
+                    except Exception as e:
+                        print(f'Error: {e}')
+                    computador = db.session.query(PontoAtendimentos.descricao, DispositivosEquipamentos.serial, Computadores.idStatus).join(Computadores, PontoAtendimentos.id==Computadores.idPontoAtendimento).join(
+                        DispositivosEquipamentos, Computadores.idDispositosEquipamento==DispositivosEquipamentos.id).filter(and_(DispositivosEquipamentos.idSite==form.idSite.data, PontoAtendimentos.descricao==form.pa.data))
+                    print(computador)    
+
+
+                    area = db.session.query(Areas).join(Areas.site).filter(and_(Sites.id == form.idSite.data, Areas.nome == form.local.data)).first()
+                    equipamento = DispositivosEquipamentos.query.get(form.idEquipamento.data)
+                    print(area.id)
+                    # equipamento.idArea = area.id
+                    # db.session.commit()
+                    flash('Direcionado para Inventário com sucesso!', 'success')
+            elif form.local.data == 'Descarte':
+                try:
+                    area = db.session.query(Areas).join(Areas.site).filter(and_(Sites.id==form.idSite.data, Areas.nome==form.local.data)).first()
+                    equipamento = DispositivosEquipamentos.query.get(form.idEquipamento.data)
+                    equipamento.idArea = area.id
+                    db.session.commit()
+                except Exception as e:
+                    print(f"Error: {e}")
+                flash('Direcionado para Descarte com sucesso!', 'success')
+            return redirect(url_for('est.estoqueConsulta', idSite=form.idSite.data))
+        elif request.method == 'POST' and idDispositivo and siteId:
             try:
                 dispositivo = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.patrimonio, DispositivosEquipamentos.modelo, Sites.nome.label('site'), TipoEquipamentos.nome.label('tipo')).join(DispositivosEquipamentos, Sites.id==DispositivosEquipamentos.idSite).join(TipoEquipamentos, DispositivosEquipamentos.idTipo==TipoEquipamentos.id).filter(and_(DispositivosEquipamentos.id==idDispositivo), DispositivosEquipamentos.idSite==siteId).first()
                 areas = db.session.query(Areas).join(Areas.site).filter(and_(Sites.id==siteId,not_(Areas.nome=='Estoque'))).all()
-
             except Exception as e:
                 print(f'Error: {e}')
+            form.idSite.data = siteId
+            form.idEquipamento.data = dispositivo.id
             form.serial.data = dispositivo.serial
             form.patrimonio.data = dispositivo.patrimonio
             form.modelo.data = dispositivo.modelo
             form.tipo.data = dispositivo.tipo
             form.local.choices = list(map(lambda area: area.nome, areas))
-            return render_template('estoque/estoque_mudarLocal.html', title='Mudar local', legenda='Mudar Local do Equipamento', descricao=f'{dispositivo.site} - Selecione o local para onde vai mudar esse Dispositivo/Equipamento.', form=form)
+            return render_template('estoque/estoque_mudarLocal.html', title='Mudar local', legenda='Mudar Local do Equipamento', descricao=f'{dispositivo.site} - Selecione o local para onde vai mudar esse Dispositivo/Equipamento.', form=form, idSite=siteId)
     else:
         abort(403)
 
