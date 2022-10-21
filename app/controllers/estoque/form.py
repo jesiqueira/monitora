@@ -37,7 +37,8 @@ class EstoqueMudarLocalForm(FlaskForm):
     modelo = StringField('Modelo')
     site = StringField('Site')
     tipo = StringField('Tipo')
-    local = SelectField(choices=[], validate_choice=False)
+    local = SelectField('Selecione para onde será movido esse equipamento/dispositivo', choices=[], validate_choice=False)
+    pa = SelectField('Local Atendimento',choices=[], validate_choice=False)
 
     submit = SubmitField('Atualizar')
 

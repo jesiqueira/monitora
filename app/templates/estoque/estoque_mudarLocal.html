@@ -79,6 +79,26 @@
         {% endif %}
       </div>
     </div>
+    <div class="form-row mt-4 localPa hide">
+      <div class="col">
+        {{ form.pa.label(class='form-control-label') }} 
+        {% if form.pa.errors %} 
+          {{ form.pa(class='form-control form-control-lg is-invalid')}}
+          <div class="invalid-feedback">
+            {% for error in form.pa.errors %}
+              <span>{{ error }}</span>
+            {% endfor %}
+          </div>
+        {% else %} 
+          {{ form.pa(class='form-control form-control-lg')}}
+        {% endif %}
+      </div>
+    </div>
+    <div class="form-row mt-4 button hide">
+      <div class="col">
+        {{form.submit(class='btn btn-outline-primary')}}
+      </div>
+    </div>
   </form>
 </main>
 
