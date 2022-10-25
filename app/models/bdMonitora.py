@@ -131,7 +131,7 @@ class Status(db.Model):
 
     computador = db.relationship('Computadores', backref='status', lazy=True)
 
-    def __init__(self, ativo=1, dataHora='') -> None:
+    def __init__(self, ativo=1, dataHora=datetime.utcnow) -> None:
         self.ativo = ativo
         self.dataHora = dataHora
 

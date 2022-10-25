@@ -1,5 +1,5 @@
 -- SELECT * from status
-SELECT * from Computadores
+-- SELECT * from Computadores
 -- SELECT * FROM Users
 -- SELECT * FROM Permissoes
 -- SELECT * from userPermissoes
@@ -10,7 +10,9 @@ SELECT * from Computadores
 -- SELECT * from areaSites
 -- SELECT * FROM PontoAtendimentos
 
-SELECT PontoAtendimentos.descricao
+-- SELECT DispositivosEquipamentos.serial, PontoAtendimentos.descricao, Areas.nome FROM Computadores JOIN DispositivosEquipamentos on DispositivosEquipamentos.id=Computadores.idDispositosEquipamento JOIN PontoAtendimentos on Computadores.idPontoAtendimento=PontoAtendimentos.id JOIN Areas on DispositivosEquipamentos.idArea=Areas.id WHERE DispositivosEquipamentos.idSite=1 AND PontoAtendimentos.descricao='TA-BA-F1-P1'
+
+SELECT PontoAtendimentos.descricao from PontoAtendimentos JOIN Sites on PontoAtendimentos.idSite=Sites.id WHERE PontoAtendimentos.descricao='TA-BA-F1-P1'
 
 -- SELECT DispositivosEquipamentos.serial, Areas.nome FROM DispositivosEquipamentos JOIN Areas on DispositivosEquipamentos.idArea=Areas.id WHERE Areas.nome ='Descarte'
 

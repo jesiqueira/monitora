@@ -3,9 +3,32 @@ from flask_login import login_required, current_user
 from app.controllers.estoque.form import EstoqueViewForm, EstoqueCadastroForm, EstoqueUpdateForm, EstoqueDeleteForm, EstoqueMudarLocalForm
 from app import db
 from sqlalchemy import or_, and_, not_
-from app.models.bdMonitora import Areas, PontoAtendimentos, Sites, TipoEquipamentos, DispositivosEquipamentos, Computadores
+from app.models.bdMonitora import Areas, PontoAtendimentos, Sites, Status, TipoEquipamentos, DispositivosEquipamentos, Computadores
+from datetime import datetime
+from pytz import timezone
 
 est = Blueprint('est', __name__)
+
+def preencherLayoutMudarLocal(idSite, idEquipamento, mensagem='', validation='success'):
+    '''Função ira buscar se existe equipamento cadastrado e irá preencher o formulário com informações.'''
+    try:
+        dispositivo = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.patrimonio, DispositivosEquipamentos.modelo, Sites.nome.label('site'), Sites.id.label('idSite'), TipoEquipamentos.nome.label('tipo')).join(
+            DispositivosEquipamentos, Sites.id == DispositivosEquipamentos.idSite).join(TipoEquipamentos, DispositivosEquipamentos.idTipo == TipoEquipamentos.id).filter(and_(DispositivosEquipamentos.id == idEquipamento), DispositivosEquipamentos.idSite == idSite).first()
+        areas = db.session.query(Areas).join(Areas.site).filter(
+            and_(Sites.id == dispositivo.idSite, not_(Areas.nome == 'Estoque'))).all()
+    except Exception as e:
+        print(f'Error: {e}')
+    
+    form = EstoqueMudarLocalForm()
+    form.idSite.data = dispositivo.idSite
+    form.idEquipamento.data = dispositivo.id
+    form.serial.data = dispositivo.serial
+    form.patrimonio.data = dispositivo.patrimonio
+    form.modelo.data = dispositivo.modelo
+    form.tipo.data = dispositivo.tipo
+    form.local.choices = list(map(lambda area: area.nome, areas))
+    flash(mensagem, validation)
+    return render_template('estoque/estoque_mudarLocal.html', title='Mudar local', legenda='Mudar Local do Equipamento', descricao=f'{dispositivo.site} - Selecione o local para onde vai mudar esse Dispositivo/Equipamento.', form=form, idSite=dispositivo.idSite)
 
 
 @est.route('/mudarLocal', methods=['GET', 'POST'])
@@ -19,40 +42,42 @@ def mudarLocal():
         if form.validate_on_submit():
             if form.local.data == 'Inventario':
                 if not form.pa.data:
-                    flash('Por favor, preencher o campo Ponto de Atendimento', 'warning')
-                    try:
-                        dispositivo = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.patrimonio, DispositivosEquipamentos.modelo, Sites.nome.label('site'), Sites.id.label('idSite'), TipoEquipamentos.nome.label('tipo')).join(
-                            DispositivosEquipamentos, Sites.id == DispositivosEquipamentos.idSite).join(TipoEquipamentos, DispositivosEquipamentos.idTipo == TipoEquipamentos.id).filter(and_(DispositivosEquipamentos.id == form.idEquipamento.data), DispositivosEquipamentos.idSite == form.idSite.data).first()
-                        areas = db.session.query(Areas).join(Areas.site).filter(
-                            and_(Sites.id == dispositivo.idSite, not_(Areas.nome == 'Estoque'))).all()
-                    except Exception as e:
-                        print(f'Error: {e}')
-                    form.idSite.data = siteId
-                    form.idEquipamento.data = dispositivo.id
-                    form.serial.data = dispositivo.serial
-                    form.patrimonio.data = dispositivo.patrimonio
-                    form.modelo.data = dispositivo.modelo
-                    form.tipo.data = dispositivo.tipo
-                    form.local.choices = list(map(lambda area: area.nome, areas))
-                    return render_template('estoque/estoque_mudarLocal.html', title='Mudar local', legenda='Mudar Local do Equipamento', descricao=f'{dispositivo.site} - Selecione o local para onde vai mudar esse Dispositivo/Equipamento.', form=form, idSite=dispositivo.idSite)
+                    return preencherLayoutMudarLocal(idSite=form.idSite.data, idEquipamento=form.idEquipamento.data, mensagem='Por favor, preencher o campo Ponto de Atendimento', validation='warning')
                 else:
                     try:
-                        pa = db.session.query(PontoAtendimentos).filter_by(descricao=form.pa.data).first()
+                        pa = db.session.query(PontoAtendimentos.descricao, PontoAtendimentos.idSite, Sites.nome).join(Sites, Sites.id==PontoAtendimentos.idSite).filter(PontoAtendimentos.descricao==form.pa.data).first()
                         if not pa:
-                            flash('Ponto de Atendimento não Cadastrado', 'danger')
+                            return preencherLayoutMudarLocal(idSite=form.idSite.data, idEquipamento=form.idEquipamento.data, mensagem='Ponto de Atendimento não Cadastrado', validation='danger')
+                        else:
+                            computador = db.session.query(DispositivosEquipamentos.serial, PontoAtendimentos.descricao, Areas.nome).join(Computadores, DispositivosEquipamentos.id==Computadores.idDispositosEquipamento).join(PontoAtendimentos, Computadores.idPontoAtendimento==PontoAtendimentos.id).join(Areas, DispositivosEquipamentos.idArea==Areas.id).filter(and_(DispositivosEquipamentos.idSite==form.idSite.data, PontoAtendimentos.descricao==form.pa.data)).first()
+                            if not computador:
+                                if pa.idSite == form.idSite.data:
+                                    area = db.session.query(Areas).join(Areas.site).filter(and_(Sites.id == form.idSite.data, Areas.nome == form.local.data)).first()
+                                    equipamento = DispositivosEquipamentos.query.get(form.idEquipamento.data)
+                                    equipamento.idArea = area.id
+
+                                    data_e_hora_atuais = datetime.now()
+                                    fuso_horario = timezone('America/Sao_Paulo')
+                                    data_e_hora_sao_paulo = data_e_hora_atuais.astimezone(fuso_horario)
+
+                                    status = Status(ativo=True, dataHora=data_e_hora_sao_paulo)
+                                    db.session.add(status)
+                                    db.session.commit()
+
+                                    computador = Computadores(idDispositosEquipamento=equipamento.id, idPontoAtendimento=pa.id, idStatus=status.id)
+                                    db.session.add(computador)
+                                    db.session.commit()
+
+                                    flash('Direcionado para Inventário com sucesso!', 'success')
+                                    return redirect(url_for('est.estoqueConsulta', idSite=form.idSite.data))
+                                else:
+                                    flash('Ponto de Atendimento não pertence site.', 'danger')
+                            else:
+                                flash('Já existe um dispositivo/equipamento cadastrado nesse local, por favor, fazer as correções!', 'danger')
                     except Exception as e:
-                        print(f'Error: {e}')
-                    computador = db.session.query(PontoAtendimentos.descricao, DispositivosEquipamentos.serial, Computadores.idStatus).join(Computadores, PontoAtendimentos.id==Computadores.idPontoAtendimento).join(
-                        DispositivosEquipamentos, Computadores.idDispositosEquipamento==DispositivosEquipamentos.id).filter(and_(DispositivosEquipamentos.idSite==form.idSite.data, PontoAtendimentos.descricao==form.pa.data))
-                    print(computador)    
-
-
-                    area = db.session.query(Areas).join(Areas.site).filter(and_(Sites.id == form.idSite.data, Areas.nome == form.local.data)).first()
-                    equipamento = DispositivosEquipamentos.query.get(form.idEquipamento.data)
-                    print(area.id)
-                    # equipamento.idArea = area.id
-                    # db.session.commit()
-                    flash('Direcionado para Inventário com sucesso!', 'success')
+                        # print(f'Error: {e}')
+                        db.session.flush()
+                        db.session.rollback()
             elif form.local.data == 'Descarte':
                 try:
                     area = db.session.query(Areas).join(Areas.site).filter(and_(Sites.id==form.idSite.data, Areas.nome==form.local.data)).first()
@@ -60,7 +85,9 @@ def mudarLocal():
                     equipamento.idArea = area.id
                     db.session.commit()
                 except Exception as e:
-                    print(f"Error: {e}")
+                    # print(f"Error: {e}")
+                    db.session.flush()
+                    db.session.rollback()
                 flash('Direcionado para Descarte com sucesso!', 'success')
             return redirect(url_for('est.estoqueConsulta', idSite=form.idSite.data))
         elif request.method == 'POST' and idDispositivo and siteId:
@@ -68,7 +95,9 @@ def mudarLocal():
                 dispositivo = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.patrimonio, DispositivosEquipamentos.modelo, Sites.nome.label('site'), TipoEquipamentos.nome.label('tipo')).join(DispositivosEquipamentos, Sites.id==DispositivosEquipamentos.idSite).join(TipoEquipamentos, DispositivosEquipamentos.idTipo==TipoEquipamentos.id).filter(and_(DispositivosEquipamentos.id==idDispositivo), DispositivosEquipamentos.idSite==siteId).first()
                 areas = db.session.query(Areas).join(Areas.site).filter(and_(Sites.id==siteId,not_(Areas.nome=='Estoque'))).all()
             except Exception as e:
-                print(f'Error: {e}')
+                # print(f'Error: {e}')
+                db.session.flush()
+            
             form.idSite.data = siteId
             form.idEquipamento.data = dispositivo.id
             form.serial.data = dispositivo.serial
@@ -103,7 +132,8 @@ def estoqueConsulta(idSite):
         try:
             site = Sites.query.get(idSite)
         except Exception as e:
-            print(f'Erro: {e}')
+            # print(f'Erro: {e}')
+            db.session.flush()
         db.session.flush()
         dispositivosEstoque = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.patrimonio, TipoEquipamentos.nome).join(
             DispositivosEquipamentos, TipoEquipamentos.id == DispositivosEquipamentos.idTipo).join(Areas, DispositivosEquipamentos.idArea == Areas.id).filter(and_(DispositivosEquipamentos.idSite == idSite, Areas.nome == 'Estoque')).all()
