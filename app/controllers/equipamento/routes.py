@@ -2,9 +2,9 @@ from flask import render_template, Blueprint, flash, redirect, url_for, request,
 from flask_login import login_required, current_user
 from app.controllers.equipamento.form_disposivo import InventariosNovoForm, TipoInventarioForm, UpdateInventariosForm, InventarioForm
 from app.controllers.equipamento.monitora import Monitora
-from app.models.bdMonitora import Areas, PontoAtendimentos, TipoEquipamentos, DispositivosEquipamentos, Sites, Status
+from app.models.bdMonitora import Areas, Computadores, PontoAtendimentos, TipoEquipamentos, DispositivosEquipamentos, Sites, Status
 from app import db
-from sqlalchemy import exc, and_
+from sqlalchemy import exc, and_, distinct
 from datetime import datetime
 from pytz import timezone
 
@@ -16,9 +16,10 @@ equipamento = Blueprint('equipamento', __name__)
 def inventarioView():
     if (current_user.permissoes[0].leitura or current_user.permissoes[0].escrita) and current_user.ativo:
         form = InventarioForm()
+        db.session.flush()
         try:
-            inventarios = db.session.query(Sites.id, Sites.nome).join(Areas.site).filter(Areas.nome == 'Inventário').all()
-            print(inventarios)
+            inventarios = db.session.query(Sites.id, Sites.nome).join(DispositivosEquipamentos, Sites.id==DispositivosEquipamentos.idSite).join(Areas, DispositivosEquipamentos.idArea==Areas.id).filter(Areas.nome=='Inventario').distinct(Sites.id).all()
+            # print(inventarios)
         except Exception as e:
             print(f'Error: {e}')
         return render_template('equipamentos/inventario_view.html', title='Inventários', legenda='Inventários cadastrados', descricao='Relação de todos os Inventarios no Sistema', inventarios=inventarios, form=form)
@@ -26,19 +27,22 @@ def inventarioView():
         abort(403)
 
 
-@equipamento.route('/inventario/<int:idInventario>/consulta')
+@equipamento.route('/inventario/<int:idSite>/consulta')
 @login_required
-def consultaInventario(idInventario):
+def consultaInventario(idSite):
     if (current_user.permissoes[0].leitura or current_user.permissoes[0].escrita) and current_user.ativo:
         form = InventarioForm()
         try:
+            db.session.flush()
             # inventarios = db.session.query(Areas.id, Sites.nome).join(Areas, Sites.id == Areas.idSite).filter(Areas.nome == 'Inventário').all()
+            inventarios = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.patrimonio, DispositivosEquipamentos.hostname, TipoEquipamentos.nome, PontoAtendimentos.descricao).join(
+                Sites, DispositivosEquipamentos.idSite==Sites.id).join(TipoEquipamentos, DispositivosEquipamentos.idTipo==TipoEquipamentos.id).join(Areas, DispositivosEquipamentos.idArea==Areas.id).join(Computadores, DispositivosEquipamentos.id==Computadores.idDispositosEquipamento).join(PontoAtendimentos, Computadores.idPontoAtendimento==PontoAtendimentos.id).filter(and_(DispositivosEquipamentos.idSite==idSite, Areas.nome=='Inventario')).all()
 
-            print(idInventario)
-            inventarios = []
+            print(idSite)
+            print(inventarios)
         except Exception as e:
             print(f'Error: {e}')
-        return render_template('equipamentos/inventario.html', title='Inventários', legenda='Inventários cadastrados', descricao='Relação de todos os Inventarios no Sistema', inventarios=inventarios, form=form, idInventario=idInventario)
+        return render_template('equipamentos/inventario.html', title='Inventários', legenda='Inventários cadastrados', descricao='Relação de todos os Inventarios no Sistema', inventarios=inventarios, form=form, idSite=idSite)
     else:
         abort(403)
 
@@ -142,9 +146,9 @@ def novo_equipamento(idSite):
                     nome=form.tipoDispositivo.data).first_or_404()
                 computador.tipo.append(tipo)
                 db.session.add(computador)
+                db.session.commit()
                 # print(computador)
                 # print(computador.tipo)
-                db.session.commit()
                 flash('Computador cadastrado com sucesso.', 'success')
                 return redirect(url_for('equipamento.inventario'))
             except Exception as e:
@@ -184,7 +188,7 @@ def atualizarInventario():
 
         if request.method == 'POST' and request.form.get('id_inventario'):
             form.idHidden.data = request.form.get('id_inventario')
-            inventarios = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.hostname, DispositivosEquipamentos.patrimonio, PontoAtendimentos.descricaoPa, TipoEquipamentos.nome).join(
+            inventarios = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.hostname, DispositivosEquipamentos.patrimonio, PontoAtendimentos.descricao, TipoEquipamentos.nome).join(
                 DispositivosEquipamentos.tipo).join(PontoAtendimentos, PontoAtendimentos.id == DispositivosEquipamentos.id).filter(DispositivosEquipamentos.id == form.idHidden.data).first_or_404()
             form.serial.data = inventarios.serial
             form.patrimonio.data = inventarios.patrimonio

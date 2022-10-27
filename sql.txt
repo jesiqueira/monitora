@@ -1,5 +1,5 @@
 -- SELECT * from status
--- SELECT * from Computadores
+SELECT * from Computadores
 -- SELECT * FROM Users
 -- SELECT * FROM Permissoes
 -- SELECT * from userPermissoes
@@ -10,9 +10,21 @@
 -- SELECT * from areaSites
 -- SELECT * FROM PontoAtendimentos
 
--- SELECT DispositivosEquipamentos.serial, PontoAtendimentos.descricao, Areas.nome FROM Computadores JOIN DispositivosEquipamentos on DispositivosEquipamentos.id=Computadores.idDispositosEquipamento JOIN PontoAtendimentos on Computadores.idPontoAtendimento=PontoAtendimentos.id JOIN Areas on DispositivosEquipamentos.idArea=Areas.id WHERE DispositivosEquipamentos.idSite=1 AND PontoAtendimentos.descricao='TA-BA-F1-P1'
+-- UPDATE DispositivosEquipamentos SET hostname='PBR001150-M19398', patrimonio='MSG0000019398' WHERE DispositivosEquipamentos.id=1
 
-SELECT PontoAtendimentos.descricao from PontoAtendimentos JOIN Sites on PontoAtendimentos.idSite=Sites.id WHERE PontoAtendimentos.descricao='TA-BA-F1-P1'
+-- SELECT DispositivosEquipamentos.id, DispositivosEquipamentos.serial, PontoAtendimentos.descricao, DispositivosEquipamentos.hostname, DispositivosEquipamentos.patrimonio, Areas.nome FROM Computadores JOIN DispositivosEquipamentos on DispositivosEquipamentos.id=Computadores.idDispositosEquipamento JOIN PontoAtendimentos on Computadores.idPontoAtendimento=PontoAtendimentos.id JOIN Areas on DispositivosEquipamentos.idArea=Areas.id WHERE DispositivosEquipamentos.idSite=1 AND PontoAtendimentos.descricao='TA-BA-F1-P1'
+
+-- Consulta sobre inventários------------------------ 
+-- SELECT DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.patrimonio, DispositivosEquipamentos.hostname, TipoEquipamentos.nome, Areas.nome FROM Sites JOIN DispositivosEquipamentos on DispositivosEquipamentos.idSite=Sites.id JOIN TipoEquipamentos on DispositivosEquipamentos.idTipo=TipoEquipamentos.id JOIN Areas on DispositivosEquipamentos.idArea==Areas.id WHERE DispositivosEquipamentos.idSite==2 AND Areas.nome='Inventario'
+
+-- SELECT DispositivosEquipamentos.idSite, DispositivosEquipamentos.hostname, DispositivosEquipamentos.patrimonio, DispositivosEquipamentos.serial, Areas.nome, Sites.nome FROM DispositivosEquipamentos JOIN Areas on DispositivosEquipamentos.idArea=Areas.id JOIN Sites on DispositivosEquipamentos.idSite=Sites.id
+
+-- SELECT DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.patrimonio, DispositivosEquipamentos.hostname, TipoEquipamentos.nome, Areas.nome, PontoAtendimentos.descricao FROM Sites JOIN DispositivosEquipamentos on DispositivosEquipamentos.idSite=Sites.id JOIN TipoEquipamentos on DispositivosEquipamentos.idTipo=TipoEquipamentos.id JOIN Areas on DispositivosEquipamentos.idArea==Areas.id JOIN Computadores on DispositivosEquipamentos.id==Computadores.idDispositosEquipamento JOIN PontoAtendimentos on Computadores.idPontoAtendimento=PontoAtendimentos.id WHERE DispositivosEquipamentos.idSite==1 AND Areas.nome='Inventario'
+
+-- SELECT DispositivosEquipamentos.id, DispositivosEquipamentos.serial, TipoEquipamentos.nome
+
+
+-- SELECT PontoAtendimentos.descricao from PontoAtendimentos JOIN Sites on PontoAtendimentos.idSite=Sites.id WHERE PontoAtendimentos.descricao='TA-BA-F1-P1'
 
 -- SELECT DispositivosEquipamentos.serial, Areas.nome FROM DispositivosEquipamentos JOIN Areas on DispositivosEquipamentos.idArea=Areas.id WHERE Areas.nome ='Descarte'
 
@@ -40,13 +52,13 @@ SELECT PontoAtendimentos.descricao from PontoAtendimentos JOIN Sites on PontoAte
 
 -- SELECT * from TipoEquipamentos join tipoEquipamentoSites on TipoEquipamentos.id == tipoEquipamentoSites.idTipos WHERE TipoEquipamentos.nome='Notebook' AND tipoEquipamentoSites.idSites = 2
 
--- SELECT Areas.nome, Sites.nome FROM Areas JOIN areaSites on Areas.id = areaSites.idAreas JOIN Sites on Sites.id = areaSites.idSites WHERE Sites.nome = 'Mapfre - (São Carlos)' AND Areas.nome = 'Estoque'
+-- SELECT Areas.nome, Sites.nome FROM Areas JOIN areaSites on Areas.id = areaSites.idAreas JOIN Sites on Sites.id = areaSites.idSites WHERE Sites.nome = 'Mapfre - (São Carlos)' AND Areas.nome = 'Inventario'
+
+-- SELECT Sites.nome, Sites.id FROM DispositivosEquipamentos JOIN Sites on Sites.id=DispositivosEquipamentos.idSite JOIN Areas on Areas.id=DispositivosEquipamentos.idArea WHERE Areas.nome='Inventario'
 
 -- SELECT PontoAtendimentos.descricao FROM PontoAtendimentos JOIN Sites on PontoAtendimentos.idSite = Sites.id WHERE Sites.id=1
 
--- SELECT Areas.nome, Sites.nome FROM Areas JOIN Sites on Areas.idSite = Sites.id WHERE Areas.nome = 'Inventário'
-
--- -- SELECT Areas.id, Areas.nome, Sites.nome FROM Areas JOIN Sites on Areas.idSite=Sites.id
+-- SELECT Areas.id, Areas.nome, Sites.nome FROM Areas JOIN Sites on Areas.idSite=Sites.id
 
 -- SELECT Computador.serial, Computador.hostname, status.ativo, status.dataHora, LocalPa.descricaoPa FROM Computador JOIN LocalPa on Computador.idLocalPa = LocalPa.id JOIN status on status.id = Computador.idStatus
 

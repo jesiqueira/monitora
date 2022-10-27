@@ -1,3 +1,4 @@
+from operator import truediv
 from flask import render_template, Blueprint, flash, redirect, url_for, request, abort
 from flask_login import login_required, current_user
 from app.controllers.estoque.form import EstoqueViewForm, EstoqueCadastroForm, EstoqueUpdateForm, EstoqueDeleteForm, EstoqueMudarLocalForm
@@ -41,8 +42,8 @@ def mudarLocal():
 
         if form.validate_on_submit():
             if form.local.data == 'Inventario':
-                if not form.pa.data:
-                    return preencherLayoutMudarLocal(idSite=form.idSite.data, idEquipamento=form.idEquipamento.data, mensagem='Por favor, preencher o campo Ponto de Atendimento', validation='warning')
+                if not form.pa.data or not form.hostname.data:
+                    return preencherLayoutMudarLocal(idSite=form.idSite.data, idEquipamento=form.idEquipamento.data, mensagem='Por favor, preencher o campo Ponto de Atendimento e Hostname', validation='warning')
                 else:
                     try:
                         pa = db.session.query(PontoAtendimentos.descricao, PontoAtendimentos.idSite, Sites.nome).join(Sites, Sites.id==PontoAtendimentos.idSite).filter(PontoAtendimentos.descricao==form.pa.data).first()
@@ -51,25 +52,46 @@ def mudarLocal():
                         else:
                             computador = db.session.query(DispositivosEquipamentos.serial, PontoAtendimentos.descricao, Areas.nome).join(Computadores, DispositivosEquipamentos.id==Computadores.idDispositosEquipamento).join(PontoAtendimentos, Computadores.idPontoAtendimento==PontoAtendimentos.id).join(Areas, DispositivosEquipamentos.idArea==Areas.id).filter(and_(DispositivosEquipamentos.idSite==form.idSite.data, PontoAtendimentos.descricao==form.pa.data)).first()
                             if not computador:
-                                if pa.idSite == form.idSite.data:
+                                if int(pa.idSite) == int(form.idSite.data):
                                     area = db.session.query(Areas).join(Areas.site).filter(and_(Sites.id == form.idSite.data, Areas.nome == form.local.data)).first()
-                                    equipamento = DispositivosEquipamentos.query.get(form.idEquipamento.data)
-                                    equipamento.idArea = area.id
+                                    try:
+                                        equipamento = DispositivosEquipamentos.query.get(form.idEquipamento.data)
+                                        equipamento.idArea = area.id
+                                        equipamento.hostname = form.hostname.data
+                                        db.session.commit()
+                                    except Exception as e:
+                                        print(f'Error equipamento: {e}')
+                                        db.session.flush()
+                                        db.session.rollback()
 
                                     data_e_hora_atuais = datetime.now()
                                     fuso_horario = timezone('America/Sao_Paulo')
                                     data_e_hora_sao_paulo = data_e_hora_atuais.astimezone(fuso_horario)
-
-                                    status = Status(ativo=True, dataHora=data_e_hora_sao_paulo)
-                                    db.session.add(status)
-                                    db.session.commit()
-
-                                    computador = Computadores(idDispositosEquipamento=equipamento.id, idPontoAtendimento=pa.id, idStatus=status.id)
-                                    db.session.add(computador)
-                                    db.session.commit()
-
-                                    flash('Direcionado para Inventário com sucesso!', 'success')
-                                    return redirect(url_for('est.estoqueConsulta', idSite=form.idSite.data))
+                                    
+                                    if equipamento:
+                                        try:
+                                            status = Status(ativo=True, dataHora=data_e_hora_sao_paulo)
+                                            db.session.add(status)
+                                            db.session.commit()
+                                        except Exception as e:
+                                            print(f'Error Status: {e}')
+                                            db.session.flush()
+                                            db.session.rollback()
+                                        
+                                        if status:
+                                            try:
+                                                computador = Computadores(idDispositosEquipamento=equipamento.id, idPontoAtendimento=pa.id, idStatus=status.id)
+                                                db.session.add(computador)
+                                                db.session.commit()
+                                            except Exception as e:
+                                                print(f'Error Status: {e}')
+                                                db.session.flush()
+                                                db.session.rollback()
+                                            flash('Direcionado para Inventário com sucesso!', 'success')
+                                            return redirect(url_for('est.estoqueConsulta', idSite=form.idSite.data))
+                                    else:
+                                        flash('Erro ao Atualizar Equipamento!', 'danger')
+                                        return redirect(url_for('est.estoqueConsulta', idSite=form.idSite.data))
                                 else:
                                     flash('Ponto de Atendimento não pertence site.', 'danger')
                             else:

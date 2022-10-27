@@ -91,7 +91,20 @@
             {% endfor %}
           </div>
         {% else %} 
-          {{ form.pa(class='form-control form-control-lg')}}
+          {{ form.pa(class='form-control form-control-lg', placeholder='Ex.: TA-BA-F1-P1')}}
+        {% endif %}
+      </div>
+      <div class="col">
+        {{ form.hostname.label(class='form-control-label') }} 
+        {% if form.hostname.errors %} 
+          {{ form.hostname(class='form-control form-control-lg is-invalid')}}
+          <div class="invalid-feedback">
+            {% for error in form.hostname.errors %}
+              <span>{{ error }}</span>
+            {% endfor %}
+          </div>
+        {% else %} 
+          {{ form.hostname(class='form-control form-control-lg', placeholder='Ex.: PBR001150-M1234')}}
         {% endif %}
       </div>
     </div>

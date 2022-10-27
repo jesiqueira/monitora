@@ -36,6 +36,7 @@ class EstoqueMudarLocalForm(FlaskForm):
     idEquipamento = HiddenField()
     serial = StringField('Serial')
     patrimonio = StringField('Patrimônio')
+    hostname = StringField('Hostname')
     modelo = StringField('Modelo')
     site = StringField('Site')
     tipo = StringField('Tipo')
