@@ -1,9 +1,9 @@
 -- SELECT * from status
-SELECT * from Computadores
+-- SELECT * from Computadores
 -- SELECT * FROM Users
 -- SELECT * FROM Permissoes
 -- SELECT * from userPermissoes
--- SELECT * FROM DispositivosEquipamentos
+SELECT * FROM DispositivosEquipamentos
 -- SELECT * FROM TipoEquipamentos
 -- SELECT * from Sites
 -- SELECT * FROM Areas

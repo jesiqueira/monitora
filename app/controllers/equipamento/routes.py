@@ -4,7 +4,7 @@ from app.controllers.equipamento.form_disposivo import InventariosNovoForm, Tipo
 from app.controllers.equipamento.monitora import Monitora
 from app.models.bdMonitora import Areas, Computadores, PontoAtendimentos, TipoEquipamentos, DispositivosEquipamentos, Sites, Status
 from app import db
-from sqlalchemy import exc, and_, distinct
+from sqlalchemy import exc, and_
 from datetime import datetime
 from pytz import timezone
 
@@ -18,11 +18,12 @@ def inventarioView():
         form = InventarioForm()
         db.session.flush()
         try:
-            inventarios = db.session.query(Sites.id, Sites.nome).join(DispositivosEquipamentos, Sites.id==DispositivosEquipamentos.idSite).join(Areas, DispositivosEquipamentos.idArea==Areas.id).filter(Areas.nome=='Inventario').distinct(Sites.id).all()
+            # inventarios = db.session.query(Sites.id, Sites.nome).join(DispositivosEquipamentos, Sites.id==DispositivosEquipamentos.idSite).join(Areas, DispositivosEquipamentos.idArea==Areas.id).filter(Areas.nome=='Inventario').distinct(Sites.id).all()
+            sites = db.session.query(Sites).all()
             # print(inventarios)
         except Exception as e:
             print(f'Error: {e}')
-        return render_template('equipamentos/inventario_view.html', title='Inventários', legenda='Inventários cadastrados', descricao='Relação de todos os Inventarios no Sistema', inventarios=inventarios, form=form)
+        return render_template('equipamentos/inventario_view.html', title='Inventários', legenda='Inventários cadastrados', descricao='Relação de todos os Inventarios no Sistema', sites=sites, form=form)
     else:
         abort(403)
 
@@ -34,15 +35,11 @@ def consultaInventario(idSite):
         form = InventarioForm()
         try:
             db.session.flush()
-            # inventarios = db.session.query(Areas.id, Sites.nome).join(Areas, Sites.id == Areas.idSite).filter(Areas.nome == 'Inventário').all()
-            inventarios = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.patrimonio, DispositivosEquipamentos.hostname, TipoEquipamentos.nome, PontoAtendimentos.descricao).join(
+            inventarios = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.patrimonio, DispositivosEquipamentos.hostname, TipoEquipamentos.nome, PontoAtendimentos.descricao, Sites.nome.label('site')).join(
                 Sites, DispositivosEquipamentos.idSite==Sites.id).join(TipoEquipamentos, DispositivosEquipamentos.idTipo==TipoEquipamentos.id).join(Areas, DispositivosEquipamentos.idArea==Areas.id).join(Computadores, DispositivosEquipamentos.id==Computadores.idDispositosEquipamento).join(PontoAtendimentos, Computadores.idPontoAtendimento==PontoAtendimentos.id).filter(and_(DispositivosEquipamentos.idSite==idSite, Areas.nome=='Inventario')).all()
-
-            print(idSite)
-            print(inventarios)
         except Exception as e:
             print(f'Error: {e}')
-        return render_template('equipamentos/inventario.html', title='Inventários', legenda='Inventários cadastrados', descricao='Relação de todos os Inventarios no Sistema', inventarios=inventarios, form=form, idSite=idSite)
+        return render_template('equipamentos/inventario.html', title='Inventários', legenda='Dispositivos cadastrados', descricao=f'{inventarios[0].site} - Relação de todos os dispositivos cadastrados no Inventário', inventarios=inventarios, form=form, idSite=idSite)
     else:
         abort(403)
 
@@ -122,60 +119,74 @@ def inventario():
 def novo_equipamento(idSite):
     if (current_user.permissoes[0].leitura or current_user.permissoes[0].escrita) and current_user.ativo:
         form = InventariosNovoForm()
+        try:
+            site = Sites.query.get(idSite)
+        except Exception as e:
+            db.session.flush()
+            print(f'Error: {e}')
         if form.validate_on_submit():
             try:
-                local = PontoAtendimentos.query.filter_by(
-                    descricao=form.selection.data).first()
-                site = Sites.query.filter_by(id=local.idSite).first_or_404()
-                data_e_hora_atuais = datetime.now()
-                fuso_horario = timezone('America/Sao_Paulo')
-                data_e_hora_sao_paulo = data_e_hora_atuais.astimezone(
-                    fuso_horario)
-                status = Status(1, data_e_hora_sao_paulo)
-                db.session.add(status)
+                area = db.session.query(Areas).join(Areas.site).filter(and_(Sites.id==form.idSite.data, Areas.nome=='Inventario')).first()
+                tipoDispositivo = db.session.query(TipoEquipamentos.nome).join(TipoEquipamentos.site).filter(and_(Sites.id == form.idSite.data, TipoEquipamentos.nome==form.tipoDispositivo.data)).all()
+                equipamento = DispositivosEquipamentos(serial=form.serial.data.upper(), hostname=form.hostname.data.upper(), patrimonio=form.patrimonio.data.upper(), modelo=form.modelo.data.upper(), processador=form.processador.data.upper(), fabricante=form.fabricante.data.upper(), idArea=area.id, idSite=int(form.idSite.data), idTipo=tipoDispositivo.id)
+                db.session.add(equipamento)
                 db.session.commit()
-            except Exception as e:
-                db.session.flush()
-                db.session.rollback()
-                # print(f'Error: {e}')
 
-            try:
-                computador = DispositivosEquipamentos(serial=form.serial.data, hostname=form.hostname.data,
-                                                      patrimonio=form.patrimonio.data, idSite=site.id, idStatus=status.id, idlocalPa=local.id)
-                tipo = TipoEquipamentos.query.filter_by(
-                    nome=form.tipoDispositivo.data).first_or_404()
-                computador.tipo.append(tipo)
-                db.session.add(computador)
-                db.session.commit()
-                # print(computador)
-                # print(computador.tipo)
-                flash('Computador cadastrado com sucesso.', 'success')
-                return redirect(url_for('equipamento.inventario'))
+                if equipamento:
+                    try:
+                        pa = db.session.query(PontoAtendimentos).filter(and_(PontoAtendimentos.descricao==form.pa.data, PontoAtendimentos.idSite==int(form.idSite.data))).first()
+
+                        data_e_hora_atuais = datetime.now()
+                        fuso_horario = timezone('America/Sao_Paulo')
+                        data_e_hora_sao_paulo = data_e_hora_atuais.astimezone(fuso_horario)
+
+                        status = Status(ativo=True, dataHora=data_e_hora_sao_paulo)
+                        db.session.add(status)
+                        db.session.commit()
+
+                        computador = Computadores(idDispositosEquipamento=equipamento.id, idPontoAtendimento=pa.id, idStatus=status.id)
+                        db.session.add(computador)
+                        db.session.commit()
+
+                        flash('Computador cadastro no inventário com sucesso!', 'success')
+                        return redirect(url_for('equipamento.consultaInventario', idSite=idSite))
+                    except Exception as e:
+                        print(f'Error cadastrar equipamento: {e}')
+                        db.session.flush()
+                        db.session.rollback()
+
+                flash('Falha ao realizar cadastro computador no inventário.', 'danger') 
+                return redirect(url_for('equipamento.consultaInventario', idSite=idSite))
+
             except Exception as e:
-                # print(f'Erro ao Obter Pa! {e}')
+                print(f'Error: {e}')
                 db.session.flush()
                 db.session.rollback()
-        if request.method == 'GET':
+            
+            flash('Falha ao realizar cadastro computador no inventário.', 'danger')
+            return redirect(url_for('equipamento.consultaInventario', idSite=idSite))
+
+        elif request.method == 'GET':
             try:
                 pontoAtendimentos = db.session.query(PontoAtendimentos.descricao).join(
                     Sites, PontoAtendimentos.idSite == Sites.id).filter(Sites.id == idSite).all()
-                # print(pontoAtendimento)
             except Exception as e:
                 print(f'Error: {e}')
 
             try:
-                # tiposEquipamentos =
-                pass
+                tiposEquipamentos = db.session.query(TipoEquipamentos.nome).join(TipoEquipamentos.site).filter(Sites.id==idSite).all()
             except Exception as e:
+                db.session.flush()
                 print(f'Error: {e}')
             
-            try:
-                site = Sites.query.get(idSite)
-            except Exception as e:
-                print(f'Error: {e}')
             # form.selection.choices = [ponto.descricao for ponto in pontoAtendimentos]
-            form.selection.choices = list(map(lambda ponto: ponto.descricao, pontoAtendimentos))
-            return render_template('equipamentos/create_equipamento.html', title='Novo Computador', form=form, legenda='Cadastrar novo dispositivo', idInventario=idSite, descricao=f'Cadastrar novo Computador no site: {site.nome}')
+            form.idSite.data = idSite
+            form.pa.choices = list(map(lambda ponto: ponto.descricao, pontoAtendimentos))
+            form.tipoDispositivo.choices = list(map(lambda tipo: tipo.nome, tiposEquipamentos))
+            return render_template('equipamentos/create_equipamento.html', title='Novo Computador', form=form, legenda='Cadastrar novo dispositivo', idSite=idSite, descricao=f'Cadastrar novo Computador no site: {site.nome}')
+        else:
+            return render_template('equipamentos/create_equipamento.html', title='Novo Computador', form=form,
+                            legenda='Cadastrar novo dispositivo', idSite=idSite, descricao=f'Cadastrar novo Computador no site: {site.nome}')
     else:
         abort(403)
 

@@ -34,6 +34,7 @@
         <th scope="col"><a href="#">Id</a></th>
         <th scope="col"><a href="#">Serial</a></th>
         <th scope="col"><a href="#">Patrimônio</a></th>
+        <th scope="col"><a href="#">Modelo</a></th>
         <th scope="col"><a href="#">Tipo Equipamento</a></th>
         <th scope="col">Ação</th>
       </tr>
@@ -44,6 +45,7 @@
         <th scope="row">{{estoque.id}}</th>
         <td>{{estoque.serial}}</td>
         <td>{{estoque.patrimonio}}</td>
+        <td>{{estoque.modelo}}</td>
         <td>{{estoque.nome}}</td>
         {% if estoque %}
           <td><a href="" onclick="updateEstoque('{{estoque.id}}','{{idSite}}')" role="button" class="btn btn-danger ml-3" data-toggle="modal"data-target="#updateExtoque"><i class="fa-solid fa-pen-to-square"></i></a></td>

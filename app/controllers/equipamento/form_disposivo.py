@@ -1,9 +1,9 @@
-from select import select
 from flask_wtf import FlaskForm
 from wtforms import StringField, SubmitField, SelectField, HiddenField
 from wtforms.validators import DataRequired, Length, ValidationError
-from app.models.bdMonitora import PontoAtendimentos, DispositivosEquipamentos, TipoEquipamentos
+from app.models.bdMonitora import PontoAtendimentos, DispositivosEquipamentos, TipoEquipamentos, Computadores, Areas, Sites
 from app import db
+from sqlalchemy import and_
 
 
 class InventarioForm(FlaskForm):
@@ -12,12 +12,16 @@ class InventarioForm(FlaskForm):
 
 
 class InventariosNovoForm(FlaskForm):
+    idSite = HiddenField()
     serial = StringField('Serial', validators=[DataRequired()])
+    modelo = StringField('Modelo', validators=[DataRequired()])
+    fabricante = StringField('Fabricante', validators=[DataRequired()])
+    processador = StringField('Processador', validators=[DataRequired()])
     patrimonio = StringField('Patromônio', validators=[DataRequired(), Length(
         min=1, max=40, message='Campo obrigatório, mínimo 1 máximo 30 caracteres.')])
     hostname = StringField('Hostname', validators=[DataRequired(), Length(
         min=1, max=30, message='Campo Obrigatório, mínimo 1 no máximo 30 caracteres.')])
-    selection = SelectField('Local', choices=[])
+    pa = SelectField('Ponto de Atendimento', choices=[])
     tipoDispositivo = SelectField('Tipo equipamento', choices=[])
     submit = SubmitField('Cadastrar')
 
@@ -39,22 +43,29 @@ class InventariosNovoForm(FlaskForm):
         if inventario:
             raise ValidationError('Hostname já cadastrado no sistema!')
 
-    def validate_selection(self, selection):
-        inventario = db.session.query(DispositivosEquipamentos).join(PontoAtendimentos, DispositivosEquipamentos.idLocalPa == PontoAtendimentos.id).filter(
-            PontoAtendimentos.descricao == selection.data).first()
+    def validate_pa(self, pa):
+        inventario = db.session.query(DispositivosEquipamentos.serial, PontoAtendimentos.descricao, Areas.nome).join(Computadores, DispositivosEquipamentos.id == Computadores.idDispositosEquipamento).join(
+            PontoAtendimentos, Computadores.idPontoAtendimento == PontoAtendimentos.id).join(Areas, DispositivosEquipamentos.idArea == Areas.id).filter(and_(DispositivosEquipamentos.idSite == self.idSite.data, PontoAtendimentos.descricao == pa.data)).first()
         if inventario:
-            raise ValidationError(
-                'Local já tem equipamento. Atualize ou remova equipamento anterior!')
+            raise ValidationError('Local já tem equipamento. Atualize ou remova equipamento anterior!')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        locais = db.session.query(PontoAtendimentos.descricao).all()
-        tipoDispositivos = db.session.query(TipoEquipamentos.nome).all()
+        if self.pa.data:
+            locais = db.session.query(PontoAtendimentos.descricao).join(
+                Sites, PontoAtendimentos.idSite == Sites.id).filter(Sites.id == self.idSite.data).all()
+        else:
+            locais = db.session.query(PontoAtendimentos.descricao).all()
+            
+        if self.idSite.data:
+            tipoDispositivos = db.session.query(TipoEquipamentos.nome).join(TipoEquipamentos.site).filter(Sites.id == self.idSite.data).all()
+        else:
+            tipoDispositivos = db.session.query(TipoEquipamentos.nome).all()
         listaLocal = []
         listatipoDispositivo = []
         for local in locais:
             listaLocal.append(local[0])
-        self.selection.choices = listaLocal
+        self.pa.choices = listaLocal
 
         for tipo in tipoDispositivos:
             listatipoDispositivo.append(tipo[0])

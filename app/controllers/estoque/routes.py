@@ -46,7 +46,8 @@ def mudarLocal():
                     return preencherLayoutMudarLocal(idSite=form.idSite.data, idEquipamento=form.idEquipamento.data, mensagem='Por favor, preencher o campo Ponto de Atendimento e Hostname', validation='warning')
                 else:
                     try:
-                        pa = db.session.query(PontoAtendimentos.descricao, PontoAtendimentos.idSite, Sites.nome).join(Sites, Sites.id==PontoAtendimentos.idSite).filter(PontoAtendimentos.descricao==form.pa.data).first()
+                        pa = db.session.query(PontoAtendimentos.id, PontoAtendimentos.descricao, PontoAtendimentos.idSite, Sites.nome).join(
+                            Sites, Sites.id == PontoAtendimentos.idSite).filter(PontoAtendimentos.descricao == form.pa.data).first()
                         if not pa:
                             return preencherLayoutMudarLocal(idSite=form.idSite.data, idEquipamento=form.idEquipamento.data, mensagem='Ponto de Atendimento não Cadastrado', validation='danger')
                         else:
@@ -57,7 +58,7 @@ def mudarLocal():
                                     try:
                                         equipamento = DispositivosEquipamentos.query.get(form.idEquipamento.data)
                                         equipamento.idArea = area.id
-                                        equipamento.hostname = form.hostname.data
+                                        equipamento.hostname = form.hostname.data.upper()
                                         db.session.commit()
                                     except Exception as e:
                                         print(f'Error equipamento: {e}')
@@ -84,7 +85,7 @@ def mudarLocal():
                                                 db.session.add(computador)
                                                 db.session.commit()
                                             except Exception as e:
-                                                print(f'Error Status: {e}')
+                                                print(f'Error Computador: {e}')
                                                 db.session.flush()
                                                 db.session.rollback()
                                             flash('Direcionado para Inventário com sucesso!', 'success')
@@ -157,7 +158,7 @@ def estoqueConsulta(idSite):
             # print(f'Erro: {e}')
             db.session.flush()
         db.session.flush()
-        dispositivosEstoque = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.patrimonio, TipoEquipamentos.nome).join(
+        dispositivosEstoque = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.patrimonio, DispositivosEquipamentos.modelo, TipoEquipamentos.nome).join(
             DispositivosEquipamentos, TipoEquipamentos.id == DispositivosEquipamentos.idTipo).join(Areas, DispositivosEquipamentos.idArea == Areas.id).filter(and_(DispositivosEquipamentos.idSite == idSite, Areas.nome == 'Estoque')).all()
         return render_template('estoque/estoque.html', title='Estoque', legenda=f'Estoque - {site.nome}', descricao='Relação de todos os Dispositivos/Equipamentos cadastrado no estoque.', idSite=idSite, form=form, dispositivosEstoque=dispositivosEstoque)
     else:

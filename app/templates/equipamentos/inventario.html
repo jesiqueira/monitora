@@ -2,12 +2,8 @@
 <header>
   <div class="jumbotron jumbotron-fluid mt-4">
     <div class="container">
-      <h1 class="display-4">
-        <i class="fa-solid fa-computer"></i> Dispositivos cadastrados no site
-      </h1>
-      <p class="lead">
-        Relação de todos os dispositivos cadastrados para uso no site.
-      </p>
+      <h1 class="display-4"><i class="fa-solid fa-computer"></i> {{legenda}}</h1>
+      <p class="lead"> {{descricao}} </p>
     </div>
   </div>
   <!-- <h2 class="my-3">Listagem</h2> -->
@@ -18,8 +14,8 @@
   >
     <div class="form-group">
       <div class="row">
-        {{form.consulta(class='form-control col-md-5', placeholder='Digita aqui
-        a consulta')}} {{form.selection(class='form-control col-md-2 ml-3')}}
+        {{form.consulta(class='form-control col-md-5', placeholder='Digita aqui a consulta')}}
+        {{form.selection(class='form-control col-md-2 ml-3')}}
         <button type="submit" class="btn btn-success ml-4">
           <i class="fa-solid fa-magnifying-glass"></i> Consultar
         </button>

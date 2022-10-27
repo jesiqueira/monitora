@@ -29,13 +29,13 @@
         </tr>
       </thead>
       <tbody>
-        {% for inventario in inventarios%}
+        {% for site in sites%}
         <tr>
-          <th scope="row">{{inventario.id}}</th>
-          <td>{{inventario.nome}}</td>
-          {% if inventario %}
-            <!-- <td><a href="" onclick="editarInventario('{{inventario.id}}')" role="button" class="btn btn-danger ml-3" data-toggle="modal" data-target="#editarInventario"><i class="fa-solid fa-pen-to-square"></i></a></td> -->
-            <td><a class="btn btn-info" href="{{url_for('equipamento.consultaInventario', idSite=inventario.id)}}" role="button"><i class="fa-solid fa-pen-to-square"></i> Acessar</a></td>
+          <th scope="row">{{site.id}}</th>
+          <td>{{site.nome}}</td>
+          {% if site %}
+            <!-- <td><a href="" onclick="editarInventario('{{site.id}}')" role="button" class="btn btn-danger ml-3" data-toggle="modal" data-target="#editarInventario"><i class="fa-solid fa-pen-to-square"></i></a></td> -->
+            <td><a class="btn btn-info" href="{{url_for('equipamento.consultaInventario', idSite=site.id)}}" role="button"><i class="fa-solid fa-pen-to-square"></i> Acessar</a></td>
           {% endif %}
         </tr>
         {% endfor %}
