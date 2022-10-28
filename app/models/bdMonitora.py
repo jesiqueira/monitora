@@ -239,7 +239,7 @@ class Computadores(db.Model):
         self.idStatus = idStatus
 
     def __repr__(self) -> str:
-        return f"Computador('{self.idDispositoEquipamento}','{self.idPontoAtendimento}',' {self.idStatus}')"
+        return f"Computador('{self.idDispositosEquipamento}','{self.idPontoAtendimento}',' {self.idStatus}')"
 
 
 class EquipamentoEmprestimos(db.Model):

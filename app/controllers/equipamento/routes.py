@@ -238,9 +238,43 @@ def atualizarInventario():
 @login_required
 def inventarioMoverEstoque():
     if (current_user.permissoes[0].leitura or current_user.permissoes[0].escrita) and current_user.ativo:
-        print('Rota mover Computador para estoque.')
-        flash('Movido para estoque com sucesso!', 'success')
-        return redirect(url_for('est.estoqueView'))
+        if request.method == 'POST' and request.form.get('idDispositivo') and request.form.get('idSite'):
+            try:
+                computador = db.session.query(Computadores).join(DispositivosEquipamentos, DispositivosEquipamentos.id == Computadores.idDispositosEquipamento).filter(and_(
+                    Computadores.idDispositosEquipamento == int(request.form.get('idDispositivo')), DispositivosEquipamentos.idSite == int(request.form.get('idSite')))).first()
+                db.session.delete(computador)
+                db.session.commit()
+            except Exception as e:
+                # print(f'Error: {e}')
+                db.session.flush()
+                db.session.rollback()
+                flash('Erro ao remover computador do Site.', 'danger')
+                return redirect(url_for('equipamento.consultaInventario', idSite=request.form.get('idSite')))
+
+            if computador:
+                try:
+                    area = db.session.query(Areas).join(DispositivosEquipamentos, Areas.id == DispositivosEquipamentos.idArea).filter(
+                        and_(DispositivosEquipamentos.idSite == int(request.form.get('idSite')), Areas.nome=='Estoque')).first()
+                    dispositivo = db.session.query(DispositivosEquipamentos).filter(
+                        and_(DispositivosEquipamentos.id == int(request.form.get('idDispositivo')), DispositivosEquipamentos.idSite == int(request.form.get('idSite')))).first()
+                    dispositivo.idArea = area.id
+                    db.session.commit()
+
+                    flash('Movido para estoque com sucesso!', 'success')
+                    return redirect(url_for('equipamento.consultaInventario', idSite=request.form.get('idSite')))
+                except Exception as e:
+                    # print(f'Error: {e}')
+                    db.session.flush()
+                    db.session.rollback()
+                    flash('Erro ao mover computador para estoque.', 'danger')
+                    return redirect(url_for('equipamento.consultaInventario', idSite=request.form.get('idSite')))
+            else:
+                flash('Erro ao remover computador do Site.', 'danger')
+                return redirect(url_for('equipamento.consultaInventario', idSite=request.form.get('idSite')))
+
+        else:
+            flash('Erro ao tentar mover para estoque!', 'success')
+            return redirect(url_for('equipamento.consultaInventario', idSite=1))
     else:
         abort(403)
 
