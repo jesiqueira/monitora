@@ -73,25 +73,14 @@ class InventariosNovoForm(FlaskForm):
 
 
 class UpdateInventariosForm(FlaskForm):
-    idHidden = HiddenField()
-    serial = StringField('Serial', validators=[DataRequired()])
-    patrimonio = StringField('Patromônio', validators=[DataRequired(), Length(
-        min=1, max=40, message='Campo obrigatório, mínimo 1 máximo 30 caracteres.')])
-    hostname = StringField('Hostname', validators=[DataRequired(), Length(
-        min=1, max=30, message='Campo Obrigatório, mínimo 1 no máximo 30 caracteres.')])
-    # selection = SelectField('Local', choices=[] )
-    selection = StringField('Local')
-    tipoDispositivo = SelectField('Tipo equipamento', choices=[])
+    idDispositivo = HiddenField()
+    idSite = HiddenField()
+    serial = StringField('Serial')
+    patrimonio = StringField('Patromônio')
+    hostname = StringField('Hostname')
+    selection = StringField('Ponto de Atendimento')
+    tipoDispositivo = StringField('Tipo equipamento')
     submit = SubmitField('Atualizar')
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        tipoDispositivos = db.session.query(TipoEquipamentos.nome).all()
-        listatipoDispositivo = []
-
-        for tipo in tipoDispositivos:
-            listatipoDispositivo.append(tipo[0])
-        self.tipoDispositivo.choices = listatipoDispositivo
 
 
 class TipoInventarioForm(FlaskForm):

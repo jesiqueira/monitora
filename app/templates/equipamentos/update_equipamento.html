@@ -67,21 +67,23 @@
             {% endif %}
           </div>
           <div class="col-6">
-            {{form.tipoDispositivo.label(class='form-group mr-2')}}
-            {{form.tipoDispositivo(class='custom-select mr-sm-2')}}
+             {{form.tipoDispositivo.label(class="form-group mr-2" )}}
+            {% if form.tipoDispositivo.errors %}
+              {{form.tipoDispositivo(class='custom-select mr-sm-2 is-invalid')}}
+              <div class="invalid-feedback">
+                {% for error in form.tipoDispositivo.errors %}
+                  <span>{{ error }}</span>
+                {% endfor %}
+              </div>
+            {% else %}
+              {{ form.tipoDispositivo(class='custom-select', disabled=true)}}
+            {% endif %}
           </div>
-          <!-- <div class="form-check form-check-inlinee mt-4">
-            {% for i in form.tipoDispositivo %}
-              {{i}}
-              {{i.label(class='form-check-label')}}
-              &nbsp;&nbsp;
-            {% endfor %}
-          </div> -->
           
         </div>
         <div class="form-group mt-4">
           {{ form.submit(class='btn btn-outline-primary')}}
-          <a href="{{url_for('equipamento.inventario')}}" class="btn btn-outline-danger ml-3">Cancelar</a>
+          <a href="{{url_for('equipamento.consultaInventario', idSite=form.idSite.data)}}" class="btn btn-outline-danger ml-3">Cancelar</a>
         </div>
       </fieldset>
     </form>
