@@ -341,11 +341,41 @@ def criarEquipamento(idSite):
         abort(403)
 
 
-@equipamento.route('/inventario/<int:idDesktop>/delete')
+@equipamento.route('/inventarioMoverDescarte', methods=['POST'])
 @login_required
-def inventarioMoverDescarte(idDesktop):
+def inventarioMoverDescarte():
     if (current_user.permissoes[0].leitura or current_user.permissoes[0].escrita) and current_user.ativo:
-        pass
+        if request.method == 'POST' and request.form.get('idDispositivo') and request.form.get('idSite'):
+            try:
+                computador = db.session.query(Computadores).join(DispositivosEquipamentos, DispositivosEquipamentos.id == Computadores.idDispositosEquipamento).filter(and_(
+                    Computadores.idDispositosEquipamento == int(request.form.get('idDispositivo')), DispositivosEquipamentos.idSite == int(request.form.get('idSite')))).first()
+                db.session.delete(computador)
+                db.session.commit()
+            except Exception as e:
+                # print(f'Error: {e}')
+                db.session.flush()
+                db.session.rollback()
+                flash('Erro ao remover computador do Site.', 'danger')
+                return redirect(url_for('equipamento.consultaInventario', idSite=request.form.get('idSite')))
+            
+            if computador:
+                try:
+                    area = db.session.query(Areas).join(Areas.site).filter(and_(Sites.id == int(request.form.get('idSite')), Areas.nome == 'Descarte')).first()
+                    dispositivo = db.session.query(DispositivosEquipamentos).filter(
+                        and_(DispositivosEquipamentos.id == int(request.form.get('idDispositivo')), DispositivosEquipamentos.idSite == int(request.form.get('idSite')))).first()
+                    dispositivo.idArea = area.id
+                    db.session.commit()
+                    flash('Movido para Descarte com sucesso!', 'success')
+                    return redirect(url_for('equipamento.consultaInventario', idSite=request.form.get('idSite')))
+                except Exception as e:
+                    # print(f'Error: {e}')
+                    db.session.flush()
+                    db.session.rollback()
+                    flash('Erro ao mover computador para Descarte.', 'danger')
+                    return redirect(url_for('equipamento.consultaInventario', idSite=request.form.get('idSite')))
+            else:
+                flash('Erro ao remover computador do Site.', 'danger')
+                return redirect(url_for('equipamento.consultaInventario', idSite=request.form.get('idSite')))
     else:
         abort(403)
 

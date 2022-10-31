@@ -110,6 +110,33 @@ function moverEstoque(){
   form.submit();
 }
 
+function moverDescarte(){
+  var idDispositivo = document.querySelector('#idDispositivo').value;
+  var idSite = document.querySelector('#idSite').value;
+
+  var url = '/inventarioMoverDescarte';
+
+  var form = document.createElement('form');
+  form.action = url;
+  form.method = 'POST';
+
+  var input = document.createElement('input');
+  input.type = 'hidden';
+  input.name = 'idDispositivo';
+  input.value = idDispositivo;
+  form.appendChild(input);
+  document.body.appendChild(form);
+
+  var input1 = document.createElement('input');
+  input1.type = 'hidden';
+  input1.name = 'idSite';
+  input1.value = idSite;
+  form.appendChild(input1);
+  document.body.appendChild(form);
+
+  form.submit();
+}
+
 // =============Funções para Estoque=======================
 
 function updateEstoque(idEstoque, idSite) {
