@@ -379,6 +379,12 @@ def inventarioMoverDescarte():
     else:
         abort(403)
 
+@equipamento.route('/mudancaDeLayout', methods=['POST'])
+@login_required
+def mudancaDeLayout():
+    print('Mudança de Layout realizada com sucesso!')
+    return redirect(url_for('equipamento.consultaInventario', idSite=request.form.get('idSite')))
+
 
 @equipamento.route('/detalhe/<tipo_relatorio>', methods=['GET'])
 @login_required
