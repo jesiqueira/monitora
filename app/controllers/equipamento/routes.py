@@ -1,3 +1,4 @@
+import site
 from flask import render_template, Blueprint, flash, redirect, url_for, request, abort
 from flask_login import login_required, current_user
 from app.controllers.equipamento.form_disposivo import InventariosNovoForm, TipoInventarioForm, UpdateInventariosForm, InventarioForm
@@ -33,13 +34,17 @@ def inventarioView():
 def consultaInventario(idSite):
     if (current_user.permissoes[0].leitura or current_user.permissoes[0].escrita) and current_user.ativo:
         form = InventarioForm()
+        site = Sites.query.get(idSite)
         try:
             db.session.flush()
             computadores = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.patrimonio, DispositivosEquipamentos.hostname, TipoEquipamentos.nome, PontoAtendimentos.descricao, Sites.nome.label('site')).join(
                 Sites, DispositivosEquipamentos.idSite == Sites.id).join(TipoEquipamentos, DispositivosEquipamentos.idTipo == TipoEquipamentos.id).join(Areas, DispositivosEquipamentos.idArea == Areas.id).join(Computadores, DispositivosEquipamentos.id == Computadores.idDispositosEquipamento).join(PontoAtendimentos, Computadores.idPontoAtendimento == PontoAtendimentos.id).filter(and_(DispositivosEquipamentos.idSite == idSite, Areas.nome == 'Inventario')).all()
         except Exception as e:
             print(f'Error: {e}')
-        return render_template('equipamentos/inventario.html', title='Inventários', legenda='Dispositivos cadastrados', descricao=f'{computadores[0].site} - Relação de todos os dispositivos cadastrados no Inventário', computadores=computadores, form=form, idSite=idSite)
+        if computadores:
+            return render_template('equipamentos/inventario.html', title='Inventários', legenda='Dispositivos cadastrados', descricao=f'{computadores[0].site} - Relação de todos os dispositivos cadastrados no Inventário', computadores=computadores, form=form, idSite=idSite)
+        else:
+            return render_template('equipamentos/inventario.html', title='Inventários', legenda='Dispositivos cadastrados', descricao=f'{site.nome} - Relação de todos os dispositivos cadastrados no Inventário', computadores=computadores, form=form, idSite=idSite)
     else:
         abort(403)
 
@@ -382,8 +387,14 @@ def inventarioMoverDescarte():
 @equipamento.route('/mudancaDeLayout', methods=['POST'])
 @login_required
 def mudancaDeLayout():
-    print('Mudança de Layout realizada com sucesso!')
-    return redirect(url_for('equipamento.consultaInventario', idSite=request.form.get('idSite')))
+    if (current_user.permissoes[0].leitura or current_user.permissoes[0].escrita) and current_user.ativo:
+        if request.method == 'POST' and request.form.get('idDispositivo') and request.form.get('idSite'):
+            computador = db.session.query(DispositivosEquipamentos).filter(and_(
+                DispositivosEquipamentos.id == request.form.get('idDispositivo'), DispositivosEquipamentos.idSite == request.form.get('idSite'))).first()
+            print(computador)
+            return redirect(url_for('equipamento.consultaInventario', idSite=request.form.get('idSite')))
+    else:
+        abort(403)
 
 
 @equipamento.route('/detalhe/<tipo_relatorio>', methods=['GET'])
