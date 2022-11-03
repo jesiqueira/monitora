@@ -1,0 +1,120 @@
+{% extends 'layout2.html' %}
+{% block content %}
+<header>
+  <div class="jumbotron jumbotron-fluid mt-4">
+    <div class="container">
+      <h1 class="display-4"><i class="fa-solid fa-clipboard-list"></i> {{legenda}}</h1>
+      <p class="lead">{{descricao}}</p>
+    </div>
+  </div>
+</header>
+<main>
+  <form action="" method="POST">
+    {{ form.hidden_tag() }}
+    <div class="form-row">
+      <div class="col">
+        {{ form.serial.label(class='form-control-label') }} 
+        {% if form.serial.errors %} 
+          {{ form.serial(class='form-control form-control-lg is-invalid')}}
+          <div class="invalid-feedback">
+            {% for error in form.serial.errors %}
+              <span>{{ error }}</span>
+            {% endfor %}
+          </div>
+        {% else %} 
+          {{ form.serial(class='form-control form-control-lg', disabled=true)}}
+        {% endif %}
+      </div>
+      <div class="col">
+        {{ form.patrimonio.label(class='form-control-label') }} 
+        {% if form.patrimonio.errors %} 
+          {{ form.patrimonio(class='form-control form-control-lg is-invalid')}}
+          <div class="invalid-feedback">
+            {% for error in form.patrimonio.errors %}
+              <span>{{ error }}</span>
+            {% endfor %}
+          </div>
+        {% else %} 
+          {{ form.patrimonio(class='form-control form-control-lg', disabled=true)}}
+        {% endif %}
+      </div>
+      <div class="col">
+        {{ form.modelo.label(class='form-control-label') }} 
+        {% if form.modelo.errors %} 
+          {{ form.modelo(class='form-control form-control-lg is-invalid')}}
+          <div class="invalid-feedback">
+            {% for error in form.modelo.errors %}
+              <span>{{ error }}</span>
+            {% endfor %}
+          </div>
+        {% else %} 
+          {{ form.modelo(class='form-control form-control-lg', disabled=true)}}
+        {% endif %}
+      </div>
+      <div class="col">
+        {{ form.tipo.label(class='form-control-label') }} 
+        {% if form.tipo.errors %} 
+          {{ form.tipo(class='form-control form-control-lg is-invalid')}}
+          <div class="invalid-feedback">
+            {% for error in form.tipo.errors %}
+              <span>{{ error }}</span>
+            {% endfor %}
+          </div>
+        {% else %} 
+          {{ form.tipo(class='form-control form-control-lg', disabled=true)}}
+        {% endif %}
+      </div>
+    </div>
+    <!-- <div class="form-row mt-4">
+      <div class="col">
+        {{ form.local.label(class='form-control-label') }} 
+        {% if form.local.errors %} 
+          {{ form.local(class='form-control form-control-lg is-invalid')}}
+          <div class="invalid-feedback">
+            {% for error in form.local.errors %}
+              <span>{{ error }}</span>
+            {% endfor %}
+          </div>
+        {% else %} 
+          {{ form.local(class='form-control form-control-lg')}}
+        {% endif %}
+      </div>
+    </div> -->
+    <div class="form-row mt-4">
+      <div class="col">
+        {{ form.de.label(class='form-control-label') }} 
+        {% if form.de.errors %} 
+          {{ form.de(class='form-control form-control-lg is-invalid')}}
+          <div class="invalid-feedback">
+            {% for error in form.de.errors %}
+              <span>{{ error }}</span>
+            {% endfor %}
+          </div>
+        {% else %} 
+          {{ form.de(class='form-control form-control-lg', placeholder='Ex.: TA-BA-F1-P1', disabled=true)}}
+        {% endif %}
+      </div>
+      <div class="col">
+        {{ form.para.label(class='form-control-label') }} 
+        {% if form.para.errors %} 
+          {{ form.para(class='form-control form-control-lg is-invalid')}}
+          <div class="invalid-feedback">
+            {% for error in form.para.errors %}
+              <span>{{ error }}</span>
+            {% endfor %}
+          </div>
+        {% else %} 
+          {{ form.para(class='form-control form-control-lg', placeholder='Ex.: TA-BA-F1-P2')}}
+        {% endif %}
+      </div>
+    </div>
+    <div class="form-row mt-4">
+      <div class="col">
+        {{form.submit(class='btn btn-outline-primary')}}
+        <a href="{{url_for('equipamento.consultaInventario', idSite=idSite)}}" class="btn btn-outline-danger ml-3"><i class="fa-solid fa-xmark"></i> Cancelar</a>   
+      </div>
+    </div>
+  </form>
+</main>
+
+{% endblock content %}

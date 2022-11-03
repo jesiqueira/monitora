@@ -89,3 +89,15 @@ class TipoInventarioForm(FlaskForm):
     site = SelectField('Site', choices=[], validate_choice=False)
 
     submit = SubmitField('Cadastrar')
+
+class MudarLayoutForm(FlaskForm):
+    idSite = HiddenField()
+    idDispositivo = HiddenField()
+    serial = StringField('Serial')
+    patrimonio = StringField('Patrimônio')
+    modelo = StringField('Modelo')
+    tipo = StringField('Tipo')
+    local = StringField('Local')
+    de = StringField('Mover de:')
+    para = StringField('Mover para:')
+    submit = SubmitField('Realizar Mudança')
