@@ -47,7 +47,8 @@ class InventariosNovoForm(FlaskForm):
         inventario = db.session.query(DispositivosEquipamentos.serial, PontoAtendimentos.descricao, Areas.nome).join(Computadores, DispositivosEquipamentos.id == Computadores.idDispositosEquipamento).join(
             PontoAtendimentos, Computadores.idPontoAtendimento == PontoAtendimentos.id).join(Areas, DispositivosEquipamentos.idArea == Areas.id).filter(and_(DispositivosEquipamentos.idSite == self.idSite.data, PontoAtendimentos.descricao == pa.data)).first()
         if inventario:
-            raise ValidationError('Local já tem equipamento. Atualize ou remova equipamento anterior!')
+            raise ValidationError(
+                'Local já tem equipamento. Atualize ou remova equipamento anterior!')
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -56,9 +57,10 @@ class InventariosNovoForm(FlaskForm):
                 Sites, PontoAtendimentos.idSite == Sites.id).filter(Sites.id == self.idSite.data).all()
         else:
             locais = db.session.query(PontoAtendimentos.descricao).all()
-            
+
         if self.idSite.data:
-            tipoDispositivos = db.session.query(TipoEquipamentos.nome).join(TipoEquipamentos.site).filter(Sites.id == self.idSite.data).all()
+            tipoDispositivos = db.session.query(TipoEquipamentos.nome).join(
+                TipoEquipamentos.site).filter(Sites.id == self.idSite.data).all()
         else:
             tipoDispositivos = db.session.query(TipoEquipamentos.nome).all()
         listaLocal = []
@@ -89,3 +91,15 @@ class TipoInventarioForm(FlaskForm):
     site = SelectField('Site', choices=[], validate_choice=False)
 
     submit = SubmitField('Cadastrar')
+
+
+class MudancalayoutForm(FlaskForm):
+    idSite = HiddenField()
+    idDispositivo = HiddenField()
+    serial = StringField('Serial')
+    patrimonio = StringField('Patrimônio')
+    modelo = StringField('Modelo')
+    tipo = StringField('Tipo')
+    de = StringField('Local Origem')
+    para = StringField('Local Destino', validators=[DataRequired(message='Campo obrigatório')])
+    submit = SubmitField('Realizar Mudança')

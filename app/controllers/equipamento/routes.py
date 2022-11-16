@@ -1,6 +1,6 @@
 from flask import render_template, Blueprint, flash, redirect, url_for, request, abort
 from flask_login import login_required, current_user
-from app.controllers.equipamento.form_disposivo import InventariosNovoForm, TipoInventarioForm, UpdateInventariosForm, InventarioForm
+from app.controllers.equipamento.form_disposivo import InventariosNovoForm, TipoInventarioForm, UpdateInventariosForm, InventarioForm, MudancalayoutForm
 from app.controllers.equipamento.monitora import Monitora
 from app.models.bdMonitora import Areas, Computadores, PontoAtendimentos, TipoEquipamentos, DispositivosEquipamentos, Sites, Status
 from app import db
@@ -379,10 +379,50 @@ def inventarioMoverDescarte():
     else:
         abort(403)
 
-@equipamento.route('/mudancaDeLayout', methods=['POST'])
+@equipamento.route('/mudancaDeLayout', methods=['GET','POST'])
 @login_required
 def mudancaDeLayout():
-    print('Mudança de Layout realizada com sucesso!')
+    form = MudancalayoutForm()
+
+    if form.validate_on_submit():
+        # print(form.idDispositivo.data)
+        # print(form.idSite.data)
+        # print(form.para.data.upper())
+        dispositivo = db.session.query(DispositivosEquipamentos.serial, PontoAtendimentos.descricao).join(Computadores, PontoAtendimentos.id==Computadores.idPontoAtendimento).join(DispositivosEquipamentos, Computadores.idDispositosEquipamento==DispositivosEquipamentos.id).filter(and_(DispositivosEquipamentos.idSite==form.idSite.data, PontoAtendimentos.descricao==form.para.data.upper())).first()
+        if not dispositivo:
+            pontoAtendimento = db.session.query(PontoAtendimentos.descricao).join(Sites, Sites.id==PontoAtendimentos.idSite).filter(and_(PontoAtendimentos.idSite==form.idSite.data, PontoAtendimentos.descricao==form.para.data.upper())).first()
+            if pontoAtendimento:
+                
+                print('Mudança de Layout realizada com sucesso, aqui!')
+            else:
+                dispositivo = db.session.query(DispositivosEquipamentos.serial, DispositivosEquipamentos.patrimonio, DispositivosEquipamentos.modelo, TipoEquipamentos.nome, PontoAtendimentos.descricao).join(DispositivosEquipamentos, TipoEquipamentos.id==DispositivosEquipamentos.idTipo).join(
+                    Areas, DispositivosEquipamentos.idArea==Areas.id).join(Computadores, DispositivosEquipamentos.id==Computadores.idDispositosEquipamento).join(PontoAtendimentos, Computadores.idPontoAtendimento==PontoAtendimentos.id).filter(and_(DispositivosEquipamentos.idSite==form.idSite.data, DispositivosEquipamentos.id==form.idDispositivo.data, Areas.nome=='Inventario')).first()
+                form.idSite.data = form.idSite.data
+                form.idDispositivo.data = form.idDispositivo.data
+                form.serial.data = dispositivo.serial
+                form.patrimonio.data = dispositivo.patrimonio
+                form.modelo.data = dispositivo.modelo
+                form.tipo.data = dispositivo.nome
+                form.de.data = dispositivo.descricao
+                flash(f'Ponto de atendimento: {form.para.data} não cadastrado.', 'danger')
+                return render_template('equipamentos/mudanca_layout.html', title='Mudança de Layout', legenda='Mudança de layout', descricao="Informe no campo 'Local destino' a 'P.A' que ira receber o equipamento.", form=form,  idSite=request.form.get('idSite'))
+        else:
+            flash(f'Remover Equipamento da P.A: {dispositivo.descricao} antes de realizar essa mudança.', 'warning')
+            return redirect(url_for('equipamento.consultaInventario', idSite=form.idSite.data))
+    elif request.method== 'POST' and request.form.get('idDispositivo') and request.form.get('idSite'):
+        idDispositivo = request.form.get('idDispositivo')
+        idSite = request.form.get('idSite')
+        dispositivo = db.session.query(DispositivosEquipamentos.serial, DispositivosEquipamentos.patrimonio, DispositivosEquipamentos.modelo, TipoEquipamentos.nome, PontoAtendimentos.descricao).join(DispositivosEquipamentos, TipoEquipamentos.id==DispositivosEquipamentos.idTipo).join(
+            Areas, DispositivosEquipamentos.idArea==Areas.id).join(Computadores, DispositivosEquipamentos.id==Computadores.idDispositosEquipamento).join(PontoAtendimentos, Computadores.idPontoAtendimento==PontoAtendimentos.id).filter(and_(DispositivosEquipamentos.idSite==idSite, DispositivosEquipamentos.id==idDispositivo, Areas.nome=='Inventario')).first()
+        form.idSite.data = idSite
+        form.idDispositivo.data = idDispositivo
+        form.serial.data = dispositivo.serial
+        form.patrimonio.data = dispositivo.patrimonio
+        form.modelo.data = dispositivo.modelo
+        form.tipo.data = dispositivo.nome
+        form.de.data = dispositivo.descricao
+
+        return render_template('equipamentos/mudanca_layout.html', title='Mudança de Layout', legenda='Mudança de layout', descricao="Informe no campo 'Local destino' a 'P.A' que ira receber o equipamento.", form=form,  idSite=request.form.get('idSite'))
     return redirect(url_for('equipamento.consultaInventario', idSite=request.form.get('idSite')))
 
 
