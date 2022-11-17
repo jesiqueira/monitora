@@ -49,6 +49,7 @@ function trocarSenhaURLUser() {
 function editarInventario(idDispositivo, idSite) {
   document.querySelector('#idDispositivo').value = idDispositivo;
   document.querySelector('#idSite').value = idSite;
+  console.log(`Id Dispositivo: ${idDispositivo}`)
 }
 
 function editarDadosEquipamentoInventario() {
@@ -140,6 +141,7 @@ function moverDescarte(){
 function mudarLayout() {
   var idDispositivo = document.querySelector('#idDispositivo').value;
   var idSite = document.querySelector('#idSite').value;
+
 
   var url = '/mudancaDeLayout';
 

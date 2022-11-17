@@ -389,15 +389,23 @@ def mudancaDeLayout():
     form = MudancalayoutForm()
 
     if form.validate_on_submit():
-        # print(form.idDispositivo.data)
-        # print(form.idSite.data)
-        # print(form.para.data.upper())
         dispositivo = db.session.query(DispositivosEquipamentos.serial, PontoAtendimentos.descricao).join(Computadores, PontoAtendimentos.id==Computadores.idPontoAtendimento).join(DispositivosEquipamentos, Computadores.idDispositosEquipamento==DispositivosEquipamentos.id).filter(and_(DispositivosEquipamentos.idSite==form.idSite.data, PontoAtendimentos.descricao==form.para.data.upper())).first()
         if not dispositivo:
-            pontoAtendimento = db.session.query(PontoAtendimentos.descricao).join(Sites, Sites.id==PontoAtendimentos.idSite).filter(and_(PontoAtendimentos.idSite==form.idSite.data, PontoAtendimentos.descricao==form.para.data.upper())).first()
+            pontoAtendimento = db.session.query(PontoAtendimentos.descricao, PontoAtendimentos.id).join(Sites, Sites.id==PontoAtendimentos.idSite).filter(and_(PontoAtendimentos.idSite==form.idSite.data, PontoAtendimentos.descricao==form.para.data.upper())).first()
             if pontoAtendimento:
-                
-                print('Mudança de Layout realizada com sucesso, aqui!')
+                computador = Computadores.query.filter_by(idDispositosEquipamento=form.idDispositivo.data).first()
+                computador.idPontoAtendimento = pontoAtendimento.id
+                try:
+                    db.session.commit()
+                    flash('Mudança de layout realizado com sucesso.', 'success')
+                    db.session.flush()
+                    return redirect(url_for('equipamento.consultaInventario', idSite=form.idSite.data))
+                except Exception as e:
+                    print(f'Error ao atualizar: {e}')
+                    db.session.flush()
+                    db.session.rollback()
+                    flash('Falha ao realizar mudança.', 'danger')
+                    return redirect(url_for('equipamento.consultaInventario', idSite=form.idSite.data))
             else:
                 dispositivo = db.session.query(DispositivosEquipamentos.serial, DispositivosEquipamentos.patrimonio, DispositivosEquipamentos.modelo, TipoEquipamentos.nome, PontoAtendimentos.descricao).join(DispositivosEquipamentos, TipoEquipamentos.id==DispositivosEquipamentos.idTipo).join(
                     Areas, DispositivosEquipamentos.idArea==Areas.id).join(Computadores, DispositivosEquipamentos.id==Computadores.idDispositosEquipamento).join(PontoAtendimentos, Computadores.idPontoAtendimento==PontoAtendimentos.id).filter(and_(DispositivosEquipamentos.idSite==form.idSite.data, DispositivosEquipamentos.id==form.idDispositivo.data, Areas.nome=='Inventario')).first()
@@ -425,7 +433,6 @@ def mudancaDeLayout():
         form.modelo.data = dispositivo.modelo
         form.tipo.data = dispositivo.nome
         form.de.data = dispositivo.descricao
-
         return render_template('equipamentos/mudanca_layout.html', title='Mudança de Layout', legenda='Mudança de layout', descricao="Informe no campo 'Local destino' a 'P.A' que ira receber o equipamento.", form=form,  idSite=request.form.get('idSite'))
     return redirect(url_for('equipamento.consultaInventario', idSite=request.form.get('idSite')))
 
