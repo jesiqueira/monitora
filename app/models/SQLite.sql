@@ -2,9 +2,7 @@
 -- SELECT * FROM Acoes
 -- SELECT * FROM DispositivosEquipamentos
 -- SELECT * FROM Status
--- SELECT * FROM PontoAtendimentos
 -- SELECT * FROM TipoEquipamentos
--- SELECT * FROM Computadores
 -- SELECT DispositivosEquipamentos.serial, Areas.nome, Areas.id FROM DispositivosEquipamentos JOIN Areas ON DispositivosEquipamentos.idArea=Areas.id WHERE Areas.nome = 'Estoque'
 -- UPDATE DispositivosEquipamentos SET idArea = 1 WHERE DispositivosEquipamentos.idArea = 2
 -- SELECT TipoEquipamentos.nome FROM tipoEquipamentoSites JOIN TipoEquipamentos on tipoEquipamentoSites.idTipos=TipoEquipamentos.id where tipoEquipamentoSites.idSites=2
@@ -12,4 +10,6 @@
 -- SELECT DispositivosEquipamentos.id, DispositivosEquipamentos.serial, TipoEquipamentos.nome, Areas.nome, Computadores.id, Computadores.idDispositosEquipamento, PontoAtendimentos.descricao FROM DispositivosEquipamentos join TipoEquipamentos on DispositivosEquipamentos.idTipo=TipoEquipamentos.id JOIN Areas on Areas.id=DispositivosEquipamentos.idArea JOIN Computadores on Computadores.idDispositosEquipamento=DispositivosEquipamentos.id JOIN PontoAtendimentos ON PontoAtendimentos.id=Computadores.idPontoAtendimento WHERE DispositivosEquipamentos.idSite=1 AND Areas.nome='Inventario' AND DispositivosEquipamentos.id=5
 -- SELECT PontoAtendimentos.descricao FROM PontoAtendimentos JOIN Computadores on PontoAtendimentos.id==Computadores.idPontoAtendimento JOIN DispositivosEquipamentos ON Computadores.idDispositosEquipamento=DispositivosEquipamentos.id WHERE DispositivosEquipamentos.id=5 AND DispositivosEquipamentos.idSite=1  AND PontoAtendimentos.descricao='TA-BA-F1-P2'
 -- SELECT DispositivosEquipamentos.serial, PontoAtendimentos.descricao FROM Computadores JOIN PontoAtendimentos ON Computadores.idPontoAtendimento=PontoAtendimentos.id JOIN DispositivosEquipamentos ON Computadores.idDispositosEquipamento=DispositivosEquipamentos.id WHERE DispositivosEquipamentos.idSite=1 AND PontoAtendimentos.descricao='TA-BA-F1-P'
-SELECT PontoAtendimentos.descricao FROM Sites JOIN PontoAtendimentos on PontoAtendimentos.idSite=Sites.id WHERE PontoAtendimentos.idSite=1 AND PontoAtendimentos.descricao='TA-BA-F1-P3'
+-- SELECT PontoAtendimentos.descricao FROM Sites JOIN PontoAtendimentos on PontoAtendimentos.idSite=Sites.id WHERE PontoAtendimentos.idSite=1 AND PontoAtendimentos.descricao='TA-BA-F1-P3'
+-- SELECT * FROM Computadores
+SELECT * FROM PontoAtendimentos
