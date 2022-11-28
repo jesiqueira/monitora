@@ -19,7 +19,8 @@
             <option value="local">E-mail</option>
           </select>
           <button type="submit" class="btn btn-success ml-4"><i class="fa-solid fa-magnifying-glass"></i> Consultar</button>
-          <a class="btn btn-primary ml-3" href="#" role="button"><i class="fa-solid fa-print"></i> Relatório</a>
+          <a class="btn btn-primary ml-3" href="{{url_for('user.novo_usuario', idSite=idSite)}}" role="button"><i class="fa-solid fa-desktop"></i> Novo</a>
+          <a class="btn btn-warning ml-3" href="#" role="button"><i class="fa-regular fa-file-pdf"></i> PDF</a>
         </div>
       </div>
     </form>
@@ -48,7 +49,7 @@
               <td>{{users.siteNome}}</td>
               <td>
                 <!-- <a class="btn btn-info" href="{{url_for('user.update_usuario', id_user=users.id)}}" role="button"><i class="fa-solid fa-pen-to-square"></i> Editar</a> -->
-                <a href="" onclick="editarUser('{{users.id}}')" role="button" class="btn btn-danger ml-3" data-toggle="modal" data-target="#editarUser"><i class="fa-solid fa-pen-to-square"></i></a>
+                <a href="" onclick="editarUser('{{users.id}}', '{{idSite}}')" role="button" class="btn btn-danger ml-3" data-toggle="modal" data-target="#editarUser"><i class="fa-solid fa-pen-to-square"></i></a>
               </td>
             </tr>
           {% endif %}
@@ -69,9 +70,10 @@
         </div>
         <div class="modal-body">
           <input type="hidden" name="id_user" id="id_user">
+          <input type="hidden" name="id_site" id="id_site">
           <div class="form-row">
             <div class="col-md-6">
-              <a class="btn btn-warning ml-4" onclick="window.location = updateURLUser()" role="button"><i class="fa-solid fa-pen-to-square"></i> Atualizar Dados</a>
+              <a class="btn btn-warning ml-4" onclick="updateURLUser()" role="button"><i class="fa-solid fa-pen-to-square"></i> Atualizar Dados</a>
             </div>
             <div class="col-md-6">
               <a class="btn btn-warning ml-4" onclick="trocarSenhaURLUser()" role="button"><i class="fa-solid fa-pen-to-square"></i> Trocar Senha</a>

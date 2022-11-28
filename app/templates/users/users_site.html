@@ -1,0 +1,31 @@
+{% extends 'layout2.html' %}
+{% block content %}
+  <header>
+    <div class="jumbotron jumbotron-fluid mt-4">
+      <div class="container">
+        <h1 class="display-4"><i class="fa-solid fa-clipboard-list"></i> {{legenda}}</h1>
+        <p class="lead">{{descricao}}</p>
+      </div>
+    </div>
+    <table class="table table-hover text-center">
+      <thead>
+        <tr class="table-secondary">
+          <th scope="col"><a href="#">Id</a></th>
+          <th scope="col"><a href="#">Site do Usuário</a></th>
+          <th scope="col">Ação</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for site in sites%}
+        <tr>
+          <th scope="row">{{site.id}}</th>
+          <td>{{site.nome}}</td>
+          {% if site %}
+            <td><a class="btn btn-info" href="{{url_for('user.lista_usuario', idSite=site.id)}}" role="button"><i class="fa-solid fa-pen-to-square"></i> Acessar</a></td>
+          {% endif %}
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </main>
+{% endblock content %}

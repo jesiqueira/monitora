@@ -106,23 +106,33 @@ def createAdmin():
         flash('Login Administrador já existe!', 'danger')
         return redirect(url_for('main.home'))
 
-
-@user.route('/usuarios')
+@user.route('/usuario/site')
 @login_required
-def lista_usuario():
-
+def usuarioSite():
     if current_user.permissoes[0].adminUser and current_user.ativo:
-        users = db.session.query(Users.id, Users.nome.label('userNome'), Users.login, Users.email, Sites.nome.label(
-            'siteNome')).join(Users, Sites.id == Users.idSite).all()
-        # print(users[1]['siteNome'])
-        return render_template('users/usuario.html', title='Usuários', usuarios=users)
+        sites = Sites.query.all()
+        return render_template('users/users_site.html', sites=sites, title='Site do Usuário', legenda='Lista de Sites', descricao='Selecione o Site que deseja acessar.')
     else:
         abort(403)
 
 
-@user.route('/usuario/novo',  methods=['GET', 'POST'])
+
+@user.route('/usuarios/site/<int:idSite>')
 @login_required
-def novo_usuario():
+def lista_usuario(idSite):
+
+    if current_user.permissoes[0].adminUser and current_user.ativo:
+        users = db.session.query(Users.id, Users.nome.label('userNome'), Users.login, Users.email, Sites.nome.label(
+            'siteNome')).join(Users, Sites.id == Users.idSite).filter(Sites.id==idSite).all()
+        # print(users[1]['siteNome'])
+        return render_template('users/usuario.html', title='Usuários', usuarios=users, idSite=idSite)
+    else:
+        abort(403)
+
+
+@user.route('/usuario/novo/<int:idSite>',  methods=['GET', 'POST'])
+@login_required
+def novo_usuario(idSite):
     form = CreateUserForm()
     # permissoes = db.session.query(Permissoes).join(Users.permissoes).filter(or_(Permissoes.leitura==form.r.data, Permissoes.escrita==form.w.data, Permissoes.adminUser==form.adminUser.data)).first()
     # print(permissoes)
@@ -141,27 +151,36 @@ def novo_usuario():
                 db.session.add(user)
                 db.session.commit()
                 flash(f'Conta criada com sucesso para: {form.nome.data}!', 'success')
-            return redirect(url_for('user.lista_usuario'))
-
-        return render_template('users/criar_usuario.html', title='Novo usuário', form=form)
+            return redirect(url_for('user.lista_usuario', idSite=site.id))
+        else:
+            site = Sites.query.get(idSite)
+            form.siteSelect.choices =[ site.nome]
+            return render_template('users/criar_usuario.html', title='Novo usuário', form=form, idSite=idSite)
     else:
         abort(403)
 
 
-@user.route('/usuario/<int:id_user>/update',  methods=['GET', 'POST'])
+@user.route('/usuarioUpdate',  methods=['GET', 'POST'])
 @login_required
-def update_usuario(id_user):
+def update_usuario():
     if current_user.permissoes[0].adminUser and current_user.ativo:
-        try:
-            # user = Users.query.get_or_404(id_user)
-            user = db.session.query(Users.nome, Users.login, Users.email, Users.ativo, Permissoes.adminUser, Permissoes.escrita, Permissoes.leitura).join(Users.permissoes).filter(Users.id==id_user).first()
-        except Exception as e:
-            # print(f'Erro ao consultar usuário {e}')
-            abort(404)
         form = UpdateUserForm()
-        if form.validate_on_submit():
-            user = Users.query.get(id_user)
-            permissoes = db.session.query(Permissoes).join(Users.permissoes).filter(Users.id==id_user).first()
+        if request.method == 'POST' and request.form.get('idUser') and request.form.get('idSite'):            
+            user = db.session.query(Users.nome, Users.login, Users.email, Users.ativo, Permissoes.adminUser, Permissoes.escrita, Permissoes.leitura).join(Users.permissoes).filter(Users.id==request.form.get('idUser')).first()
+            form.idUsuario.data = request.form.get('idUser')
+            form.idSite.data = request.form.get('idSite')
+            form.nome.data = user.nome
+            form.login.data = user.login
+            form.email.data = user.email
+            form.ativo.data = user.ativo
+            form.adminUser.data = user.adminUser
+            form.leitura.data = user.leitura
+            form.escrita.data = user.escrita
+            return render_template('users/update_usuario.html', title='Editar usuário', legenda='Update dados do Usuário', form=form)
+        
+        elif form.validate_on_submit():
+            user = Users.query.get(form.idUsuario.data)
+            permissoes = db.session.query(Permissoes).join(Users.permissoes).filter(Users.id==form.idUsuario.data).first()
             user.nome = form.nome.data
             user.login = form.login.data
             user.email = form.email.data
@@ -172,16 +191,7 @@ def update_usuario(id_user):
             user.permissoes = [permissoes]
             db.session.commit()
             flash('Dados atualizados com sucesso', 'success')
-            return redirect(url_for('user.lista_usuario'))
-        elif request.method == 'GET':
-            form.nome.data = user.nome
-            form.login.data = user.login
-            form.email.data = user.email
-            form.ativo.data = user.ativo
-            form.adminUser.data = user.adminUser
-            form.leitura.data = user.leitura
-            form.escrita.data = user.escrita
-        return render_template('users/update_usuario.html', title='Editar usuário', legenda='Update dados do Usuário', form=form)
+            return redirect(url_for('user.lista_usuario', idSite=form.idSite.data))
     else:
         abort(403)
 
@@ -191,8 +201,9 @@ def update_usuario(id_user):
 def updatePassword():
     if current_user.permissoes[0].adminUser and current_user.ativo:
         form = UpdatePassWordUserForm()
-        if request.method == 'POST':
+        if request.method == 'POST' and request.form.get('id_users') and request.form.get('idSite'):
             form.id_user.data = request.form.get('id_users')
+            form.idSite.data = request.form.get('idSite')
             return render_template('users/passWord_usuario.html', title='Editar Senha', legenda='Atualizar senha do Usuário', form=form)
     else:
         abort(403)
@@ -212,7 +223,7 @@ def updatePassword_usuario():
                 form.password.data).decode('utf-8')
             db.session.commit()
             flash('Senha atualizados com sucesso', 'success')
-            return redirect(url_for('user.lista_usuario'))
+            return redirect(url_for('user.lista_usuario', idSite=form.idSite.data))
         return render_template('users/passWord_usuario.html', title='Editar Senha', legenda='Atualizar senha do Usuário', form=form)
     else:
         abort(403)
