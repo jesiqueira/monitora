@@ -60,6 +60,8 @@ class CreateUserForm(FlaskForm):
 
 
 class UpdateUserForm(FlaskForm):
+    idUsuario = HiddenField()
+    idSite = HiddenField()
     nome = StringField('Nome',  validators=[DataRequired(), Length(
         min=4, max=40, message='Nome não corresponde aos criterios! Tem que ter entre 4 a 40 caracter.')])
     login = StringField('Login', validators=[DataRequired(), Length(
@@ -73,17 +75,15 @@ class UpdateUserForm(FlaskForm):
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        sites = db.session.query(Sites.nome).all()
-        listaSite = []
-        for site in sites:
-            listaSite.append(site[0])
-        self.siteSelect.choices = listaSite
+        site = Sites.query.get(self.idSite.data)
+        self.siteSelect.choices = [site.nome]
 
     submit = SubmitField('Atualizar')
 
 
 class UpdatePassWordUserForm(FlaskForm):
     id_user = HiddenField()
+    idSite = HiddenField()
     password = PasswordField('Senha', validators=[DataRequired(), Length(
         min=6, max=16, message='Se atentar ao criterio, senha deve ter no mínimo 6 e no máximo 16 caracter!')])
     confiPassword = PasswordField('Confirme a Senha', validators=[
