@@ -29,7 +29,7 @@ class Monitora:
                     'patrimonio': computador.patrimonio,
                     'idStatus': computador.idStatus,
                     'status': computador.ativo,
-                    'descricaoPa': computador.descricaoPa,
+                    'descricaoPa': computador.descricao,
                     'data': computador.dataHora
                 }
                 self.listaComputadores.append(desktop.copy())
@@ -87,8 +87,8 @@ class Monitora:
 
     def threadAtualizarStatusComputador(self) -> None:
         '''Está função faz as chamadas dos metodos parar realizar a consulta via Thread do Status dos computadores na rede e atualizar o BD com os Status recebidos'''
-        result = self.executarThread(
-            self.consultaAtualizaStatusComputadores, self.listaComputadores)
+        self.executarThread(self.consultaAtualizaStatusComputadores, self.listaComputadores)
+        # print(self.listaStatusComputadores)
         self.atualizarStatusComputador(self.listaStatusComputadores)
 
     def executarThread(self, func, lista):
@@ -100,8 +100,10 @@ class Monitora:
         '''Atualiza o status dos computadores no BD ao receber uma lista com Status da consulta realizada por PIP nos computadores da rede'''
         try:
             for computador in listaDeComputadores:
+                # print(computador)
                 status = db.session.query(Status).join(Computadores, Status.id == Computadores.idStatus).filter(
-                    Computadores.id == computador['idComputador'] and Status.id == computador['idStatus']).first_or_404()
+                    Computadores.idDispositosEquipamento == computador['idComputador'] and Status.id == computador['idStatus']).first()
+                # print(f'Status: {status}')
                 if computador['statusComputador']:
                     status.ativo = computador['statusComputador']
                     status.dataHora = self.horaAtual()
