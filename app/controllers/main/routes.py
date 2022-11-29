@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, url_for, Blueprint, request, abort
 from app.controllers.main.form import (
-    SiteForm, LocalAtendimento, SiteUpdateForm, UpdateLocal, AreaForm, localViewForm, AreaViewForm)
+    SiteForm, LocalAtendimento, SiteUpdateForm, UpdateLocal, AreaForm, localViewForm, AreaViewForm, ConsultaSiteForm)
 from flask_login import current_user, login_required
 from app.models.bdMonitora import Enderecos, Sites, PontoAtendimentos, Areas
 from app import db
@@ -24,14 +24,38 @@ def home():
 @main.route('/site')
 @login_required
 def site():
-    print(current_user.permissoes)
+    # print(current_user.permissoes)
+    form = ConsultaSiteForm()
     if (current_user.permissoes[0].leitura or current_user.permissoes[0].escrita) and (current_user.permissoes[0].leitura or current_user.permissoes[0].escrita) and current_user.ativo:
         sites = db.session.query(Sites.id, Sites.nome, Enderecos.rua, Enderecos.cep, Enderecos.cidade).join(
             Sites, Enderecos.id == Sites.id).all()
-        return render_template('main/site.html', title='Site', sites=sites)
+        return render_template('main/site.html', title='Site', sites=sites, form=form)
     else:
         abort(403)
 
+@main.route('/consultaSite', methods=['POST'])
+@login_required
+def consultaSite():
+    if (current_user.permissoes[0].leitura or current_user.permissoes[0].escrita) and current_user.ativo:
+        form = ConsultaSiteForm()
+        if form.validate_on_submit():
+            consulta = '%'+form.consulta.data+'%'
+            selection = form.selection.data
+            if selection == 'Site':
+                sites = db.session.query(Sites.id, Sites.nome, Enderecos.rua, Enderecos.cep, Enderecos.cidade).join(Sites, Enderecos.id == Sites.id).filter(Sites.nome.like(consulta)).all()
+            elif selection == 'Cidade':
+                sites = db.session.query(Sites.id, Sites.nome, Enderecos.rua, Enderecos.cep, Enderecos.cidade).join(Sites, Enderecos.id == Sites.id).filter(Enderecos.cidade.like(consulta)).all()
+            elif selection == 'Cep':
+                 sites = db.session.query(Sites.id, Sites.nome, Enderecos.rua, Enderecos.cep, Enderecos.cidade).join(Sites, Enderecos.id == Sites.id).filter(Enderecos.cep.like(consulta)).all()
+            else:
+                sites = db.session.query(Sites.id, Sites.nome, Enderecos.rua, Enderecos.cep, Enderecos.cidade).join(Sites, Enderecos.id == Sites.id).all()
+            return render_template('main/site.html', title='Site', sites=sites, form=form)
+        else:
+            flash('Erro, verificar dados informados ', 'danger')
+            sites = db.session.query(Sites.id, Sites.nome, Enderecos.rua, Enderecos.cep, Enderecos.cidade).join(Sites, Enderecos.id == Sites.id).all()
+            return render_template('main/site.html', title='Site', sites=sites, form=form)
+    else:
+        abort(403)
 
 @main.route('/site/new', methods=['GET', 'POST'])
 @login_required
