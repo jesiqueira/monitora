@@ -90,3 +90,9 @@ class UpdatePassWordUserForm(FlaskForm):
                                   DataRequired(), EqualTo('password', message="As senhas não são iguais.")])
 
     submit = SubmitField('Atualizar')
+
+
+class SelecaoFormUser(FlaskForm):
+    idSite = HiddenField()
+    consulta = StringField('Digita aqui a consulta', validators=[DataRequired()])
+    selection = SelectField(choices=['Nome', 'Login', 'Email'])
