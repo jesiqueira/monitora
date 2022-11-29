@@ -443,13 +443,14 @@ def detalhe(tipo_relatorio):
     if (current_user.permissoes[0].leitura or current_user.permissoes[0].escrita) and current_user.ativo:
         monitora = Monitora()
         if tipo_relatorio == 'Conectado':
-            computadores = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.hostname, DispositivosEquipamentos.patrimonio, Status.ativo, PontoAtendimentos.descricaoPa).join(
-                DispositivosEquipamentos, Status.id == DispositivosEquipamentos.idStatus).join(PontoAtendimentos, DispositivosEquipamentos.idLocalPa == PontoAtendimentos.id).filter(Status.ativo == True).all()
+            pass
+            # computadores = db.session.query(DispositivosEquipamentos.id, DispositivosEquipamentos.serial, DispositivosEquipamentos.hostname, DispositivosEquipamentos.patrimonio, Status.ativo, PontoAtendimentos.descricao).join(
+            #     Status, Computadores.idStatus==Status.id).join(PontoAtendimentos, Computadores.idPontoAtendimento == PontoAtendimentos.id).join(Computadores, DispositivosEquipamentos.id==Computadores.idDispositosEquipamento).filter(Status.ativo == True).all()
         elif tipo_relatorio == 'Desconectado':
             computadores = monitora.statusDesconectado()
         else:
             computadores = monitora.statusAtencao()
         # DispositivosEquipamentoses=DispositivosEquipamentoses
-        return render_template('equipamentos/detalhe.html', title='Informações - Dispositivos', legenda=f'{tipo_relatorio}')
+        return render_template('equipamentos/detalhe.html', title='Informações - Dispositivos', legenda=f'{tipo_relatorio}', computadores=computadores)
     else:
         abort(403)
